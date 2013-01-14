@@ -60,7 +60,7 @@ libtess.assert = function(condition, opt_message) {
  * @param {libtess.GluTesselator} tess
  */
 libtess.sweepDebugEvent = function(tess) {
-  // TODO(bckenny)
+  // TODO(bckenny): closure debug flag/debugger support
   // sweep event updated
 };
 

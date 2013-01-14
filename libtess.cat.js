@@ -210,7 +210,6 @@ libtess.PQHandle;
 /** @typedef {Object} */
 libtess.PQKey;
 
-
 // require libtess
 /*global libtess */
 
