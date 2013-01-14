@@ -8,7 +8,7 @@ bring it into compliance with modern free software licenses, with terms
 identical to that of the X11 License. More guidance [here](http://www.gnu.org/licenses/license-list.html#SGIFreeB).
 
 ## License
-[SGI Free Sofware License B 2.0](http://oss.sgi.com/projects/FreeB/)
+[SGI Free Sofware License B 2.0](http://oss.sgi.com/projects/FreeB/)  
 Copyright 2000, Silicon Graphics, Inc. All Rights Reserved.  
 Copyright 2012, Google Inc. All Rights Reserved.
 
