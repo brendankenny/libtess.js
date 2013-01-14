@@ -2,7 +2,7 @@ libtess.js
 ==========
 
 
-Copyright 2000, Silicon Graphics, Inc. All Rights Reserved.
+Copyright 2000, Silicon Graphics, Inc. All Rights Reserved.  
 Copyright 2012, Google Inc. All Rights Reserved.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -29,5 +29,5 @@ Inc. The Original Code is Copyright (c) 1991-2000 Silicon Graphics, Inc.
 Copyright in any portions created by third parties is as indicated
 elsewhere herein. All Rights Reserved.
 
-@author Eric Veach, July 1994
+@author Eric Veach, July 1994  
 @author Brendan Kenny
