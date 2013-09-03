@@ -28,8 +28,8 @@
  */
 
 /**
- * @author Eric Veach, July 1994
- * @author Brendan Kenny
+ * @author ericv@cs.stanford.edu (Eric Veach)
+ * @author bckenny@google.com (Brendan Kenny)
  */
 
 // require libtess
@@ -37,6 +37,8 @@
 /*global libtess */
 
 // TODO(bckenny): better typing for DictKey?
+
+
 
 /**
  * [DictNode description]
@@ -55,7 +57,7 @@ libtess.DictNode = function() {
    * @type {libtess.DictNode}
    */
   this.next = null;
-  
+
   /**
    * [prev description]
    * @type {libtess.DictNode}
@@ -63,26 +65,29 @@ libtess.DictNode = function() {
   this.prev = null;
 };
 
+
 /**
  * [getKey description]
- * @return {libtess.dictKey} [description]
+ * @return {libtess.dictKey} [description].
  */
 libtess.DictNode.prototype.getKey = function() {
   return this.key;
 };
 
+
 /**
  * [getSucc description]
- * @return {libtess.DictNode} [description]
+ * @return {libtess.DictNode} [description].
  */
 libtess.DictNode.prototype.getSucc = function() {
   // TODO(bckenny): unabreviated naming?
   return this.next;
 };
 
+
 /**
  * [getPred description]
- * @return {libtess.DictNode} [description]
+ * @return {libtess.DictNode} [description].
  */
 libtess.DictNode.prototype.getPred = function() {
   // TODO(bckenny): unabreviated naming?

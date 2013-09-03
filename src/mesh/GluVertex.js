@@ -28,12 +28,14 @@
  */
 
 /**
- * @author Eric Veach, July 1994
- * @author Brendan Kenny
+ * @author ericv@cs.stanford.edu (Eric Veach)
+ * @author bckenny@google.com (Brendan Kenny)
  */
 
 // requre libtess.GluHalfEdge
 /*global libtess */
+
+
 
 /**
  * Each vertex has a pointer to next and previous vertices in the
@@ -41,8 +43,8 @@
  * the origin (null if this is the dummy header). There is also a
  * field "data" for client data.
  *
- * @param {libtess.GluVertex=} opt_nextVertex [description]
- * @param {libtess.GluVertex=} opt_prevVertex [description]
+ * @param {libtess.GluVertex=} opt_nextVertex [description].
+ * @param {libtess.GluVertex=} opt_prevVertex [description].
  * @constructor
  */
 libtess.GluVertex = function(opt_nextVertex, opt_prevVertex) {
@@ -65,7 +67,7 @@ libtess.GluVertex = function(opt_nextVertex, opt_prevVertex) {
    * @type {libtess.GluHalfEdge}
    */
   this.anEdge = null;
-  
+
   /**
    * The client's data.
    * @type {Object}
