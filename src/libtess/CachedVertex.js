@@ -28,12 +28,14 @@
  */
 
 /**
- * @author Eric Veach, July 1994
- * @author Brendan Kenny
+ * @author ericv@cs.stanford.edu (Eric Veach)
+ * @author bckenny@google.com (Brendan Kenny)
  */
 
 // require libtess
 /*global libtess */
+
+
 
 /**
  * Cached vertex data for single-countour polygons for quick-and-dirty
@@ -47,7 +49,7 @@ libtess.CachedVertex = function() {
    */
   this.coords = [0, 0, 0];
   // TODO(bckenny): better way to init?
-  
+
   /**
    * [data description]
    * @type {Object}
