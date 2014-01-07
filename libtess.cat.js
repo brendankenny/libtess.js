@@ -41,7 +41,7 @@ var libtess = libtess || {};
 /**
  * node.js export
  */
-if (module !== undefined)
+if (typeof module !== 'undefined')
   module.exports = libtess;
 
 
