@@ -1,5 +1,5 @@
 {
-  "version": "1.0.1",
+  "version": "1.0.2",
   "name": "libtess",
   "description": "Polygon tesselation library, ported from OpenGL Utility Library (GLU).",
   "author": "Brendan Kenny",
