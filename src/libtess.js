@@ -40,6 +40,13 @@ var libtess = libtess || {};
 
 
 /**
+ * node.js export
+ */
+if (typeof module !== 'undefined')
+  module.exports = libtess;
+
+
+/**
  * @define {boolean} [DEBUG description].
  */
 libtess.DEBUG = false;

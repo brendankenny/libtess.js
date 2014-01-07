@@ -1,0 +1,11 @@
+{
+  "version": "1.0.2",
+  "name": "libtess",
+  "description": "Polygon tesselation library, ported from OpenGL Utility Library (GLU).",
+  "author": "Brendan Kenny",
+  "main": "./libtess.cat.js",
+  "license": "SGI Free Sofware License B 2.0",
+  "engines": {
+    "node": ">=0.8.14"
+  }
+}
