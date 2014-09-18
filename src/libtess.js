@@ -1,4 +1,5 @@
 /**
+ * @license
  * Copyright 2000, Silicon Graphics, Inc. All Rights Reserved.
  * Copyright 2012, Google Inc. All Rights Reserved.
  *
@@ -31,7 +32,6 @@
  * @author ericv@cs.stanford.edu (Eric Veach)
  * @author bckenny@google.com (Brendan Kenny)
  */
-
 
 /**
  * Base namespace.

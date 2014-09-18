@@ -27,11 +27,6 @@
  * elsewhere herein. All Rights Reserved.
  */
 
-/**
- * @author ericv@cs.stanford.edu (Eric Veach)
- * @author bckenny@google.com (Brendan Kenny)
- */
-
 // require libtess
 /*global libtess */
 
@@ -41,7 +36,6 @@
 libtess.dictKey;
 
 // TODO(bckenny): better typing for all of this, really. no need not to eg use tess as frame directly
-
 
 
 /**

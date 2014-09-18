@@ -27,11 +27,6 @@
  * elsewhere herein. All Rights Reserved.
  */
 
-/**
- * @author ericv@cs.stanford.edu (Eric Veach)
- * @author bckenny@google.com (Brendan Kenny)
- */
-
 // TODO(bckenny): get rid of this:
 // NOTE(bckenny): using NO_BRANCH_CONDITIONS = false
 
