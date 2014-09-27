@@ -27,18 +27,11 @@
  * elsewhere herein. All Rights Reserved.
  */
 
-/**
- * @author ericv@cs.stanford.edu (Eric Veach)
- * @author bckenny@google.com (Brendan Kenny)
- */
-
 // require libtess
 // require libtess.Dict
 /*global libtess */
 
 // TODO(bckenny): better typing for DictKey?
-
-
 
 /**
  * [DictNode description]

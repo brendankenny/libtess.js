@@ -27,12 +27,6 @@
  * elsewhere herein. All Rights Reserved.
  */
 
-/**
- * @author ericv@cs.stanford.edu (Eric Veach)
- * @author bckenny@google.com (Brendan Kenny)
- */
-
-
 // require libtess
 // require libtess.DictNode
 // require libtess.GluHalfEdge

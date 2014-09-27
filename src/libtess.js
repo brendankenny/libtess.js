@@ -1,6 +1,7 @@
 /**
+ * @license
  * Copyright 2000, Silicon Graphics, Inc. All Rights Reserved.
- * Copyright 2012, Google Inc. All Rights Reserved.
+ * Copyright 2014, Google Inc. All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -31,7 +32,6 @@
  * @author ericv@cs.stanford.edu (Eric Veach)
  * @author bckenny@google.com (Brendan Kenny)
  */
-
 
 /**
  * Base namespace.
@@ -140,7 +140,6 @@ libtess.tessState = {
  */
 libtess.windingRule = {
   // NOTE(bckenny): values from enumglu.spec
-  // TODO(bckenny): need to export when compiled
   GLU_TESS_WINDING_ODD: 100130,
   GLU_TESS_WINDING_NONZERO: 100131,
   GLU_TESS_WINDING_POSITIVE: 100132,
@@ -158,7 +157,6 @@ libtess.windingRule = {
  */
 libtess.primitiveType = {
   // TODO(bckenny): doc types
-  // TODO(bckenny): need to export when compiled, but can just use webgl constants when available
   GL_LINE_LOOP: 2,
   GL_TRIANGLES: 4,
   GL_TRIANGLE_STRIP: 5,
