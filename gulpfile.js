@@ -50,4 +50,6 @@ gulp.task('build-min', function() {
 
 gulp.task('prepublish', ['build-cat', 'build-min']);
 
+// TODO(bckenny): lint, test
+
 gulp.task('default', ['prepublish']);
