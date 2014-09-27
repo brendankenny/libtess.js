@@ -7,7 +7,7 @@
     "type": "git",
     "url": "https://github.com/brendankenny/libtess.js.git"
   },
-  "main": "libtess.cat.js",
+  "main": "libtess.min.js",
   "scripts": {
     "prepublish": "gulp prepublish"
   },

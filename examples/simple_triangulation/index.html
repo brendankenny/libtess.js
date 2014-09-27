@@ -14,7 +14,7 @@
       }
     </style>
 
-    <script src="../../libtess.cat.js"></script>
+    <script src="../../libtess.min.js"></script>
     <script src="webgl_draw.js"></script>
     <script src="triangulate.js"></script>
     <script>
@@ -32,8 +32,8 @@
         initWebGL(canvas);
 
         contours = [
-          new Float32Array(generateNoisyLoop(NUM_VERTS, true, .8, .1)),
-          new Float32Array(generateNoisyLoop(NUM_VERTS, false, .4, .1))
+          new Float32Array(generateNoisyLoop(NUM_VERTS, true, 0.8, 0.1)),
+          new Float32Array(generateNoisyLoop(NUM_VERTS, false, 0.4, 0.1))
         ];
         
         var startTime = window.nowish();
