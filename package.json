@@ -1,0 +1,34 @@
+{
+  "name": "libtess",
+  "version": "1.0.3",
+  "description": "Polygon tesselation library, ported from SGI's GLU implementation.",
+  "homepage": "https://github.com/brendankenny/libtess.js/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/brendankenny/libtess.js.git"
+  },
+  "main": "libtess.cat.js",
+  "scripts": {
+    "prepublish": "gulp prepublish"
+  },
+  "author": "Brendan Kenny <bckenny@google.com>",
+  "contributors": [
+    "Tom Payne <twpayne@gmail.com>"
+  ],
+  "license": "SGI-B-2.0",
+  "bugs": "https://github.com/brendankenny/libtess.js/issues",
+  "keywords": [
+    "polygon",
+    "tesselation",
+    "tessellation",
+    "triangulation",
+    "GLUtesselator"
+  ],
+  "devDependencies": {
+    "closurecompiler": "^1.3.2",
+    "gulp": "^3.8.8",
+    "gulp-closure-compiler": "^0.2.5",
+    "gulp-concat": "^2.4.1",
+    "gulp-replace": "^0.4.0"
+  }
+}
