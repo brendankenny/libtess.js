@@ -3,15 +3,15 @@
 Polygon tesselation library, ported from the tesselator in Silicon Graphics,
 Inc's
 [reference implementation](http://oss.sgi.com/projects/ogl-sample/index.html) of
-the OpenGL Utility Library (GLU).
+the OpenGL Utility Library (GLU), written primarily by Eric Veach while at SGI.
 
-### Tesselator or Tessellator?
+## Tesselator or Tessellator?
 
 Probably tessellator, but `GLUtesselator`, etc is in the original GLU API handed
 down from Ancient Times and "tesselator" is already all over the original source
 code, so that's what we're going with.
 
-### License
+## License
 
 Licensed under the [SGI Free Software License B v2.0](LICENSE).
 
