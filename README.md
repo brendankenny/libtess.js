@@ -18,7 +18,8 @@ code, so that's what we're going with.
 
 ## License
 
-Licensed under the [SGI Free Software License B v2.0](LICENSE).
+Licensed under the
+[SGI Free Software License B v2.0](https://github.com/brendankenny/libtess.js/blob/gh-pages/LICENSE).
 
 This SGI license is not a common one, but the
 [FSF has helped](https://www.fsf.org/blogs/licensing/2008-09-sgi-announcement)
