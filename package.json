@@ -1,6 +1,6 @@
 {
   "name": "libtess",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Polygon tesselation library, ported from SGI's GLU implementation.",
   "homepage": "https://github.com/brendankenny/libtess.js/",
   "repository": {
@@ -15,7 +15,12 @@
   "contributors": [
     "Tom Payne <twpayne@gmail.com>"
   ],
-  "license": "SGI-B-2.0",
+  "licenses": [
+    {
+      "type": "SGI-B-2.0",
+      "url": "https://github.com/brendankenny/libtess.js/blob/gh-pages/LICENSE" 
+    } 
+  ],
   "bugs": "https://github.com/brendankenny/libtess.js/issues",
   "keywords": [
     "polygon",
