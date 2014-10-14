@@ -9,7 +9,8 @@
   },
   "main": "libtess.min.js",
   "scripts": {
-    "prepublish": "gulp prepublish"
+    "prepublish": "gulp prepublish",
+    "test": "gulp test"
   },
   "author": "Brendan Kenny <bckenny@google.com>",
   "contributors": [
@@ -18,8 +19,8 @@
   "licenses": [
     {
       "type": "SGI-B-2.0",
-      "url": "https://github.com/brendankenny/libtess.js/blob/gh-pages/LICENSE" 
-    } 
+      "url": "https://github.com/brendankenny/libtess.js/blob/gh-pages/LICENSE"
+    }
   ],
   "bugs": "https://github.com/brendankenny/libtess.js/issues",
   "keywords": [
@@ -30,10 +31,13 @@
     "GLUtesselator"
   ],
   "devDependencies": {
+    "chai": "^1.9.2",
     "closurecompiler": "^1.3.2",
     "gulp": "^3.8.8",
-    "gulp-closure-compiler": "^0.2.5",
+    "gulp-closure-compiler": "^0.2.7",
     "gulp-concat": "^2.4.1",
-    "gulp-replace": "^0.4.0"
+    "gulp-mocha": "^1.1.1",
+    "gulp-replace": "^0.4.0",
+    "mocha": "^1.21.5"
   }
 }
