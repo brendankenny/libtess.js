@@ -19,7 +19,7 @@ var HOURGLASS_RESULT_ = [
   [1, 1, 0, 0, 0, 0, -1, 1, 0, 1, -1, 0, -1, -1, 0, 0, 0, 0]
 ];
 
-suite('Errors', function() {
+suite('Explicit Error States', function() {
   var contour = hourglass.value[0];
 
   suite('GLU_TESS_MISSING_BEGIN_POLYGON', function() {

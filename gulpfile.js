@@ -4,6 +4,7 @@ var gulp = require('gulp');
 var replace = require('gulp-replace');
 var concat = require('gulp-concat');
 var closureCompiler = require('gulp-closure-compiler');
+var mocha = require('gulp-mocha');
 
 var COMPILER_PATH = 'node_modules/closurecompiler/compiler/compiler.jar';
 
@@ -51,5 +52,11 @@ gulp.task('build-min', function() {
 gulp.task('prepublish', ['build-cat', 'build-min']);
 
 // TODO(bckenny): lint, test
+gulp.task('test', ['prepublish'], function() {
+  return gulp.src(['./test/errors.js'], {read: false})
+    .pipe(mocha({
+      ui: 'tdd'
+    }));
+});
 
 gulp.task('default', ['prepublish']);
