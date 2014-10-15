@@ -160,7 +160,7 @@ suite('Explicit Error States', function() {
   // the predefined constant GLU_TESS_MAX_COORD in absolute value, and
   // that the value has been clamped (Coordinate values must be small
   // enough so that two can be multiplied together without overflow).
-  suite('GLU_TESS_COORD_TOO_LARGE errors', function() {
+  suite('GLU_TESS_COORD_TOO_LARGE', function() {
     test('should throw if x coordinate is too large', function() {
       var tess = createTessellator(libtess);
       tess.gluTessBeginPolygon();
@@ -233,7 +233,7 @@ suite('Explicit Error States', function() {
   // callback (below) was not provided. No output will be generated.
   // 
   // This is the only error that can occur during tesselation and rendering.
-  suite('GLU_TESS_NEED_COMBINE_CALLBACK errors', function() {
+  suite('GLU_TESS_NEED_COMBINE_CALLBACK', function() {
     var resultVerts = [];
 
     test('should throw if no combine callback is provided', function() {

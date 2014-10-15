@@ -5,6 +5,7 @@ var replace = require('gulp-replace');
 var concat = require('gulp-concat');
 var closureCompiler = require('gulp-closure-compiler');
 var mocha = require('gulp-mocha');
+var browserify = require('gulp-browserify');
 
 var COMPILER_PATH = 'node_modules/closurecompiler/compiler/compiler.jar';
 
@@ -49,11 +50,23 @@ gulp.task('build-min', function() {
     .pipe(gulp.dest('.'));
 });
 
-gulp.task('prepublish', ['build-cat', 'build-min']);
+gulp.task('browserify-tests', ['build-cat', 'build-min'], function() {
+  return gulp.src('test/*.test.js')
+    .pipe(browserify({
+      ignore: 'chai'
+    }))
+    // NOTE(bckenny): kind of a hack, but no need to ship chai in our
+    //     browserified tests.
+    .pipe(replace('var chai = require(\'chai\');', ''))
+    .pipe(concat('tests_browserified.js', {newLine: ';'}))
+    .pipe(gulp.dest('./test'));
+});
 
-// TODO(bckenny): lint, test
+gulp.task('prepublish', ['build-cat', 'build-min', 'browserify-tests']);
+
+// TODO(bckenny): lint
 gulp.task('test', ['prepublish'], function() {
-  return gulp.src(['./test/errors.js'], {read: false})
+  return gulp.src(['test/*.test.js'], {read: false})
     .pipe(mocha({
       ui: 'tdd'
     }));
