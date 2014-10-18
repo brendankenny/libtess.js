@@ -6,12 +6,18 @@ var concat = require('gulp-concat');
 var closureCompiler = require('gulp-closure-compiler');
 var mocha = require('gulp-mocha');
 var browserify = require('browserify');
-var transform = require('vinyl-transform');
+var vinylTransform = require('vinyl-transform');
+var jshint = require('gulp-jshint');
+var stylish = require('jshint-stylish');
 
 var COMPILER_PATH = 'node_modules/closurecompiler/compiler/compiler.jar';
+var LIBTESS_SRC = ['./src/libtess.js', './src/**/*.js'];
+var JSHINT_SRC = ['./libtess.cat.js', './{build,examples,test}/**/*.{js,html}',
+    '!./build/externs/*', '!./test/tests-browserified.js',
+    '!./test/expectations/*'];
 
 gulp.task('build-cat', function() {
-  return gulp.src(['./src/libtess.js', './src/**/*.js', './build/node_export.js'])
+  return gulp.src(LIBTESS_SRC.concat('./build/node_export.js'))
     // remove license at top of each file
     .pipe(replace(/^\/\*[\s\*]+Copyright 2000[\s\S]*?\*\//m, ''))
     .pipe(concat('libtess.cat.js'))
@@ -19,7 +25,7 @@ gulp.task('build-cat', function() {
 });
 
 gulp.task('build-min', function() {
-  return gulp.src(['./src/libtess.js', './src/**/*.js', './build/closure_exports.js'])
+  return gulp.src(LIBTESS_SRC.concat('./build/closure_exports.js'))
     .pipe(closureCompiler({
       compilerPath: COMPILER_PATH,
       fileName: 'libtess.min.js',
@@ -51,9 +57,9 @@ gulp.task('build-min', function() {
     .pipe(gulp.dest('.'));
 });
 
-gulp.task('browserify-tests', ['build-cat', 'build-min'], function() {
-  gulp.src('test/*.test.js')
-    .pipe(transform(function(filename) {
+gulp.task('browserify-tests', function() {
+  return gulp.src('test/*.test.js')
+    .pipe(vinylTransform(function(filename) {
       return browserify(filename)
         // custom chai and libtess injected on page (for e.g. debug libtess)
         // TODO(bckenny): is there a less-dumb way of doing this?
@@ -70,14 +76,22 @@ gulp.task('browserify-tests', ['build-cat', 'build-min'], function() {
     .pipe(gulp.dest('./test'));
 });
 
-gulp.task('prepublish', ['build-cat', 'build-min', 'browserify-tests']);
+gulp.task('build', ['build-cat', 'build-min', 'browserify-tests']);
 
-// TODO(bckenny): lint
-gulp.task('test', ['prepublish'], function() {
+gulp.task('lint', ['build'], function() {
+  return gulp.src(LIBTESS_SRC.concat(JSHINT_SRC))
+    .pipe(jshint.extract('auto'))
+    .pipe(jshint())
+    .pipe(jshint.reporter(stylish))
+    .pipe(jshint.reporter('fail'));
+});
+
+gulp.task('test', ['lint'], function() {
   return gulp.src(['test/*.test.js'], {read: false})
     .pipe(mocha({
+      reporter: 'spec',
       ui: 'tdd'
     }));
 });
 
-gulp.task('default', ['prepublish']);
+gulp.task('default', ['build']);
