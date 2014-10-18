@@ -5,7 +5,8 @@ var replace = require('gulp-replace');
 var concat = require('gulp-concat');
 var closureCompiler = require('gulp-closure-compiler');
 var mocha = require('gulp-mocha');
-var browserify = require('gulp-browserify');
+var browserify = require('browserify');
+var transform = require('vinyl-transform');
 
 var COMPILER_PATH = 'node_modules/closurecompiler/compiler/compiler.jar';
 
@@ -51,14 +52,21 @@ gulp.task('build-min', function() {
 });
 
 gulp.task('browserify-tests', ['build-cat', 'build-min'], function() {
-  return gulp.src('test/*.test.js')
-    .pipe(browserify({
-      ignore: 'chai'
+  gulp.src('test/*.test.js')
+    .pipe(transform(function(filename) {
+      return browserify(filename)
+        // custom chai and libtess injected on page (for e.g. debug libtess)
+        // TODO(bckenny): is there a less-dumb way of doing this?
+        .require('./test/browser/fake-chai.js', {expose: 'chai'})
+        .require('./test/browser/fake-libtess.js', {expose: '../libtess.min.js'})
+
+        // expand list of tests in geometry/ at browserify time
+        .ignore('./test/rfolder.js')
+        .transform('rfolderify')
+
+        .bundle();
     }))
-    // NOTE(bckenny): kind of a hack, but no need to ship chai in our
-    //     browserified tests.
-    .pipe(replace('var chai = require(\'chai\');', ''))
-    .pipe(concat('tests_browserified.js', {newLine: ';'}))
+    .pipe(concat('tests-browserified.js', {newLine: ';'}))
     .pipe(gulp.dest('./test'));
 });
 

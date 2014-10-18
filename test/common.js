@@ -19,6 +19,7 @@ var ERROR_TYPES_ = {
   100155: 'GLU_TESS_COORD_TOO_LARGE',
   100156: 'GLU_TESS_NEED_COMBINE_CALLBACK'
 };
+exports.ERROR_TYPES = ERROR_TYPES_;
 
 /**
  * Lookup table for primitive types by number.
@@ -32,6 +33,7 @@ var PRIMITIVE_TYPES_ = {
   5: 'GL_TRIANGLE_STRIP',
   6: 'GL_TRIANGLE_FAN'
 };
+exports.PRIMITIVE_TYPES = PRIMITIVE_TYPES_;
 
 /**
  * Tessellation output types.
