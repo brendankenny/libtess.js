@@ -79,7 +79,7 @@ gulp.task('browserify-tests', function() {
         .bundle();
     }))
     .pipe(concat('tests-browserified.js', {newLine: ';'}))
-    .pipe(gulp.dest('./test'));
+    .pipe(gulp.dest('./test/browser'));
 });
 
 // TODO(bckenny): more incremental
