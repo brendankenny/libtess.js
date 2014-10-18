@@ -9,7 +9,7 @@
   },
   "main": "libtess.min.js",
   "scripts": {
-    "prepublish": "gulp prepublish",
+    "prepublish": "gulp build",
     "test": "gulp test"
   },
   "author": "Brendan Kenny <bckenny@google.com>",
