@@ -74,7 +74,7 @@ libtess.render.renderMesh = function(tess, mesh) {
     // We examine all faces in an arbitrary order.  Whenever we find
     // an unprocessed face F, we output a group of faces including F
     // whose size is maximum.
-    if (f.inside && ! f.marked) {
+    if (f.inside && !f.marked) {
       libtess.render.renderMaximumFaceGroup_(tess, f);
       libtess.assert(f.marked);
     }
@@ -168,7 +168,8 @@ libtess.render.renderCache = function(tess) {
 
   tess.callBeginOrBeginData(tess.boundaryOnly ?
       libtess.primitiveType.GL_LINE_LOOP : (tess.cacheCount > 3) ?
-      libtess.primitiveType.GL_TRIANGLE_FAN : libtess.primitiveType.GL_TRIANGLES);
+      libtess.primitiveType.GL_TRIANGLE_FAN :
+      libtess.primitiveType.GL_TRIANGLES);
 
   // indexes into tess.cache to replace pointers
   // TODO(bckenny): refactor to be more straightforward
@@ -300,7 +301,9 @@ libtess.render.maximumStrip_ = function(eOrig) {
   }
   eTail = e;
 
-  for (e = eOrig; !libtess.render.marked_(e.rFace()); ++headSize, e = e.dNext()) {
+  for (e = eOrig; !libtess.render.marked_(e.rFace()); ++headSize,
+      e = e.dNext()) {
+
     // NOTE(bckenny): AddToTrail(e.rFace(), trail) macro
     e.rFace().trail = trail;
     trail = e.rFace();

@@ -64,7 +64,7 @@ var OUTPUT_TYPES_ = [
  * statements. Most of the callbacks can be overridden by simply assigning a new
  * one.
  * @param {libtess} libtess Injected libtess implementation.
- * @param {{name: string, value: boolean}=} opt_outputType 
+ * @param {{name: string, value: boolean}=} opt_outputType
  * @return {!libtess.GluTesselator}
  */
 exports.createInstrumentedTessellator = function(libtess, opt_outputType) {
@@ -99,7 +99,7 @@ exports.createInstrumentedTessellator = function(libtess, opt_outputType) {
     assert.isTrue(begun, 'GLU_TESS_END called while not inside a primitive');
     begun = false;
   }
-  
+
   function errorCallback(errorNumber) {
     throw new Error(ERROR_TYPES_[errorNumber]);
   }
@@ -182,7 +182,7 @@ suite('Explicit Error States', function() {
     });
   });
 
-  // from the original README: 
+  // from the original README:
   // The interface recovers from these errors by inserting the missing call(s).
 
   suite('GLU_TESS_MISSING_BEGIN_CONTOUR', function() {
@@ -212,7 +212,7 @@ suite('Explicit Error States', function() {
       tess.gluTessEndContour();
       tess.gluTessEndPolygon();
       assert.deepEqual(resultVerts, HOURGLASS_RESULT_,
-          'tessellation not correct after GLU_TESS_MISSING_BEGIN_CONTOUR error');
+          'tessellation incorrect after GLU_TESS_MISSING_BEGIN_CONTOUR error');
     });
     test('should throw when gluTessEndContour called without it', function() {
       var tess = createTessellator(libtess);
@@ -248,7 +248,7 @@ suite('Explicit Error States', function() {
     });
     test('tessellator should recover and produce a correct result', function() {
       assert.deepEqual(resultVerts, HOURGLASS_RESULT_,
-          'tessellation not correct after GLU_TESS_MISSING_END_CONTOUR error');
+          'tessellation incorrect after GLU_TESS_MISSING_END_CONTOUR error');
     });
   });
 
@@ -284,7 +284,7 @@ suite('Explicit Error States', function() {
     // (see http://cgit.freedesktop.org/mesa/glu/tree/src/libtess/tess.c#n180)
     // test('tessellator should recover and produce a correct result', function() {
     //   assert.deepEqual(resultVerts, HOURGLASS_RESULT_,
-    //       'tessellation not correct after GLU_TESS_MISSING_END_POLYGON error');
+    //       'tessellation incorrect after GLU_TESS_MISSING_END_POLYGON error');
     // });
   });
 
@@ -348,7 +348,7 @@ suite('Explicit Error States', function() {
         assert.strictEqual(errorValue,
             libtess.errorType.GLU_TESS_COORD_TOO_LARGE,
             'did not throw GLU_TESS_COORD_TOO_LARGE');
-        
+
         // reset error state
         errorValue = -1;
       }
@@ -356,7 +356,7 @@ suite('Explicit Error States', function() {
       tess.gluTessEndPolygon();
 
       assert.deepEqual(resultVerts, [tooLargeContour],
-          'tessellation not correct after GLU_TESS_COORD_TOO_LARGE error');
+          'tessellation incorrect after GLU_TESS_COORD_TOO_LARGE error');
     });
   });
 
@@ -364,7 +364,7 @@ suite('Explicit Error States', function() {
   // GLU_TESS_NEED_COMBINE_CALLBACK says that the algorithm detected an
   // intersection between two edges in the input data, and the "combine"
   // callback (below) was not provided. No output will be generated.
-  // 
+  //
   // This is the only error that can occur during tesselation and rendering.
   suite('GLU_TESS_NEED_COMBINE_CALLBACK', function() {
     var resultVerts = [];
@@ -494,7 +494,7 @@ var OUTPUT_TYPES_ = [
  * statements. Most of the callbacks can be overridden by simply assigning a new
  * one.
  * @param {libtess} libtess Injected libtess implementation.
- * @param {{name: string, value: boolean}=} opt_outputType 
+ * @param {{name: string, value: boolean}=} opt_outputType
  * @return {!libtess.GluTesselator}
  */
 exports.createInstrumentedTessellator = function(libtess, opt_outputType) {
@@ -529,7 +529,7 @@ exports.createInstrumentedTessellator = function(libtess, opt_outputType) {
     assert.isTrue(begun, 'GLU_TESS_END called while not inside a primitive');
     begun = false;
   }
-  
+
   function errorCallback(errorNumber) {
     throw new Error(ERROR_TYPES_[errorNumber]);
   }
@@ -660,7 +660,7 @@ var WINDING_RULES = Object.keys(libtess.windingRule).map(
       name: windingRuleName.substring(9),
       value: libtess.windingRule[windingRuleName]
     };
-});
+  });
 
 /**
  * Set of normals for planes in which to test tessellation.

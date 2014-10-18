@@ -82,12 +82,10 @@ libtess.geom.vertLeq = function(u, v) {
  * @return {number} double.
  */
 libtess.geom.edgeEval = function(u, v, w) {
-  var gapL, gapR;
-
   libtess.assert(libtess.geom.vertLeq(u, v) && libtess.geom.vertLeq(v, w));
 
-  gapL = v.s - u.s;
-  gapR = w.s - v.s;
+  var gapL = v.s - u.s;
+  var gapR = w.s - v.s;
 
   if (gapL + gapR > 0) {
     if (gapL < gapR) {
@@ -113,12 +111,10 @@ libtess.geom.edgeEval = function(u, v, w) {
  * @return {number} double.
  */
 libtess.geom.edgeSign = function(u, v, w) {
-  var gapL, gapR;
-
   libtess.assert(libtess.geom.vertLeq(u, v) && libtess.geom.vertLeq(v, w));
 
-  gapL = v.s - u.s;
-  gapR = w.s - v.s;
+  var gapL = v.s - u.s;
+  var gapR = w.s - v.s;
 
   if (gapL + gapR > 0) {
     return (v.t - w.t) * gapL + (v.t - u.t) * gapR;
@@ -160,12 +156,10 @@ libtess.geom.transLeq = function(u, v) {
  * @return {number} double.
  */
 libtess.geom.transEval = function(u, v, w) {
-  var gapL, gapR;
-
   libtess.assert(libtess.geom.transLeq(u, v) && libtess.geom.transLeq(v, w));
 
-  gapL = v.t - u.t;
-  gapR = w.t - v.t;
+  var gapL = v.t - u.t;
+  var gapR = w.t - v.t;
 
   if (gapL + gapR > 0) {
     if (gapL < gapR) {
@@ -192,12 +186,10 @@ libtess.geom.transEval = function(u, v, w) {
  * @return {number} double.
  */
 libtess.geom.transSign = function(u, v, w) {
-  var gapL, gapR;
-
   libtess.assert(libtess.geom.transLeq(u, v) && libtess.geom.transLeq(v, w));
 
-  gapL = v.t - u.t;
-  gapR = w.t - v.t;
+  var gapL = v.t - u.t;
+  var gapR = w.t - v.t;
 
   if (gapL + gapR > 0) {
     return (v.s - w.s) * gapL + (v.s - u.s) * gapR;
@@ -311,7 +303,8 @@ libtess.geom.edgeIntersect = function(o1, d1, o2, d2, v) {
    * and interpolate the intersection s-value from these.  Then repeat
    * using the TransLeq ordering to find the intersection t-value.
    */
-  var z1, z2;
+  var z1;
+  var z2;
   var tmp;
 
   if (!libtess.geom.vertLeq(o1, d1)) {

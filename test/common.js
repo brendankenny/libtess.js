@@ -57,7 +57,7 @@ var OUTPUT_TYPES_ = [
  * statements. Most of the callbacks can be overridden by simply assigning a new
  * one.
  * @param {libtess} libtess Injected libtess implementation.
- * @param {{name: string, value: boolean}=} opt_outputType 
+ * @param {{name: string, value: boolean}=} opt_outputType
  * @return {!libtess.GluTesselator}
  */
 exports.createInstrumentedTessellator = function(libtess, opt_outputType) {
@@ -92,7 +92,7 @@ exports.createInstrumentedTessellator = function(libtess, opt_outputType) {
     assert.isTrue(begun, 'GLU_TESS_END called while not inside a primitive');
     begun = false;
   }
-  
+
   function errorCallback(errorNumber) {
     throw new Error(ERROR_TYPES_[errorNumber]);
   }

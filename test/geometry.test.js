@@ -28,7 +28,7 @@ var WINDING_RULES = Object.keys(libtess.windingRule).map(
       name: windingRuleName.substring(9),
       value: libtess.windingRule[windingRuleName]
     };
-});
+  });
 
 /**
  * Set of normals for planes in which to test tessellation.

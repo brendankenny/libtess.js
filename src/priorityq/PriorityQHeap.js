@@ -48,7 +48,8 @@ libtess.PriorityQHeap = function(leq) {
    * @private
    * @type {Array.<libtess.PQNode>}
    */
-  this.nodes_ = libtess.PQNode.realloc(null, libtess.PriorityQHeap.INIT_SIZE_ + 1);
+  this.nodes_ = libtess.PQNode.realloc(null,
+      libtess.PriorityQHeap.INIT_SIZE_ + 1);
 
   /**
    * Each handle stores a key, plus a pointer back to the node which currently
@@ -56,9 +57,11 @@ libtess.PriorityQHeap = function(leq) {
    * @private
    * @type {Array.<libtess.PQHandleElem>}
    */
-  this.handles_ = libtess.PQHandleElem.realloc(null, libtess.PriorityQHeap.INIT_SIZE_ + 1);
+  this.handles_ = libtess.PQHandleElem.realloc(null,
+      libtess.PriorityQHeap.INIT_SIZE_ + 1);
 
-  // TODO(bckenny): size and max should probably be libtess.PQHandle for correct typing (see PriorityQ.js)
+  // TODO(bckenny): size and max should probably be libtess.PQHandle for correct
+  // typing (see PriorityQ.js)
   /**
    * The size of the queue.
    * @private
@@ -92,7 +95,8 @@ libtess.PriorityQHeap = function(leq) {
   this.initialized_ = false;
 
   // TODO(bckenny): leq was inlined by define in original, but appears to
-  // be vertLeq, as passed. Using injected version, but is it better just to manually inline?
+  // be vertLeq, as passed. Using injected version, but is it better just to
+  // manually inline?
   /**
    * [leq description]
    * @private
@@ -126,8 +130,8 @@ libtess.PriorityQHeap.prototype.deleteHeap = function() {
 
 
 /**
- * Initializing ordering of the heap. Must be called before any method other than
- * insert is called to ensure correctness when removing or querying.
+ * Initializing ordering of the heap. Must be called before any method other
+ * than insert is called to ensure correctness when removing or querying.
  */
 libtess.PriorityQHeap.prototype.init = function() {
   // This method of building a heap is O(n), rather than O(n lg n).
@@ -235,7 +239,9 @@ libtess.PriorityQHeap.prototype.remove = function(hCurr) {
   h[n[curr].handle].node = curr;
 
   if (curr <= --this.size_) {
-    if (curr <= 1 || this.leq_(h[n[curr >> 1].handle].key, h[n[curr].handle].key)) {
+    if (curr <= 1 ||
+        this.leq_(h[n[curr >> 1].handle].key, h[n[curr].handle].key)) {
+
       this.floatDown_(curr);
     } else {
       this.floatUp_(curr);
@@ -258,11 +264,13 @@ libtess.PriorityQHeap.prototype.floatDown_ = function(curr) {
   var h = this.handles_;
 
   var hCurr = n[curr].handle;
-  for (;; ) {
+  for (;;) {
     // The children of node i are nodes 2i and 2i+1.
     // set child to the index of the child with the minimum key
     var child = curr << 1;
-    if (child < this.size_ && this.leq_(h[n[child + 1].handle].key, h[n[child].handle].key)) {
+    if (child < this.size_ &&
+        this.leq_(h[n[child + 1].handle].key, h[n[child].handle].key)) {
+
       ++child;
     }
 
@@ -291,7 +299,7 @@ libtess.PriorityQHeap.prototype.floatUp_ = function(curr) {
   var h = this.handles_;
 
   var hCurr = n[curr].handle;
-  for (;; ) {
+  for (;;) {
     var parent = curr >> 1;
     var hParent = n[parent].handle;
     if (parent === 0 || this.leq_(h[hParent].key, h[hCurr].key)) {

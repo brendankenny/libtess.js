@@ -52,7 +52,7 @@ function triangulate(contours) {
     tessy.gluTessBeginContour();
     var contour = contours[i];
     for (var j = 0; j < contour.length; j += 2) {
-      var coords = [contour[j], contour[j+1], 0];
+      var coords = [contour[j], contour[j + 1], 0];
       tessy.gluTessVertex(coords, coords);
     }
     tessy.gluTessEndContour();
