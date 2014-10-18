@@ -47,7 +47,8 @@ libtess.PriorityQ = function(leq) {
    * @private
    * @type {Array.<libtess.PQKey>}
    */
-  this.keys_ = libtess.PriorityQ.prototype.PQKeyRealloc_(null, libtess.PriorityQ.INIT_SIZE_);
+  this.keys_ = libtess.PriorityQ.prototype.PQKeyRealloc_(null,
+      libtess.PriorityQ.INIT_SIZE_);
 
   /**
    * Array of indexes into this.keys_
@@ -84,7 +85,8 @@ libtess.PriorityQ = function(leq) {
    * @private
    * @type {function(libtess.PQKey, libtess.PQKey): boolean}
    */
-  this.leq_ = /** @type {function(libtess.PQKey, libtess.PQKey): boolean} */(leq);
+  this.leq_ =
+      /** @type {function(libtess.PQKey, libtess.PQKey): boolean} */(leq);
 
   /**
    * [heap_ description]
@@ -127,15 +129,16 @@ libtess.PriorityQ.prototype.init = function() {
 
   // Create an array of indirect pointers to the keys, so that
   // the handles we have returned are still valid.
-  // TODO(bckenny): valid for when? it appears we can just store indexes into keys_, but what did this mean?
+  // TODO(bckenny): valid for when? it appears we can just store indexes into
+  // keys_, but what did this mean?
   for (var i = 0; i < this.size_; i++) {
     this.order_[i] = i;
   }
 
   // sort the indirect pointers in descending order of the keys themselves
   // TODO(bckenny): make sure it's ok that keys[a] === keys[b] returns 1
-  // TODO(bckenny): unstable sort means we may get slightly different polys in different
-  // browsers, but only when passing in equal points
+  // TODO(bckenny): unstable sort means we may get slightly different polys in
+  // different browsers, but only when passing in equal points
   // TODO(bckenny): make less awkward closure?
   var comparator = (function(keys, leq) {
     return function(a, b) {
@@ -154,7 +157,8 @@ libtess.PriorityQ.prototype.init = function() {
     var p = 0;
     var r = p + this.size_ - 1;
     for (i = p; i < r; ++i) {
-      libtess.assert(this.leq_(this.keys_[this.order_[i + 1]], this.keys_[this.order_[i]]));
+      libtess.assert(this.leq_(this.keys_[this.order_[i + 1]],
+          this.keys_[this.order_[i]]));
     }
   }
   // #endif
@@ -167,7 +171,8 @@ libtess.PriorityQ.prototype.init = function() {
  * @return {libtess.PQHandle} [description].
  */
 libtess.PriorityQ.prototype.insert = function(keyNew) {
-  // NOTE(bckenny): originally returned LONG_MAX as alloc failure signal. no longer does.
+  // NOTE(bckenny): originally returned LONG_MAX as alloc failure signal. no
+  // longer does.
   if (this.initialized_) {
     return this.heap_.insert(keyNew);
   }
@@ -176,7 +181,8 @@ libtess.PriorityQ.prototype.insert = function(keyNew) {
   if (++this.size_ >= this.max_) {
     // If the heap overflows, double its size.
     this.max_ *= 2;
-    this.keys_ = libtess.PriorityQ.prototype.PQKeyRealloc_(this.keys_, this.max_);
+    this.keys_ =
+        libtess.PriorityQ.prototype.PQKeyRealloc_(this.keys_, this.max_);
   }
 
   this.keys_[curr] = keyNew;

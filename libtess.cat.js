@@ -53,7 +53,8 @@ libtess.DEBUG = false;
  */
 libtess.assert = function(condition, opt_message) {
   if (libtess.DEBUG && !condition) {
-    throw new Error('Assertion failed' + (opt_message ? ': ' + opt_message : ''));
+    throw new Error('Assertion failed' +
+        (opt_message ? ': ' + opt_message : ''));
   }
 };
 
@@ -279,12 +280,10 @@ libtess.geom.vertLeq = function(u, v) {
  * @return {number} double.
  */
 libtess.geom.edgeEval = function(u, v, w) {
-  var gapL, gapR;
-
   libtess.assert(libtess.geom.vertLeq(u, v) && libtess.geom.vertLeq(v, w));
 
-  gapL = v.s - u.s;
-  gapR = w.s - v.s;
+  var gapL = v.s - u.s;
+  var gapR = w.s - v.s;
 
   if (gapL + gapR > 0) {
     if (gapL < gapR) {
@@ -310,12 +309,10 @@ libtess.geom.edgeEval = function(u, v, w) {
  * @return {number} double.
  */
 libtess.geom.edgeSign = function(u, v, w) {
-  var gapL, gapR;
-
   libtess.assert(libtess.geom.vertLeq(u, v) && libtess.geom.vertLeq(v, w));
 
-  gapL = v.s - u.s;
-  gapR = w.s - v.s;
+  var gapL = v.s - u.s;
+  var gapR = w.s - v.s;
 
   if (gapL + gapR > 0) {
     return (v.t - w.t) * gapL + (v.t - u.t) * gapR;
@@ -357,12 +354,10 @@ libtess.geom.transLeq = function(u, v) {
  * @return {number} double.
  */
 libtess.geom.transEval = function(u, v, w) {
-  var gapL, gapR;
-
   libtess.assert(libtess.geom.transLeq(u, v) && libtess.geom.transLeq(v, w));
 
-  gapL = v.t - u.t;
-  gapR = w.t - v.t;
+  var gapL = v.t - u.t;
+  var gapR = w.t - v.t;
 
   if (gapL + gapR > 0) {
     if (gapL < gapR) {
@@ -389,12 +384,10 @@ libtess.geom.transEval = function(u, v, w) {
  * @return {number} double.
  */
 libtess.geom.transSign = function(u, v, w) {
-  var gapL, gapR;
-
   libtess.assert(libtess.geom.transLeq(u, v) && libtess.geom.transLeq(v, w));
 
-  gapL = v.t - u.t;
-  gapR = w.t - v.t;
+  var gapL = v.t - u.t;
+  var gapR = w.t - v.t;
 
   if (gapL + gapR > 0) {
     return (v.s - w.s) * gapL + (v.s - u.s) * gapR;
@@ -508,7 +501,8 @@ libtess.geom.edgeIntersect = function(o1, d1, o2, d2, v) {
    * and interpolate the intersection s-value from these.  Then repeat
    * using the TransLeq ordering to find the intersection t-value.
    */
-  var z1, z2;
+  var z1;
+  var z2;
   var tmp;
 
   if (!libtess.geom.vertLeq(o1, d1)) {
@@ -1293,8 +1287,10 @@ libtess.normal.projectPolygon = function(tess) {
     sUnit[(i + 2) % 3] = libtess.normal.S_UNIT_Y_;
 
     tUnit[i] = 0;
-    tUnit[(i + 1) % 3] = (norm[i] > 0) ? -libtess.normal.S_UNIT_Y_ : libtess.normal.S_UNIT_Y_;
-    tUnit[(i + 2) % 3] = (norm[i] > 0) ? libtess.normal.S_UNIT_X_ : -libtess.normal.S_UNIT_X_;
+    tUnit[(i + 1) % 3] = (norm[i] > 0) ?
+        -libtess.normal.S_UNIT_Y_ : libtess.normal.S_UNIT_Y_;
+    tUnit[(i + 2) % 3] = (norm[i] > 0) ?
+        libtess.normal.S_UNIT_X_ : -libtess.normal.S_UNIT_X_;
   }
 
   // Project the vertices onto the sweep plane
@@ -1459,7 +1455,7 @@ libtess.normal.checkOrientation_ = function(tess) {
     // Reverse the orientation by flipping all the t-coordinates
     var vHead = tess.mesh.vHead;
     for (var v = vHead.next; v !== vHead; v = v.next) {
-      v.t = - v.t;
+      v.t = -v.t;
     }
     tess.tUnit[0] = -tess.tUnit[0];
     tess.tUnit[1] = -tess.tUnit[1];
@@ -1516,7 +1512,7 @@ libtess.render.renderMesh = function(tess, mesh) {
     // We examine all faces in an arbitrary order.  Whenever we find
     // an unprocessed face F, we output a group of faces including F
     // whose size is maximum.
-    if (f.inside && ! f.marked) {
+    if (f.inside && !f.marked) {
       libtess.render.renderMaximumFaceGroup_(tess, f);
       libtess.assert(f.marked);
     }
@@ -1610,7 +1606,8 @@ libtess.render.renderCache = function(tess) {
 
   tess.callBeginOrBeginData(tess.boundaryOnly ?
       libtess.primitiveType.GL_LINE_LOOP : (tess.cacheCount > 3) ?
-      libtess.primitiveType.GL_TRIANGLE_FAN : libtess.primitiveType.GL_TRIANGLES);
+      libtess.primitiveType.GL_TRIANGLE_FAN :
+      libtess.primitiveType.GL_TRIANGLES);
 
   // indexes into tess.cache to replace pointers
   // TODO(bckenny): refactor to be more straightforward
@@ -1742,7 +1739,9 @@ libtess.render.maximumStrip_ = function(eOrig) {
   }
   eTail = e;
 
-  for (e = eOrig; !libtess.render.marked_(e.rFace()); ++headSize, e = e.dNext()) {
+  for (e = eOrig; !libtess.render.marked_(e.rFace()); ++headSize,
+      e = e.dNext()) {
+
     // NOTE(bckenny): AddToTrail(e.rFace(), trail) macro
     e.rFace().trail = trail;
     trail = e.rFace();
@@ -2133,7 +2132,7 @@ libtess.sweep.computeInterior = function(tess) {
   // TODO(bckenny): don't need the cast if pq's key is better typed
   var v;
   while ((v = /** @type {libtess.GluVertex} */(tess.pq.extractMin())) !== null) {
-    for (;; ) {
+    for (;;) {
       var vNext = /** @type {libtess.GluVertex} */(tess.pq.minimum());
       if (vNext === null || !libtess.geom.vertEq(vNext, v)) {
         break;
@@ -2480,7 +2479,9 @@ libtess.sweep.finishLeftRegions_ = function(tess, regFirst, regLast) {
  * @param {libtess.GluHalfEdge} eTopLeft [description].
  * @param {boolean} cleanUp [description].
  */
-libtess.sweep.addRightEdges_ = function(tess, regUp, eFirst, eLast, eTopLeft, cleanUp) {
+libtess.sweep.addRightEdges_ = function(tess, regUp, eFirst, eLast, eTopLeft,
+    cleanUp) {
+
   var firstTime = true;
 
   // Insert the new right-going edges in the dictionary
@@ -2500,7 +2501,7 @@ libtess.sweep.addRightEdges_ = function(tess, regUp, eFirst, eLast, eTopLeft, cl
   var regPrev = regUp;
   var ePrev = eTopLeft;
   var reg;
-  for (;; ) {
+  for (;;) {
     reg = regPrev.regionBelow();
     e = reg.eUp.sym;
     if (e.org !== ePrev.org) {
@@ -2567,7 +2568,8 @@ libtess.sweep.callCombine_ = function(tess, isect, data, weights, needed) {
       // The only way fatal error is when two edges are found to intersect,
       // but the user has not provided the callback necessary to handle
       // generated intersection points.
-      tess.callErrorOrErrorData(libtess.errorType.GLU_TESS_NEED_COMBINE_CALLBACK);
+      tess.callErrorOrErrorData(
+          libtess.errorType.GLU_TESS_NEED_COMBINE_CALLBACK);
       tess.fatalError = true;
     }
   }
@@ -2638,7 +2640,9 @@ libtess.sweep.vertexWeights_ = function(isect, org, dst, weights, weightIndex) {
  * @param {libtess.GluVertex} orgLo [description].
  * @param {libtess.GluVertex} dstLo [description].
  */
-libtess.sweep.getIntersectData_ = function(tess, isect, orgUp, dstUp, orgLo, dstLo) {
+libtess.sweep.getIntersectData_ = function(tess, isect, orgUp, dstUp, orgLo,
+    dstLo) {
+
   // TODO(bckenny): called for every intersection event, should these be from a pool?
   // TODO(bckenny): better way to init these?
   var weights = [0, 0, 0, 0];
@@ -2884,8 +2888,12 @@ libtess.sweep.checkForIntersect_ = function(tess, regUp) {
     return false;
   }
 
-  if ((!libtess.geom.vertEq(dstUp, tess.event) && libtess.geom.edgeSign(dstUp, tess.event, isect) >= 0) ||
-      (!libtess.geom.vertEq(dstLo, tess.event) && libtess.geom.edgeSign(dstLo, tess.event, isect) <= 0)) {
+  // TODO(bckenny): clean this up; length is distracting
+  if ((!libtess.geom.vertEq(dstUp, tess.event) &&
+      libtess.geom.edgeSign(dstUp, tess.event, isect) >= 0) ||
+      (!libtess.geom.vertEq(dstLo, tess.event) &&
+      libtess.geom.edgeSign(dstLo, tess.event, isect) <= 0)) {
+
     /* Very unusual -- the new upper or lower edge would pass on the
      * wrong side of the sweep event, or through it. This can happen
      * due to very small numerical errors in the intersection calculation.
@@ -2910,7 +2918,8 @@ libtess.sweep.checkForIntersect_ = function(tess, regUp) {
       var e = regUp.regionBelow().eUp.rPrev();
       regLo.eUp = eLo.oPrev();
       eLo = libtess.sweep.finishLeftRegions_(tess, regLo, null);
-      libtess.sweep.addRightEdges_(tess, regUp, eLo.oNext, eUp.rPrev(), e, true);
+      libtess.sweep.addRightEdges_(tess, regUp, eLo.oNext, eUp.rPrev(), e,
+          true);
       return true;
     }
 
@@ -2971,7 +2980,7 @@ libtess.sweep.checkForIntersect_ = function(tess, regUp) {
 libtess.sweep.walkDirtyRegions_ = function(tess, regUp) {
   var regLo = regUp.regionBelow();
 
-  for (;; ) {
+  for (;;) {
     // Find the lowest dirty region (we walk from the bottom up).
     while (regLo.dirty) {
       regUp = regLo;
@@ -3012,7 +3021,8 @@ libtess.sweep.walkDirtyRegions_ = function(tess, regUp) {
     }
 
     if (eUp.org !== eLo.org) {
-      if (eUp.dst() !== eLo.dst() && !regUp.fixUpperEdge && !regLo.fixUpperEdge &&
+      if (eUp.dst() !== eLo.dst() && !regUp.fixUpperEdge &&
+          !regLo.fixUpperEdge &&
           (eUp.dst() === tess.event || eLo.dst() === tess.event)) {
         /* When all else fails in checkForIntersect(), it uses tess.event
          * as the intersection location. To make this possible, it requires
@@ -3107,7 +3117,8 @@ libtess.sweep.connectRightVertex_ = function(tess, regUp, eBottomLeft) {
     degenerate = true;
   }
   if (degenerate) {
-    libtess.sweep.addRightEdges_(tess, regUp, eBottomLeft.oNext, eTopLeft, eTopLeft, true);
+    libtess.sweep.addRightEdges_(tess, regUp, eBottomLeft.oNext, eTopLeft,
+        eTopLeft, true);
     return;
   }
 
@@ -3123,7 +3134,8 @@ libtess.sweep.connectRightVertex_ = function(tess, regUp, eBottomLeft) {
 
   // Prevent cleanup, otherwise eNew might disappear before we've even
   // had a chance to mark it as a temporary edge.
-  libtess.sweep.addRightEdges_(tess, regUp, eNew, eNew.oNext, eNew.oNext, false);
+  libtess.sweep.addRightEdges_(tess, regUp, eNew, eNew.oNext, eNew.oNext,
+      false);
   eNew.sym.activeRegion.fixUpperEdge = true;
   libtess.sweep.walkDirtyRegions_(tess, regUp);
 };
@@ -3191,7 +3203,8 @@ libtess.sweep.connectLeftDegenerate_ = function(tess, regUp, vEvent) {
     eTopLeft = null;
   }
 
-  libtess.sweep.addRightEdges_(tess, regUp, eTopRight.oNext, eLast, eTopLeft, true);
+  libtess.sweep.addRightEdges_(tess, regUp, eTopRight.oNext, eLast, eTopLeft,
+      true);
 };
 
 
@@ -3223,7 +3236,8 @@ libtess.sweep.connectLeftVertex_ = function(tess, vEvent) {
 
   // Get a pointer to the active region containing vEvent
   tmp.eUp = vEvent.anEdge.sym;
-  var regUp = /** @type {libtess.ActiveRegion} */(tess.dict.search(tmp).getKey());
+  var regUp =
+      /** @type {libtess.ActiveRegion} */(tess.dict.search(tmp).getKey());
   var regLo = regUp.regionBelow();
   var eUp = regUp.eUp;
   var eLo = regLo.eUp;
@@ -3251,14 +3265,16 @@ libtess.sweep.connectLeftVertex_ = function(tess, vEvent) {
       libtess.sweep.fixUpperEdge_(reg, eNew);
 
     } else {
-      libtess.sweep.computeWinding_(tess, libtess.sweep.addRegionBelow_(tess, regUp, eNew));
+      libtess.sweep.computeWinding_(tess,
+          libtess.sweep.addRegionBelow_(tess, regUp, eNew));
     }
     libtess.sweep.sweepEvent_(tess, vEvent);
 
   } else {
     // The new vertex is in a region which does not belong to the polygon.
     // We don''t need to connect this vertex to the rest of the mesh.
-    libtess.sweep.addRightEdges_(tess, regUp, vEvent.anEdge, vEvent.anEdge, null, true);
+    libtess.sweep.addRightEdges_(tess, regUp, vEvent.anEdge, vEvent.anEdge,
+        null, true);
   }
 };
 
@@ -3310,7 +3326,8 @@ libtess.sweep.sweepEvent_ = function(tess, vEvent) {
     libtess.sweep.connectRightVertex_(tess, regUp, eBottomLeft);
 
   } else {
-    libtess.sweep.addRightEdges_(tess, regUp, eBottomLeft.oNext, eTopLeft, eTopLeft, true);
+    libtess.sweep.addRightEdges_(tess, regUp, eBottomLeft.oNext, eTopLeft,
+        eTopLeft, true);
   }
 };
 
@@ -5306,7 +5323,8 @@ libtess.PriorityQ = function(leq) {
    * @private
    * @type {Array.<libtess.PQKey>}
    */
-  this.keys_ = libtess.PriorityQ.prototype.PQKeyRealloc_(null, libtess.PriorityQ.INIT_SIZE_);
+  this.keys_ = libtess.PriorityQ.prototype.PQKeyRealloc_(null,
+      libtess.PriorityQ.INIT_SIZE_);
 
   /**
    * Array of indexes into this.keys_
@@ -5343,7 +5361,8 @@ libtess.PriorityQ = function(leq) {
    * @private
    * @type {function(libtess.PQKey, libtess.PQKey): boolean}
    */
-  this.leq_ = /** @type {function(libtess.PQKey, libtess.PQKey): boolean} */(leq);
+  this.leq_ =
+      /** @type {function(libtess.PQKey, libtess.PQKey): boolean} */(leq);
 
   /**
    * [heap_ description]
@@ -5386,15 +5405,16 @@ libtess.PriorityQ.prototype.init = function() {
 
   // Create an array of indirect pointers to the keys, so that
   // the handles we have returned are still valid.
-  // TODO(bckenny): valid for when? it appears we can just store indexes into keys_, but what did this mean?
+  // TODO(bckenny): valid for when? it appears we can just store indexes into
+  // keys_, but what did this mean?
   for (var i = 0; i < this.size_; i++) {
     this.order_[i] = i;
   }
 
   // sort the indirect pointers in descending order of the keys themselves
   // TODO(bckenny): make sure it's ok that keys[a] === keys[b] returns 1
-  // TODO(bckenny): unstable sort means we may get slightly different polys in different
-  // browsers, but only when passing in equal points
+  // TODO(bckenny): unstable sort means we may get slightly different polys in
+  // different browsers, but only when passing in equal points
   // TODO(bckenny): make less awkward closure?
   var comparator = (function(keys, leq) {
     return function(a, b) {
@@ -5413,7 +5433,8 @@ libtess.PriorityQ.prototype.init = function() {
     var p = 0;
     var r = p + this.size_ - 1;
     for (i = p; i < r; ++i) {
-      libtess.assert(this.leq_(this.keys_[this.order_[i + 1]], this.keys_[this.order_[i]]));
+      libtess.assert(this.leq_(this.keys_[this.order_[i + 1]],
+          this.keys_[this.order_[i]]));
     }
   }
   // #endif
@@ -5426,7 +5447,8 @@ libtess.PriorityQ.prototype.init = function() {
  * @return {libtess.PQHandle} [description].
  */
 libtess.PriorityQ.prototype.insert = function(keyNew) {
-  // NOTE(bckenny): originally returned LONG_MAX as alloc failure signal. no longer does.
+  // NOTE(bckenny): originally returned LONG_MAX as alloc failure signal. no
+  // longer does.
   if (this.initialized_) {
     return this.heap_.insert(keyNew);
   }
@@ -5435,7 +5457,8 @@ libtess.PriorityQ.prototype.insert = function(keyNew) {
   if (++this.size_ >= this.max_) {
     // If the heap overflows, double its size.
     this.max_ *= 2;
-    this.keys_ = libtess.PriorityQ.prototype.PQKeyRealloc_(this.keys_, this.max_);
+    this.keys_ =
+        libtess.PriorityQ.prototype.PQKeyRealloc_(this.keys_, this.max_);
   }
 
   this.keys_[curr] = keyNew;
@@ -5602,7 +5625,8 @@ libtess.PriorityQHeap = function(leq) {
    * @private
    * @type {Array.<libtess.PQNode>}
    */
-  this.nodes_ = libtess.PQNode.realloc(null, libtess.PriorityQHeap.INIT_SIZE_ + 1);
+  this.nodes_ = libtess.PQNode.realloc(null,
+      libtess.PriorityQHeap.INIT_SIZE_ + 1);
 
   /**
    * Each handle stores a key, plus a pointer back to the node which currently
@@ -5610,9 +5634,11 @@ libtess.PriorityQHeap = function(leq) {
    * @private
    * @type {Array.<libtess.PQHandleElem>}
    */
-  this.handles_ = libtess.PQHandleElem.realloc(null, libtess.PriorityQHeap.INIT_SIZE_ + 1);
+  this.handles_ = libtess.PQHandleElem.realloc(null,
+      libtess.PriorityQHeap.INIT_SIZE_ + 1);
 
-  // TODO(bckenny): size and max should probably be libtess.PQHandle for correct typing (see PriorityQ.js)
+  // TODO(bckenny): size and max should probably be libtess.PQHandle for correct
+  // typing (see PriorityQ.js)
   /**
    * The size of the queue.
    * @private
@@ -5646,7 +5672,8 @@ libtess.PriorityQHeap = function(leq) {
   this.initialized_ = false;
 
   // TODO(bckenny): leq was inlined by define in original, but appears to
-  // be vertLeq, as passed. Using injected version, but is it better just to manually inline?
+  // be vertLeq, as passed. Using injected version, but is it better just to
+  // manually inline?
   /**
    * [leq description]
    * @private
@@ -5680,8 +5707,8 @@ libtess.PriorityQHeap.prototype.deleteHeap = function() {
 
 
 /**
- * Initializing ordering of the heap. Must be called before any method other than
- * insert is called to ensure correctness when removing or querying.
+ * Initializing ordering of the heap. Must be called before any method other
+ * than insert is called to ensure correctness when removing or querying.
  */
 libtess.PriorityQHeap.prototype.init = function() {
   // This method of building a heap is O(n), rather than O(n lg n).
@@ -5789,7 +5816,9 @@ libtess.PriorityQHeap.prototype.remove = function(hCurr) {
   h[n[curr].handle].node = curr;
 
   if (curr <= --this.size_) {
-    if (curr <= 1 || this.leq_(h[n[curr >> 1].handle].key, h[n[curr].handle].key)) {
+    if (curr <= 1 ||
+        this.leq_(h[n[curr >> 1].handle].key, h[n[curr].handle].key)) {
+
       this.floatDown_(curr);
     } else {
       this.floatUp_(curr);
@@ -5812,11 +5841,13 @@ libtess.PriorityQHeap.prototype.floatDown_ = function(curr) {
   var h = this.handles_;
 
   var hCurr = n[curr].handle;
-  for (;; ) {
+  for (;;) {
     // The children of node i are nodes 2i and 2i+1.
     // set child to the index of the child with the minimum key
     var child = curr << 1;
-    if (child < this.size_ && this.leq_(h[n[child + 1].handle].key, h[n[child].handle].key)) {
+    if (child < this.size_ &&
+        this.leq_(h[n[child + 1].handle].key, h[n[child].handle].key)) {
+
       ++child;
     }
 
@@ -5845,7 +5876,7 @@ libtess.PriorityQHeap.prototype.floatUp_ = function(curr) {
   var h = this.handles_;
 
   var hCurr = n[curr].handle;
-  for (;; ) {
+  for (;;) {
     var parent = curr >> 1;
     var hParent = n[parent].handle;
     if (parent === 0 || this.leq_(h[hParent].key, h[hCurr].key)) {
@@ -5988,6 +6019,8 @@ libtess.ActiveRegion.prototype.regionAbove = function() {
   // TODO(bckenny): better typing? or is cast unavoidable
   return /** @type {libtess.ActiveRegion} */ (this.nodeUp.getSucc().getKey());
 };
+
+/* global libtess, module */
 
 /**
  * node.js export for non-compiled source

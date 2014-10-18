@@ -19,6 +19,7 @@ var ERROR_TYPES_ = {
   100155: 'GLU_TESS_COORD_TOO_LARGE',
   100156: 'GLU_TESS_NEED_COMBINE_CALLBACK'
 };
+exports.ERROR_TYPES = ERROR_TYPES_;
 
 /**
  * Lookup table for primitive types by number.
@@ -32,6 +33,7 @@ var PRIMITIVE_TYPES_ = {
   5: 'GL_TRIANGLE_STRIP',
   6: 'GL_TRIANGLE_FAN'
 };
+exports.PRIMITIVE_TYPES = PRIMITIVE_TYPES_;
 
 /**
  * Tessellation output types.
@@ -55,7 +57,7 @@ var OUTPUT_TYPES_ = [
  * statements. Most of the callbacks can be overridden by simply assigning a new
  * one.
  * @param {libtess} libtess Injected libtess implementation.
- * @param {{name: string, value: boolean}=} opt_outputType 
+ * @param {{name: string, value: boolean}=} opt_outputType
  * @return {!libtess.GluTesselator}
  */
 exports.createInstrumentedTessellator = function(libtess, opt_outputType) {
@@ -90,7 +92,7 @@ exports.createInstrumentedTessellator = function(libtess, opt_outputType) {
     assert.isTrue(begun, 'GLU_TESS_END called while not inside a primitive');
     begun = false;
   }
-  
+
   function errorCallback(errorNumber) {
     throw new Error(ERROR_TYPES_[errorNumber]);
   }

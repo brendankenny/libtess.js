@@ -53,7 +53,8 @@ libtess.DEBUG = false;
  */
 libtess.assert = function(condition, opt_message) {
   if (libtess.DEBUG && !condition) {
-    throw new Error('Assertion failed' + (opt_message ? ': ' + opt_message : ''));
+    throw new Error('Assertion failed' +
+        (opt_message ? ': ' + opt_message : ''));
   }
 };
 

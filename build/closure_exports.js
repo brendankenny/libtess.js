@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-/* global libtess, module */
+/* global libtess */
+/* jshint sub: true */
 
 /**
  * @fileoverview Closure compiler exports for libtess.

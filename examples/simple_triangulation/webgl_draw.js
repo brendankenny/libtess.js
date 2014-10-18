@@ -1,3 +1,5 @@
+/* exported initWebGL, draw, initArrayBuffer */
+
 var gl;
 var polyProgram;
 var positionLoc;

@@ -118,8 +118,10 @@ libtess.normal.projectPolygon = function(tess) {
     sUnit[(i + 2) % 3] = libtess.normal.S_UNIT_Y_;
 
     tUnit[i] = 0;
-    tUnit[(i + 1) % 3] = (norm[i] > 0) ? -libtess.normal.S_UNIT_Y_ : libtess.normal.S_UNIT_Y_;
-    tUnit[(i + 2) % 3] = (norm[i] > 0) ? libtess.normal.S_UNIT_X_ : -libtess.normal.S_UNIT_X_;
+    tUnit[(i + 1) % 3] = (norm[i] > 0) ?
+        -libtess.normal.S_UNIT_Y_ : libtess.normal.S_UNIT_Y_;
+    tUnit[(i + 2) % 3] = (norm[i] > 0) ?
+        libtess.normal.S_UNIT_X_ : -libtess.normal.S_UNIT_X_;
   }
 
   // Project the vertices onto the sweep plane
@@ -284,7 +286,7 @@ libtess.normal.checkOrientation_ = function(tess) {
     // Reverse the orientation by flipping all the t-coordinates
     var vHead = tess.mesh.vHead;
     for (var v = vHead.next; v !== vHead; v = v.next) {
-      v.t = - v.t;
+      v.t = -v.t;
     }
     tess.tUnit[0] = -tess.tUnit[0];
     tess.tUnit[1] = -tess.tUnit[1];

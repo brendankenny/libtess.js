@@ -1,0 +1,24 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>libtess.js tests</title>
+    <link rel="stylesheet" href="../node_modules/mocha/mocha.css">
+  </head>
+  <body>
+    <div id="mocha"></div>
+    <script src="../node_modules/mocha/mocha.js"></script>
+    <script src="../node_modules/chai/chai.js"></script>
+    <script>
+      /* global mocha */
+      mocha.setup('tdd');
+    </script>
+
+    <script src="../libtess.min.js"></script>
+    <script src="tests-browserified.js"></script>
+
+    <script>
+      mocha.run();
+    </script>
+  </body>
+</html>

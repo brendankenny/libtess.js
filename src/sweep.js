@@ -119,7 +119,7 @@ libtess.sweep.computeInterior = function(tess) {
   // TODO(bckenny): don't need the cast if pq's key is better typed
   var v;
   while ((v = /** @type {libtess.GluVertex} */(tess.pq.extractMin())) !== null) {
-    for (;; ) {
+    for (;;) {
       var vNext = /** @type {libtess.GluVertex} */(tess.pq.minimum());
       if (vNext === null || !libtess.geom.vertEq(vNext, v)) {
         break;
@@ -466,7 +466,9 @@ libtess.sweep.finishLeftRegions_ = function(tess, regFirst, regLast) {
  * @param {libtess.GluHalfEdge} eTopLeft [description].
  * @param {boolean} cleanUp [description].
  */
-libtess.sweep.addRightEdges_ = function(tess, regUp, eFirst, eLast, eTopLeft, cleanUp) {
+libtess.sweep.addRightEdges_ = function(tess, regUp, eFirst, eLast, eTopLeft,
+    cleanUp) {
+
   var firstTime = true;
 
   // Insert the new right-going edges in the dictionary
@@ -486,7 +488,7 @@ libtess.sweep.addRightEdges_ = function(tess, regUp, eFirst, eLast, eTopLeft, cl
   var regPrev = regUp;
   var ePrev = eTopLeft;
   var reg;
-  for (;; ) {
+  for (;;) {
     reg = regPrev.regionBelow();
     e = reg.eUp.sym;
     if (e.org !== ePrev.org) {
@@ -553,7 +555,8 @@ libtess.sweep.callCombine_ = function(tess, isect, data, weights, needed) {
       // The only way fatal error is when two edges are found to intersect,
       // but the user has not provided the callback necessary to handle
       // generated intersection points.
-      tess.callErrorOrErrorData(libtess.errorType.GLU_TESS_NEED_COMBINE_CALLBACK);
+      tess.callErrorOrErrorData(
+          libtess.errorType.GLU_TESS_NEED_COMBINE_CALLBACK);
       tess.fatalError = true;
     }
   }
@@ -624,7 +627,9 @@ libtess.sweep.vertexWeights_ = function(isect, org, dst, weights, weightIndex) {
  * @param {libtess.GluVertex} orgLo [description].
  * @param {libtess.GluVertex} dstLo [description].
  */
-libtess.sweep.getIntersectData_ = function(tess, isect, orgUp, dstUp, orgLo, dstLo) {
+libtess.sweep.getIntersectData_ = function(tess, isect, orgUp, dstUp, orgLo,
+    dstLo) {
+
   // TODO(bckenny): called for every intersection event, should these be from a pool?
   // TODO(bckenny): better way to init these?
   var weights = [0, 0, 0, 0];
@@ -870,8 +875,12 @@ libtess.sweep.checkForIntersect_ = function(tess, regUp) {
     return false;
   }
 
-  if ((!libtess.geom.vertEq(dstUp, tess.event) && libtess.geom.edgeSign(dstUp, tess.event, isect) >= 0) ||
-      (!libtess.geom.vertEq(dstLo, tess.event) && libtess.geom.edgeSign(dstLo, tess.event, isect) <= 0)) {
+  // TODO(bckenny): clean this up; length is distracting
+  if ((!libtess.geom.vertEq(dstUp, tess.event) &&
+      libtess.geom.edgeSign(dstUp, tess.event, isect) >= 0) ||
+      (!libtess.geom.vertEq(dstLo, tess.event) &&
+      libtess.geom.edgeSign(dstLo, tess.event, isect) <= 0)) {
+
     /* Very unusual -- the new upper or lower edge would pass on the
      * wrong side of the sweep event, or through it. This can happen
      * due to very small numerical errors in the intersection calculation.
@@ -896,7 +905,8 @@ libtess.sweep.checkForIntersect_ = function(tess, regUp) {
       var e = regUp.regionBelow().eUp.rPrev();
       regLo.eUp = eLo.oPrev();
       eLo = libtess.sweep.finishLeftRegions_(tess, regLo, null);
-      libtess.sweep.addRightEdges_(tess, regUp, eLo.oNext, eUp.rPrev(), e, true);
+      libtess.sweep.addRightEdges_(tess, regUp, eLo.oNext, eUp.rPrev(), e,
+          true);
       return true;
     }
 
@@ -957,7 +967,7 @@ libtess.sweep.checkForIntersect_ = function(tess, regUp) {
 libtess.sweep.walkDirtyRegions_ = function(tess, regUp) {
   var regLo = regUp.regionBelow();
 
-  for (;; ) {
+  for (;;) {
     // Find the lowest dirty region (we walk from the bottom up).
     while (regLo.dirty) {
       regUp = regLo;
@@ -998,7 +1008,8 @@ libtess.sweep.walkDirtyRegions_ = function(tess, regUp) {
     }
 
     if (eUp.org !== eLo.org) {
-      if (eUp.dst() !== eLo.dst() && !regUp.fixUpperEdge && !regLo.fixUpperEdge &&
+      if (eUp.dst() !== eLo.dst() && !regUp.fixUpperEdge &&
+          !regLo.fixUpperEdge &&
           (eUp.dst() === tess.event || eLo.dst() === tess.event)) {
         /* When all else fails in checkForIntersect(), it uses tess.event
          * as the intersection location. To make this possible, it requires
@@ -1093,7 +1104,8 @@ libtess.sweep.connectRightVertex_ = function(tess, regUp, eBottomLeft) {
     degenerate = true;
   }
   if (degenerate) {
-    libtess.sweep.addRightEdges_(tess, regUp, eBottomLeft.oNext, eTopLeft, eTopLeft, true);
+    libtess.sweep.addRightEdges_(tess, regUp, eBottomLeft.oNext, eTopLeft,
+        eTopLeft, true);
     return;
   }
 
@@ -1109,7 +1121,8 @@ libtess.sweep.connectRightVertex_ = function(tess, regUp, eBottomLeft) {
 
   // Prevent cleanup, otherwise eNew might disappear before we've even
   // had a chance to mark it as a temporary edge.
-  libtess.sweep.addRightEdges_(tess, regUp, eNew, eNew.oNext, eNew.oNext, false);
+  libtess.sweep.addRightEdges_(tess, regUp, eNew, eNew.oNext, eNew.oNext,
+      false);
   eNew.sym.activeRegion.fixUpperEdge = true;
   libtess.sweep.walkDirtyRegions_(tess, regUp);
 };
@@ -1177,7 +1190,8 @@ libtess.sweep.connectLeftDegenerate_ = function(tess, regUp, vEvent) {
     eTopLeft = null;
   }
 
-  libtess.sweep.addRightEdges_(tess, regUp, eTopRight.oNext, eLast, eTopLeft, true);
+  libtess.sweep.addRightEdges_(tess, regUp, eTopRight.oNext, eLast, eTopLeft,
+      true);
 };
 
 
@@ -1209,7 +1223,8 @@ libtess.sweep.connectLeftVertex_ = function(tess, vEvent) {
 
   // Get a pointer to the active region containing vEvent
   tmp.eUp = vEvent.anEdge.sym;
-  var regUp = /** @type {libtess.ActiveRegion} */(tess.dict.search(tmp).getKey());
+  var regUp =
+      /** @type {libtess.ActiveRegion} */(tess.dict.search(tmp).getKey());
   var regLo = regUp.regionBelow();
   var eUp = regUp.eUp;
   var eLo = regLo.eUp;
@@ -1237,14 +1252,16 @@ libtess.sweep.connectLeftVertex_ = function(tess, vEvent) {
       libtess.sweep.fixUpperEdge_(reg, eNew);
 
     } else {
-      libtess.sweep.computeWinding_(tess, libtess.sweep.addRegionBelow_(tess, regUp, eNew));
+      libtess.sweep.computeWinding_(tess,
+          libtess.sweep.addRegionBelow_(tess, regUp, eNew));
     }
     libtess.sweep.sweepEvent_(tess, vEvent);
 
   } else {
     // The new vertex is in a region which does not belong to the polygon.
     // We don''t need to connect this vertex to the rest of the mesh.
-    libtess.sweep.addRightEdges_(tess, regUp, vEvent.anEdge, vEvent.anEdge, null, true);
+    libtess.sweep.addRightEdges_(tess, regUp, vEvent.anEdge, vEvent.anEdge,
+        null, true);
   }
 };
 
@@ -1296,7 +1313,8 @@ libtess.sweep.sweepEvent_ = function(tess, vEvent) {
     libtess.sweep.connectRightVertex_(tess, regUp, eBottomLeft);
 
   } else {
-    libtess.sweep.addRightEdges_(tess, regUp, eBottomLeft.oNext, eTopLeft, eTopLeft, true);
+    libtess.sweep.addRightEdges_(tess, regUp, eBottomLeft.oNext, eTopLeft,
+        eTopLeft, true);
   }
 };
 
