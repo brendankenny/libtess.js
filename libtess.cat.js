@@ -5989,6 +5989,8 @@ libtess.ActiveRegion.prototype.regionAbove = function() {
   return /** @type {libtess.ActiveRegion} */ (this.nodeUp.getSucc().getKey());
 };
 
+/* global libtess, module */
+
 /**
  * node.js export for non-compiled source
  */

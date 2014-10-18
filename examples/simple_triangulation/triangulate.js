@@ -1,4 +1,5 @@
 /*global libtess */
+/* exported triangulate */
 
 var tessy = (function initTesselator() {
   // function called for each vertex of tesselator output

@@ -1,5 +1,5 @@
 /* jshint node: true */
-/* global suite, test, setup */
+/* global suite, test */
 'use strict';
 
 var chai = require('chai');
@@ -16,22 +16,6 @@ var geometryFiles = rfolder('./geometry');
 var geometries = Object.keys(geometryFiles).map(function(filename) {
   return geometryFiles[filename];
 });
-
-/**
- * Lookup table for error types by number.
- * @enum {string}
- * @const
- * @private
- */
-var ERROR_TYPES_ = common.ERROR_TYPES;
-
-/**
- * Lookup table for primitive types by number.
- * @enum {string}
- * @const
- * @private
- */
-var PRIMITIVE_TYPES_ = common.PRIMITIVE_TYPES_;
 
 /**
  * Enumeration of supported winding rules.
@@ -125,7 +109,7 @@ function testGeometry(geometry) {
 
                 WINDING_RULES.forEach(function(windingRule) {
 
-                  var baselineTessellator = createTessellator(libtess,
+                  var baselineTessellator = createTessellator(basetess,
                       outputType);
                   var expectation = tessellate(baselineTessellator,
                       geometry.value, outputType, provideNormal, normal,

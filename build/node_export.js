@@ -1,3 +1,5 @@
+/* global libtess, module */
+
 /**
  * node.js export for non-compiled source
  */
