@@ -1,4 +1,4 @@
-# libtess.js
+# libtess.js [![Build Status](https://travis-ci.org/brendankenny/libtess.js.svg?branch=gh-pages)](https://travis-ci.org/brendankenny/libtess.js)
 
 Polygon tesselation library, ported from the tesselator in Silicon Graphics's
 [reference implementation](http://oss.sgi.com/projects/ogl-sample/index.html) of
