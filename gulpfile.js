@@ -9,10 +9,12 @@ var browserify = require('browserify');
 var vinylTransform = require('vinyl-transform');
 var jshint = require('gulp-jshint');
 var stylish = require('jshint-stylish');
+var jscs = require('gulp-jscs');
+var filter = require('gulp-filter');
 
 var COMPILER_PATH = 'node_modules/closurecompiler/compiler/compiler.jar';
 var LIBTESS_SRC = ['./src/libtess.js', './src/**/*.js'];
-var JSHINT_SRC = LIBTESS_SRC.concat([
+var LINT_SRC = LIBTESS_SRC.concat([
   './libtess.cat.js',
   './{build,examples,test}/**/*.{js,html}',
   '!./build/externs/*',
@@ -80,14 +82,21 @@ gulp.task('browserify-tests', function() {
     .pipe(gulp.dest('./test'));
 });
 
+// TODO(bckenny): more incremental
 gulp.task('build', ['build-cat', 'build-min', 'browserify-tests']);
 
 gulp.task('lint', ['build'], function() {
-  return gulp.src(JSHINT_SRC)
+  return gulp.src(LINT_SRC)
+    // jshint
     .pipe(jshint.extract('auto'))
     .pipe(jshint())
     .pipe(jshint.reporter(stylish))
-    .pipe(jshint.reporter('fail'));
+    .pipe(jshint.reporter('fail'))
+
+    // jscs (code style)
+    // TODO(bckenny): get jscs to lint inline JS in html?
+    .pipe(filter('**/*.js'))
+    .pipe(jscs());
 });
 
 gulp.task('test', ['lint'], function() {
