@@ -644,7 +644,7 @@ var common = require('./common.js');
 var createTessellator = common.createInstrumentedTessellator;
 
 var rfolder = require('./rfolder.js');
-var geometryFiles = {"hourglass": require("./geometry/hourglass.json")};
+var geometryFiles = {"hourglass": require("./geometry/hourglass.json"),"two-traingles": require("./geometry/two-traingles.json")};
 var geometries = Object.keys(geometryFiles).map(function(filename) {
   return geometryFiles[filename];
 });
@@ -811,7 +811,7 @@ function tessellate(tess, contours, outputType, provideNormal, normal,
   return resultVerts;
 }
 
-},{"../libtess.min.js":undefined,"./common.js":2,"./expectations/libtess.baseline.js":3,"./geometry/hourglass.json":5,"./rfolder.js":1,"chai":undefined}],5:[function(require,module,exports){
+},{"../libtess.min.js":undefined,"./common.js":2,"./expectations/libtess.baseline.js":3,"./geometry/hourglass.json":5,"./geometry/two-traingles.json":6,"./rfolder.js":1,"chai":undefined}],5:[function(require,module,exports){
 module.exports={
   "name": "Hourglass",
   "value": [
@@ -820,6 +820,23 @@ module.exports={
       -1, -1, 0,
       1, -1, 0,
       -1, 1, 0
+    ]
+  ]
+}
+
+},{}],6:[function(require,module,exports){
+module.exports={
+  "name": "Two Triangles",
+  "value": [
+    [
+      1, -1, 0,
+      0, 1, 0,
+      -1, -1, 0
+    ],
+    [
+      1, 1, 0,
+      -1, 1, 0,
+      0, -1, 0
     ]
   ]
 }
