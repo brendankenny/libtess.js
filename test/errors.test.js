@@ -8,7 +8,7 @@ var assert = chai.assert;
 var libtess = require('../libtess.min.js');
 var common = require('./common.js');
 var createTessellator = common.createInstrumentedTessellator;
-var hourglass = require('./geometry/hourglass.json');
+var hourglass = require('./geometry/hourglass.js');
 
 /**
  * The result of triangulating hourglass with the default options.

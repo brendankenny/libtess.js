@@ -141,7 +141,7 @@ var assert = chai.assert;
 var libtess = require('../libtess.min.js');
 var common = require('./common.js');
 var createTessellator = common.createInstrumentedTessellator;
-var hourglass = require('./geometry/hourglass.json');
+var hourglass = require('./geometry/hourglass.js');
 
 /**
  * The result of triangulating hourglass with the default options.
@@ -406,10 +406,14 @@ suite('Explicit Error States', function() {
   });
 });
 
-},{"../libtess.min.js":undefined,"./common.js":1,"./geometry/hourglass.json":3,"chai":undefined}],3:[function(require,module,exports){
-module.exports={
-  "name": "Hourglass",
-  "value": [
+},{"../libtess.min.js":undefined,"./common.js":1,"./geometry/hourglass.js":3,"chai":undefined}],3:[function(require,module,exports){
+/* jshint node: true */
+
+module.exports = {
+  // simple self intersecting shape
+  // bottom of hourglass is anticlockwise, top is clockwise
+  'name': 'Hourglass',
+  'value': [
     [
       1, 1, 0,
       -1, -1, 0,
@@ -417,7 +421,7 @@ module.exports={
       -1, 1, 0
     ]
   ]
-}
+};
 
 },{}],"chai":[function(require,module,exports){
 /* jshint node: true */
@@ -644,7 +648,7 @@ var common = require('./common.js');
 var createTessellator = common.createInstrumentedTessellator;
 
 var rfolder = require('./rfolder.js');
-var geometryFiles = {"hourglass": require("./geometry/hourglass.json"),"two-traingles": require("./geometry/two-traingles.json")};
+var geometryFiles = {"hourglass": require("./geometry/hourglass.js"),"two-traingles": require("./geometry/two-traingles.js")};
 var geometries = Object.keys(geometryFiles).map(function(filename) {
   return geometryFiles[filename];
 });
@@ -811,10 +815,14 @@ function tessellate(tess, contours, outputType, provideNormal, normal,
   return resultVerts;
 }
 
-},{"../libtess.min.js":undefined,"./common.js":2,"./expectations/libtess.baseline.js":3,"./geometry/hourglass.json":5,"./geometry/two-traingles.json":6,"./rfolder.js":1,"chai":undefined}],5:[function(require,module,exports){
-module.exports={
-  "name": "Hourglass",
-  "value": [
+},{"../libtess.min.js":undefined,"./common.js":2,"./expectations/libtess.baseline.js":3,"./geometry/hourglass.js":5,"./geometry/two-traingles.js":6,"./rfolder.js":1,"chai":undefined}],5:[function(require,module,exports){
+/* jshint node: true */
+
+module.exports = {
+  // simple self intersecting shape
+  // bottom of hourglass is anticlockwise, top is clockwise
+  'name': 'Hourglass',
+  'value': [
     [
       1, 1, 0,
       -1, -1, 0,
@@ -822,12 +830,16 @@ module.exports={
       -1, 1, 0
     ]
   ]
-}
+};
 
 },{}],6:[function(require,module,exports){
-module.exports={
-  "name": "Two Triangles",
-  "value": [
+/* jshint node: true */
+
+module.exports = {
+  // two intersecting triangles
+  // both are anticlockwise (positive winding)
+  'name': 'Two Triangles',
+  'value': [
     [
       1, -1, 0,
       0, 1, 0,
@@ -839,7 +851,7 @@ module.exports={
       0, -1, 0
     ]
   ]
-}
+};
 
 },{}],"chai":[function(require,module,exports){
 /* jshint node: true */
