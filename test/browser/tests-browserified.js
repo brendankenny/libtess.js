@@ -648,7 +648,7 @@ var common = require('./common.js');
 var createTessellator = common.createInstrumentedTessellator;
 
 var rfolder = require('./rfolder.js');
-var geometryFiles = {"hourglass": require("./geometry/hourglass.js"),"two-traingles": require("./geometry/two-traingles.js")};
+var geometryFiles = {"hourglass": require("./geometry/hourglass.js"),"two-opposite-triangles": require("./geometry/two-opposite-triangles.js"),"two-traingles": require("./geometry/two-traingles.js")};
 var geometries = Object.keys(geometryFiles).map(function(filename) {
   return geometryFiles[filename];
 });
@@ -815,7 +815,7 @@ function tessellate(tess, contours, outputType, provideNormal, normal,
   return resultVerts;
 }
 
-},{"../libtess.min.js":undefined,"./common.js":2,"./expectations/libtess.baseline.js":3,"./geometry/hourglass.js":5,"./geometry/two-traingles.js":6,"./rfolder.js":1,"chai":undefined}],5:[function(require,module,exports){
+},{"../libtess.min.js":undefined,"./common.js":2,"./expectations/libtess.baseline.js":3,"./geometry/hourglass.js":5,"./geometry/two-opposite-triangles.js":6,"./geometry/two-traingles.js":7,"./rfolder.js":1,"chai":undefined}],5:[function(require,module,exports){
 /* jshint node: true */
 
 module.exports = {
@@ -833,6 +833,27 @@ module.exports = {
 };
 
 },{}],6:[function(require,module,exports){
+/* jshint node: true */
+
+module.exports = {
+  // two intersecting triangles with opposite winding
+  // first is anticlockwise, second is clockwise
+  'name': 'Two Opposite Triangles',
+  'value': [
+    [
+      1, -1, 0,
+      0, 1, 0,
+      -1, -1, 0
+    ],
+    [
+      1, 1, 0,
+      0, -1, 0,
+      -1, 1, 0
+    ]
+  ]
+};
+
+},{}],7:[function(require,module,exports){
 /* jshint node: true */
 
 module.exports = {
