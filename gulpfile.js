@@ -15,6 +15,7 @@ var filter = require('gulp-filter');
 var COMPILER_PATH = 'node_modules/closurecompiler/compiler/compiler.jar';
 var LIBTESS_SRC = ['./src/libtess.js', './src/**/*.js'];
 var LINT_SRC = LIBTESS_SRC.concat([
+  './gulpfile.js',
   './libtess.cat.js',
   './{build,examples,test}/**/*.{js,html}',
   '!./build/externs/*',
@@ -57,7 +58,8 @@ gulp.task('build-min', function() {
         ],
 
         // for node export
-        output_wrapper: '%output% if (typeof module !== \'undefined\') { module.exports = this.libtess; }'
+        output_wrapper: '%output% if (typeof module !== \'undefined\') { ' +
+            'module.exports = this.libtess; }'
       }
     }))
     .pipe(gulp.dest('.'));
@@ -70,7 +72,8 @@ gulp.task('browserify-tests', function() {
         // custom chai and libtess injected on page (for e.g. debug libtess)
         // TODO(bckenny): is there a less-dumb way of doing this?
         .require('./test/browser/fake-chai.js', {expose: 'chai'})
-        .require('./test/browser/fake-libtess.js', {expose: '../libtess.min.js'})
+        .require('./test/browser/fake-libtess.js',
+            {expose: '../libtess.min.js'})
 
         // expand list of tests in geometry/ at browserify time
         .ignore('./test/rfolder.js')
