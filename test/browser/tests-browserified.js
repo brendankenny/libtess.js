@@ -410,7 +410,7 @@ suite('Explicit Error States', function() {
 /* jshint node: true */
 
 module.exports = {
-  // simple self intersecting shape
+  // short self-intersecting single contour
   // bottom of hourglass is anticlockwise, top is clockwise
   'name': 'Hourglass',
   'value': [
@@ -819,7 +819,7 @@ function tessellate(tess, contours, outputType, provideNormal, normal,
 /* jshint node: true */
 
 module.exports = {
-  // simple self intersecting shape
+  // short self-intersecting single contour
   // bottom of hourglass is anticlockwise, top is clockwise
   'name': 'Hourglass',
   'value': [
