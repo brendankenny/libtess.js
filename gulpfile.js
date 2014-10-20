@@ -6,7 +6,8 @@ var concat = require('gulp-concat');
 var closureCompiler = require('gulp-closure-compiler');
 var mocha = require('gulp-mocha');
 var browserify = require('browserify');
-var vinylTransform = require('vinyl-transform');
+var glob = require('glob');
+var vinylSource = require('vinyl-source-stream');
 var jshint = require('gulp-jshint');
 var stylish = require('jshint-stylish');
 var jscs = require('gulp-jscs');
@@ -66,22 +67,21 @@ gulp.task('build-min', function() {
 });
 
 gulp.task('browserify-tests', function() {
-  return gulp.src('test/*.test.js')
-    .pipe(vinylTransform(function(filename) {
-      return browserify(filename)
-        // custom chai and libtess injected on page (for e.g. debug libtess)
-        // TODO(bckenny): is there a less-dumb way of doing this?
-        .require('./test/browser/fake-chai.js', {expose: 'chai'})
-        .require('./test/browser/fake-libtess.js',
-            {expose: '../libtess.min.js'})
+  return browserify(glob.sync('./test/*.test.js'))
+    // custom chai and libtess injected on page (for e.g. debug libtess)
+    // TODO(bckenny): is there a less-dumb way of doing this?
+    .require('./test/browser/fake-chai.js', {expose: 'chai'})
+    .require('./test/browser/fake-libtess.js',
+        {expose: '../libtess.min.js'})
 
-        // expand list of tests in geometry/ at browserify time
-        .ignore('./test/rfolder.js')
-        .transform('rfolderify')
+    // expand list of tests in geometry/ at browserify time
+    .ignore('./test/rfolder.js')
+    .transform('rfolderify')
 
-        .bundle();
-    }))
-    .pipe(concat('tests-browserified.js', {newLine: ';'}))
+    .bundle()
+
+    // convert to vinyl stream and output via gulp.dest
+    .pipe(vinylSource('tests-browserified.js'))
     .pipe(gulp.dest('./test/browser'));
 });
 
