@@ -143,7 +143,7 @@ gulp.task('coverage', ['build'], function(doneCallback) {
               var lcov = fs.readFileSync('./coverage/lcov.info',
                   {encoding: 'utf8'});
               coveralls(lcov, doneCallback);
-            } catch(err) {
+            } catch (err) {
               doneCallback(err);
             }
           } else {
