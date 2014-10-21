@@ -15,7 +15,6 @@ var jscs = require('gulp-jscs');
 var filter = require('gulp-filter');
 var istanbul = require('gulp-istanbul');
 var exec = require('child_process').exec;
-var del = require('del');
 
 var COMPILER_PATH = 'node_modules/closurecompiler/compiler/compiler.jar';
 var LIBTESS_SRC = ['./src/libtess.js', './src/**/*.js'];
@@ -135,9 +134,7 @@ gulp.task('coverage', ['build'], function(doneCallback) {
           ui: 'tdd'
         }))
 
-        .pipe(istanbul.writeReports({
-          reporters: ['lcovonly']
-        }))
+        .pipe(istanbul.writeReports())
         .on('end', function() {
           // send coverage information to coveralls.io
           // TODO(bckenny): only do this when running on travis?
@@ -146,10 +143,7 @@ gulp.task('coverage', ['build'], function(doneCallback) {
               function(error, stdout, stderr) {
                 console.log('stdout: ' + stdout);
                 console.log('stderr: ' + stderr);
-
-                del('./coverage', function(err) {
-                  doneCallback(error);
-                });
+                doneCallback(error);
               });
         });
     });
