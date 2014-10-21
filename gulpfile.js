@@ -130,21 +130,25 @@ gulp.task('coverage', ['build'], function(doneCallback) {
     .on('finish', function() {
       gulp.src('test/*.test.js')
         .pipe(mocha({
-          reporter: 'spec',
+          reporter: 'nyan',
           ui: 'tdd'
         }))
 
         .pipe(istanbul.writeReports())
         .on('end', function() {
-          // send coverage information to coveralls.io
-          // TODO(bckenny): only do this when running on travis?
-          exec('./node_modules/coveralls/bin/coveralls.js < ' +
+          // send coverage information to coveralls.io if running on travis
+          if (process.env.TRAVIS) {
+            exec('./node_modules/coveralls/bin/coveralls.js < ' +
               './coverage/lcov.info',
               function(error, stdout, stderr) {
                 console.log('stdout: ' + stdout);
                 console.log('stderr: ' + stderr);
                 doneCallback(error);
               });
+          } else {
+            console.log('exiting coverage without uploading to coveralls');
+            doneCallback();
+          }
         });
     });
 });
