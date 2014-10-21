@@ -4,6 +4,17 @@
 var chai = require('chai');
 var assert = chai.assert;
 
+// TODO(bckenny): not sure of a better way of doing this yet. Want to inject
+// libtess.cat.js for coverage, but libtess.min.js for all other runs.
+// gulp-mocha takes file names, though. Write to temp files first?
+exports.libtess = (function() {
+  if (process.env.testType === 'coverage') {
+    return require('../libtess.cat.js');
+  } else {
+    return require('../libtess.min.js');
+  }
+})();
+
 // TODO(bckenny): replace with some destructuring?
 /**
  * Lookup table for error types by number.

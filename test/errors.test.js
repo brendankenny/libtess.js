@@ -5,8 +5,8 @@
 var chai = require('chai');
 var assert = chai.assert;
 
-var libtess = require('../libtess.min.js');
 var common = require('./common.js');
+var libtess = common.libtess;
 var createTessellator = common.createInstrumentedTessellator;
 var hourglass = require('./geometry/hourglass.js');
 

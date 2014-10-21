@@ -5,11 +5,11 @@
 var chai = require('chai');
 var assert = chai.assert;
 
-var libtess = require('../libtess.min.js');
-var basetess = require('./expectations/libtess.baseline.js');
-
 var common = require('./common.js');
+var libtess = common.libtess;
 var createTessellator = common.createInstrumentedTessellator;
+
+var basetess = require('./expectations/libtess.baseline.js');
 
 var rfolder = require('./rfolder.js');
 var geometryFiles = rfolder('./geometry');

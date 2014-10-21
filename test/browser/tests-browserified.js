@@ -12,8 +12,8 @@ module.exports = window.libtess;
 var chai = require('chai');
 var assert = chai.assert;
 
-var libtess = require('../libtess.min.js');
 var common = require('./common.js');
+var libtess = common.libtess;
 var createTessellator = common.createInstrumentedTessellator;
 var hourglass = require('./geometry/hourglass.js');
 
@@ -280,7 +280,7 @@ suite('Explicit Error States', function() {
   });
 });
 
-},{"../libtess.min.js":undefined,"./common.js":4,"./geometry/hourglass.js":6,"chai":undefined}],2:[function(require,module,exports){
+},{"./common.js":4,"./geometry/hourglass.js":6,"chai":undefined}],2:[function(require,module,exports){
 /* jshint node: true */
 /* global suite, test */
 'use strict';
@@ -288,11 +288,11 @@ suite('Explicit Error States', function() {
 var chai = require('chai');
 var assert = chai.assert;
 
-var libtess = require('../libtess.min.js');
-var basetess = require('./expectations/libtess.baseline.js');
-
 var common = require('./common.js');
+var libtess = common.libtess;
 var createTessellator = common.createInstrumentedTessellator;
+
+var basetess = require('./expectations/libtess.baseline.js');
 
 var rfolder = require('./rfolder.js');
 var geometryFiles = {"hourglass": require("./geometry/hourglass.js"),"two-opposite-triangles": require("./geometry/two-opposite-triangles.js"),"two-traingles": require("./geometry/two-traingles.js")};
@@ -462,7 +462,7 @@ function tessellate(tess, contours, outputType, provideNormal, normal,
   return resultVerts;
 }
 
-},{"../libtess.min.js":undefined,"./common.js":4,"./expectations/libtess.baseline.js":5,"./geometry/hourglass.js":6,"./geometry/two-opposite-triangles.js":7,"./geometry/two-traingles.js":8,"./rfolder.js":3,"chai":undefined}],3:[function(require,module,exports){
+},{"./common.js":4,"./expectations/libtess.baseline.js":5,"./geometry/hourglass.js":6,"./geometry/two-opposite-triangles.js":7,"./geometry/two-traingles.js":8,"./rfolder.js":3,"chai":undefined}],3:[function(require,module,exports){
 
 },{}],4:[function(require,module,exports){
 /* jshint node: true */
@@ -470,6 +470,17 @@ function tessellate(tess, contours, outputType, provideNormal, normal,
 
 var chai = require('chai');
 var assert = chai.assert;
+
+// TODO(bckenny): not sure of a better way of doing this yet. Want to inject
+// libtess.cat.js for coverage, but libtess.min.js for all other runs.
+// gulp-mocha takes file names, though. Write to temp files first?
+exports.libtess = (function() {
+  if ("browserify" === 'coverage') {
+    return require('../libtess.cat.js');
+  } else {
+    return require('../libtess.min.js');
+  }
+})();
 
 // TODO(bckenny): replace with some destructuring?
 /**
@@ -590,7 +601,7 @@ exports.createInstrumentedTessellator = function(libtess, opt_outputType) {
   return tess;
 };
 
-},{"chai":undefined}],5:[function(require,module,exports){
+},{"../libtess.cat.js":undefined,"../libtess.min.js":undefined,"chai":undefined}],5:[function(require,module,exports){
 /*
 
  Copyright 2000, Silicon Graphics, Inc. All Rights Reserved.

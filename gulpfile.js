@@ -6,12 +6,16 @@ var concat = require('gulp-concat');
 var closureCompiler = require('gulp-closure-compiler');
 var mocha = require('gulp-mocha');
 var browserify = require('browserify');
+var envify = require('envify/custom');
 var glob = require('glob');
 var vinylSource = require('vinyl-source-stream');
 var jshint = require('gulp-jshint');
 var stylish = require('jshint-stylish');
 var jscs = require('gulp-jscs');
 var filter = require('gulp-filter');
+var istanbul = require('gulp-istanbul');
+var exec = require('child_process').exec;
+var del = require('del');
 
 var COMPILER_PATH = 'node_modules/closurecompiler/compiler/compiler.jar';
 var LIBTESS_SRC = ['./src/libtess.js', './src/**/*.js'];
@@ -72,11 +76,18 @@ gulp.task('browserify-tests', function() {
     // TODO(bckenny): is there a less-dumb way of doing this?
     .require('./test/browser/fake-chai.js', {expose: 'chai'})
     .require('./test/browser/fake-libtess.js',
+        {expose: '../libtess.cat.js'})
+    .require('./test/browser/fake-libtess.js',
         {expose: '../libtess.min.js'})
 
     // expand list of tests in geometry/ at browserify time
     .ignore('./test/rfolder.js')
     .transform('rfolderify')
+
+    // eliminate env nonsense in common.js
+    .transform(envify({
+      testType: 'browserify'
+    }))
 
     .bundle()
 
@@ -103,11 +114,45 @@ gulp.task('lint', ['build'], function() {
 });
 
 gulp.task('test', ['lint'], function() {
-  return gulp.src(['test/*.test.js'], {read: false})
+  return gulp.src('test/*.test.js', {read: false})
     .pipe(mocha({
       reporter: 'spec',
       ui: 'tdd'
     }));
+});
+
+// TODO(bckenny): clean this up
+gulp.task('coverage', ['build'], function(doneCallback) {
+  // use libtess.cat.js for coverage testing (see TODO in test/common.js)
+  process.env.testType = 'coverage';
+
+  gulp.src('libtess.cat.js')
+    .pipe(istanbul())
+    .on('finish', function() {
+      gulp.src('test/*.test.js')
+        .pipe(mocha({
+          reporter: 'spec',
+          ui: 'tdd'
+        }))
+
+        .pipe(istanbul.writeReports({
+          reporters: ['lcovonly']
+        }))
+        .on('end', function() {
+          // send coverage information to coveralls.io
+          // TODO(bckenny): only do this when running on travis?
+          exec('./node_modules/coveralls/bin/coveralls.js < ' +
+              './coverage/lcov.info',
+              function(error, stdout, stderr) {
+                console.log('stdout: ' + stdout);
+                console.log('stderr: ' + stderr);
+
+                del('./coverage', function(err) {
+                  doneCallback(error);
+                });
+              });
+        });
+    });
 });
 
 gulp.task('default', ['build']);
