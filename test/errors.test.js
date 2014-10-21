@@ -161,28 +161,49 @@ suite('Explicit Error States', function() {
   // that the value has been clamped (Coordinate values must be small
   // enough so that two can be multiplied together without overflow).
   suite('GLU_TESS_COORD_TOO_LARGE', function() {
-    test('should throw if x coordinate is too large', function() {
+    test('should throw if x coordinate is too large or small', function() {
       var tess = createTessellator(libtess);
       tess.gluTessBeginPolygon();
       tess.gluTessBeginContour();
 
       assert.throws(tess.gluTessVertex.bind(tess, [1e151, 0, 0]),
           'GLU_TESS_COORD_TOO_LARGE', 'did not throw GLU_TESS_COORD_TOO_LARGE');
+
+      tess = createTessellator(libtess);
+      tess.gluTessBeginPolygon();
+      tess.gluTessBeginContour();
+
+      assert.throws(tess.gluTessVertex.bind(tess, [-1e151, 0, 0]),
+          'GLU_TESS_COORD_TOO_LARGE', 'did not throw GLU_TESS_COORD_TOO_LARGE');
     });
-    test('should throw if y coordinate is too large', function() {
+    test('should throw if y coordinate is too large or small', function() {
       var tess = createTessellator(libtess);
       tess.gluTessBeginPolygon();
       tess.gluTessBeginContour();
 
       assert.throws(tess.gluTessVertex.bind(tess, [0, 1e151, 0]),
           'GLU_TESS_COORD_TOO_LARGE', 'did not throw GLU_TESS_COORD_TOO_LARGE');
+
+      tess = createTessellator(libtess);
+      tess.gluTessBeginPolygon();
+      tess.gluTessBeginContour();
+
+      assert.throws(tess.gluTessVertex.bind(tess, [0, -1e151, 0]),
+          'GLU_TESS_COORD_TOO_LARGE', 'did not throw GLU_TESS_COORD_TOO_LARGE');
     });
-    test('should throw if z coordinate is too large', function() {
+    test('should throw if z coordinate is too large or small', function() {
       var tess = createTessellator(libtess);
       tess.gluTessBeginPolygon();
       tess.gluTessBeginContour();
 
       assert.throws(tess.gluTessVertex.bind(tess, [0, 0, 1e151]),
+          'GLU_TESS_COORD_TOO_LARGE', 'did not throw GLU_TESS_COORD_TOO_LARGE');
+
+      tess = createTessellator(libtess);
+      tess.gluTessBeginPolygon();
+      tess.gluTessBeginContour();
+
+      assert.throws(tess.gluTessVertex.bind(tess, [0, 0, -1e151]),
           'GLU_TESS_COORD_TOO_LARGE', 'did not throw GLU_TESS_COORD_TOO_LARGE');
     });
 
@@ -198,7 +219,7 @@ suite('Explicit Error States', function() {
 
       var tooLargeContour = [
         1, 0, 1e151,
-        0, 1, 1e151,
+        0, 1, -1e151,
         0, 0, 1e151
       ];
       var resultVerts = [];
