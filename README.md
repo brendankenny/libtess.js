@@ -1,6 +1,6 @@
 # libtess.js
 
-[![Build Status](https://travis-ci.org/brendankenny/libtess.js.svg?branch=gh-pages)](https://travis-ci.org/brendankenny/libtess.js) [![Coverage Status](https://img.shields.io/coveralls/brendankenny/libtess.js/gh-pages.svg)](https://coveralls.io/r/brendankenny/libtess.js?branch=gh-pages)
+[![Build Status](https://img.shields.io/travis/brendankenny/libtess.js/gh-pages.svg?style=flat-square)](https://travis-ci.org/brendankenny/libtess.js) [![Coverage Status](https://img.shields.io/coveralls/brendankenny/libtess.js/gh-pages.svg?style=flat-square)](https://coveralls.io/r/brendankenny/libtess.js?branch=gh-pages)
 
 Polygon tesselation library, ported from the tesselator in Silicon Graphics's
 [reference implementation](http://oss.sgi.com/projects/ogl-sample/index.html) of
