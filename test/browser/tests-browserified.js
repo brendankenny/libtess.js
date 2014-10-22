@@ -431,6 +431,48 @@ suite('Explicit Error States', function() {
       assert.deepEqual(resultVerts, [], 'no output should be generated');
     });
   });
+
+  // not technically one of the main errors; possibly this should live in
+  // basics.test.js
+  suite('GLU_INVALID_ENUM', function() {
+    test('should throw on setting non-existent property', function() {
+      var tess = createTessellator(libtess);
+      assert.throw(tess.gluTessProperty.bind(tess,
+          libtess.gluEnum.GLU_TESS_MESH, 5), 'GLU_INVALID_ENUM',
+          'did not throw GLU_INVALID_ENUM');
+    });
+    test('should throw on getting non-existent property', function() {
+      var tess = createTessellator(libtess);
+      assert.throw(tess.gluGetTessProperty.bind(tess,
+          libtess.gluEnum.GLU_TESS_END), 'GLU_INVALID_ENUM',
+          'did not throw GLU_INVALID_ENUM');
+    });
+    test('should throw on setting non-existent callback', function() {
+      var tess = createTessellator(libtess);
+      assert.throw(tess.gluTessCallback.bind(tess,
+          libtess.gluEnum.GLU_TESS_TOLERANCE), 'GLU_INVALID_ENUM',
+          'did not throw GLU_INVALID_ENUM');
+    });
+  });
+
+  suite('GLU_INVALID_VALUE', function() {
+    test('should throw on out-of-range tolerance', function() {
+      var tess = createTessellator(libtess);
+      assert.throw(tess.gluTessProperty.bind(tess,
+          libtess.gluEnum.GLU_TESS_TOLERANCE, 1.1), 'GLU_INVALID_VALUE',
+          'did not throw GLU_INVALID_VALUE');
+      assert.throw(tess.gluTessProperty.bind(tess,
+          libtess.gluEnum.GLU_TESS_TOLERANCE, -0.1), 'GLU_INVALID_VALUE',
+          'did not throw GLU_INVALID_VALUE');
+    });
+    test('should throw on invalid winding room', function() {
+      var tess = createTessellator(libtess);
+      assert.throw(tess.gluTessProperty.bind(tess,
+          libtess.gluEnum.GLU_TESS_WINDING_RULE,
+          libtess.gluEnum.GLU_TESS_VERTEX_DATA), 'GLU_INVALID_VALUE',
+          'did not throw GLU_INVALID_VALUE');
+    });
+  });
 });
 
 },{"./common.js":5,"./geometry/hourglass.js":7,"chai":undefined}],3:[function(require,module,exports){
@@ -647,6 +689,8 @@ exports.libtess = (function() {
  * @private
  */
 var ERROR_TYPES_ = {
+  100900: 'GLU_INVALID_ENUM',
+  100901: 'GLU_INVALID_VALUE',
   100151: 'GLU_TESS_MISSING_BEGIN_POLYGON',
   100153: 'GLU_TESS_MISSING_END_POLYGON',
   100152: 'GLU_TESS_MISSING_BEGIN_CONTOUR',
