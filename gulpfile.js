@@ -14,8 +14,7 @@ var stylish = require('jshint-stylish');
 var jscs = require('gulp-jscs');
 var filter = require('gulp-filter');
 var istanbul = require('gulp-istanbul');
-var fs = require('fs');
-var coveralls = require('coveralls').handleInput;
+var exec = require('child_process').exec;
 
 var COMPILER_PATH = 'node_modules/closurecompiler/compiler/compiler.jar';
 var LIBTESS_SRC = ['./src/libtess.js', './src/**/*.js'];
@@ -139,13 +138,13 @@ gulp.task('coverage', ['build'], function(doneCallback) {
         .on('end', function() {
           // send coverage information to coveralls.io if running on travis
           if (process.env.TRAVIS) {
-            try {
-              var lcov = fs.readFileSync('./coverage/lcov.info',
-                  {encoding: 'utf8'});
-              coveralls(lcov, doneCallback);
-            } catch (err) {
-              doneCallback(err);
-            }
+            exec('./node_modules/coveralls/bin/coveralls.js < ' +
+                './coverage/lcov.info',
+                function(error, stdout, stderr) {
+                  console.log('stdout: ' + stdout);
+                  console.log('stderr: ' + stderr);
+                  doneCallback(error);
+                });
           } else {
             console.log('exiting coverage without uploading to coveralls');
             doneCallback();
