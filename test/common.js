@@ -9,7 +9,11 @@ var assert = chai.assert;
 // gulp-mocha takes file names, though. Write to temp files first?
 exports.libtess = (function() {
   if (process.env.testType === 'coverage') {
-    return require('../libtess.cat.js');
+    var libtess = require('../libtess.cat.js');
+    // TODO(bckenny): along with better dynamic loading, smooth this as well
+    libtess.DEBUG = true;
+    return libtess;
+
   } else {
     return require('../libtess.min.js');
   }
