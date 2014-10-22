@@ -1,2 +1,9 @@
-node_modules
+node_modules/**
+!node_modules/mocha
+!node_modules/mocha/mocha.css
+!node_modules/mocha/mocha.js
+!node_modules/mocha/LICENSE
+!node_modules/chai
+!node_modules/chai/chai.js
+!node_modules/chai/README.md
 coverage
