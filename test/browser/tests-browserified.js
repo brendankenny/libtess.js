@@ -9,6 +9,138 @@ module.exports = window.libtess;
 /* global suite, test */
 'use strict';
 
+/**
+ * Basic tests of the API.
+ */
+
+var chai = require('chai');
+var assert = chai.assert;
+
+var common = require('./common.js');
+var libtess = common.libtess;
+var createTessellator = common.createInstrumentedTessellator;
+
+suite('Basic Tests', function() {
+  suite('Getting and Setting Properties', function() {
+    // NOTE(bckenny): libtess doesn't actually do anything with this value
+    test('GLU_TESS_TOLERANCE settable and gettable', function() {
+      var tess = createTessellator(libtess);
+      var tolerance = 0.5;
+      tess.gluTessProperty(libtess.gluEnum.GLU_TESS_TOLERANCE, tolerance);
+      var gotTolerance =
+          tess.gluGetTessProperty(libtess.gluEnum.GLU_TESS_TOLERANCE);
+
+      assert.strictEqual(gotTolerance, tolerance,
+          'GLU_TESS_TOLERANCE did not round trip correctly');
+    });
+    test('GLU_TESS_WINDING_RULE settable and gettable', function() {
+      var tess = createTessellator(libtess);
+      var windingRule = libtess.windingRule.GLU_TESS_WINDING_ABS_GEQ_TWO;
+      tess.gluTessProperty(libtess.gluEnum.GLU_TESS_WINDING_RULE, windingRule);
+      var gotWindingRule =
+          tess.gluGetTessProperty(libtess.gluEnum.GLU_TESS_WINDING_RULE);
+
+      assert.strictEqual(gotWindingRule, windingRule,
+          'GLU_TESS_WINDING_RULE did not round trip correctly');
+    });
+    test('GLU_TESS_BOUNDARY_ONLY settable and gettable', function() {
+      var tess = createTessellator(libtess);
+
+      var boundaryOnly = true;
+      for (var i = 0; i < 2; i++) {
+        tess.gluTessProperty(libtess.gluEnum.GLU_TESS_BOUNDARY_ONLY,
+            boundaryOnly);
+        var gotBoundaryOnly =
+            tess.gluGetTessProperty(libtess.gluEnum.GLU_TESS_BOUNDARY_ONLY);
+        assert.strictEqual(gotBoundaryOnly, boundaryOnly,
+            'GLU_TESS_BOUNDARY_ONLY did not round trip correctly');
+        boundaryOnly = !boundaryOnly;
+      }
+    });
+  });
+
+  suite('Basic Geometry', function() {
+    test('a single point should return an empty result', function() {
+      var tess = createTessellator(libtess);
+
+      var resultVerts = [];
+      tess.gluTessBeginPolygon(resultVerts);
+      tess.gluTessBeginContour();
+      tess.gluTessVertex([1, 0, 0], [1, 0, 0]);
+      tess.gluTessEndContour();
+      tess.gluTessEndPolygon();
+
+      assert.deepEqual(resultVerts, [], 'single point resulted in geometry');
+    });
+    test('two points should return an empty result', function() {
+      var tess = createTessellator(libtess);
+
+      var resultVerts = [];
+      tess.gluTessBeginPolygon(resultVerts);
+      tess.gluTessBeginContour();
+      tess.gluTessVertex([1, 0, 0], [1, 0, 0]);
+      tess.gluTessVertex([0, 1, 0], [0, 1, 0]);
+      tess.gluTessEndContour();
+      tess.gluTessEndPolygon();
+
+      assert.deepEqual(resultVerts, [], 'two points resulted in geometry');
+    });
+    test('three distinct points should result in itself', function() {
+      var tess = createTessellator(libtess);
+
+      var resultVerts = [];
+      tess.gluTessBeginPolygon(resultVerts);
+      tess.gluTessBeginContour();
+      tess.gluTessVertex([1, 0, 0], [1, 0, 0]);
+      tess.gluTessVertex([0, 1, 0], [0, 1, 0]);
+      tess.gluTessVertex([0, 0, 0], [0, 0, 0]);
+      tess.gluTessEndContour();
+      tess.gluTessEndPolygon();
+
+      assert.deepEqual(resultVerts, [[1, 0, 0, 0, 1, 0, 0, 0, 0]],
+          'triangle was not tessellated to itself');
+    });
+  });
+
+  suite('Degenerate Geometry', function() {
+    test('triangle with collapsed edge should return empty result', function() {
+      var tess = createTessellator(libtess);
+
+      var resultVerts = [];
+      tess.gluTessBeginPolygon(resultVerts);
+      tess.gluTessBeginContour();
+      tess.gluTessVertex([1, 0, 0], [1, 0, 0]);
+      tess.gluTessVertex([0, 1, 0], [0, 1, 0]);
+      tess.gluTessVertex([0, 1, 0], [0, 1, 0]);
+      tess.gluTessEndContour();
+      tess.gluTessEndPolygon();
+
+      assert.deepEqual(resultVerts, [],
+          'degenerate triangle resulted in geometry');
+    });
+    test('triangle collapsed to point should return empty result', function() {
+      var tess = createTessellator(libtess);
+
+      var resultVerts = [];
+      tess.gluTessBeginPolygon(resultVerts);
+      tess.gluTessBeginContour();
+      tess.gluTessVertex([1, 0, 0], [1, 0, 0]);
+      tess.gluTessVertex([1, 0, 0], [1, 0, 0]);
+      tess.gluTessVertex([1, 0, 0], [1, 0, 0]);
+      tess.gluTessEndContour();
+      tess.gluTessEndPolygon();
+
+      assert.deepEqual(resultVerts, [],
+          'degenerate triangle resulted in geometry');
+    });
+  });
+});
+
+},{"./common.js":5,"chai":undefined}],2:[function(require,module,exports){
+/* jshint node: true */
+/* global suite, test */
+'use strict';
+
 var chai = require('chai');
 var assert = chai.assert;
 
@@ -301,7 +433,7 @@ suite('Explicit Error States', function() {
   });
 });
 
-},{"./common.js":4,"./geometry/hourglass.js":6,"chai":undefined}],2:[function(require,module,exports){
+},{"./common.js":5,"./geometry/hourglass.js":7,"chai":undefined}],3:[function(require,module,exports){
 /* jshint node: true */
 /* global suite, test */
 'use strict';
@@ -483,9 +615,9 @@ function tessellate(tess, contours, outputType, provideNormal, normal,
   return resultVerts;
 }
 
-},{"./common.js":4,"./expectations/libtess.baseline.js":5,"./geometry/hourglass.js":6,"./geometry/two-opposite-triangles.js":7,"./geometry/two-traingles.js":8,"./rfolder.js":3,"chai":undefined}],3:[function(require,module,exports){
+},{"./common.js":5,"./expectations/libtess.baseline.js":6,"./geometry/hourglass.js":7,"./geometry/two-opposite-triangles.js":8,"./geometry/two-traingles.js":9,"./rfolder.js":4,"chai":undefined}],4:[function(require,module,exports){
 
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 /* jshint node: true */
 'use strict';
 
@@ -626,7 +758,7 @@ exports.createInstrumentedTessellator = function(libtess, opt_outputType) {
   return tess;
 };
 
-},{"../libtess.cat.js":undefined,"../libtess.min.js":undefined,"chai":undefined}],5:[function(require,module,exports){
+},{"../libtess.cat.js":undefined,"../libtess.min.js":undefined,"chai":undefined}],6:[function(require,module,exports){
 /*
 
  Copyright 2000, Silicon Graphics, Inc. All Rights Reserved.
@@ -695,7 +827,7 @@ function Ia(a,b){for(var c=a.c,d=a.a,e=c[b].a;;){var f=b<<1;f<a.b&&a.g(d[c[f+1].
 gluEnum:{GLU_TESS_MESH:100112,GLU_TESS_TOLERANCE:100142,GLU_TESS_WINDING_RULE:100140,GLU_TESS_BOUNDARY_ONLY:100141,GLU_INVALID_ENUM:100900,GLU_INVALID_VALUE:100901,GLU_TESS_BEGIN:100100,GLU_TESS_VERTEX:100101,GLU_TESS_END:100102,GLU_TESS_ERROR:100103,GLU_TESS_EDGE_FLAG:100104,GLU_TESS_COMBINE:100105,GLU_TESS_BEGIN_DATA:100106,GLU_TESS_VERTEX_DATA:100107,GLU_TESS_END_DATA:100108,GLU_TESS_ERROR_DATA:100109,GLU_TESS_EDGE_FLAG_DATA:100110,GLU_TESS_COMBINE_DATA:100111}};Z.prototype.gluDeleteTess=Z.prototype.M;
 Z.prototype.gluTessProperty=Z.prototype.R;Z.prototype.gluGetTessProperty=Z.prototype.N;Z.prototype.gluTessNormal=Z.prototype.Q;Z.prototype.gluTessCallback=Z.prototype.O;Z.prototype.gluTessVertex=Z.prototype.S;Z.prototype.gluTessBeginPolygon=Z.prototype.J;Z.prototype.gluTessBeginContour=Z.prototype.I;Z.prototype.gluTessEndContour=Z.prototype.K;Z.prototype.gluTessEndPolygon=Z.prototype.P; if (typeof module !== 'undefined') { module.exports = this.libtess; }
 
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 /* jshint node: true */
 
 module.exports = {
@@ -712,7 +844,7 @@ module.exports = {
   ]
 };
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 /* jshint node: true */
 
 module.exports = {
@@ -733,7 +865,7 @@ module.exports = {
   ]
 };
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 /* jshint node: true */
 
 module.exports = {
@@ -760,4 +892,4 @@ module.exports = {
 // stub to let the browserified tests use the page-provided Chai
 module.exports = window.chai;
 
-},{}]},{},[1,2]);
+},{}]},{},[1,2,3]);
