@@ -139,3 +139,44 @@ exports.createInstrumentedTessellator = function(libtess, opt_outputType) {
 
   return tess;
 };
+
+/**
+ * Create a rotation function that rotates coordinates from a plane with a z=1
+ * normal to a plane with the specified normal. Normal must be unit length.
+ * Returned function returns a new array with transformed coordinates.
+ * Note: works precisely for normals of z=-1 (treated as rotation around the
+ * y-axis by π), but will likely have numerical issues with normals
+ * *approaching* z=-1. Don't use this elsewhere.
+ * @param {!Array.<number>} normal
+ * @return {function(number, number, number): !Array.<number>}
+ */
+exports.createPlaneRotation = function(normal) {
+  var nx = normal[0];
+  var ny = normal[1];
+  var nz = normal[2];
+
+  // if normal is negative-z-axis aligned, special case it
+  if (nx === 0 && ny === 0 && nz === -1) {
+    return function(x, y, z) {
+      return [-x, y, -z];
+    };
+  }
+
+  // arbitrary normal, hopefully not too near nz = -1
+  var denom = 1 + nz;
+  var transform = [
+    nz + ny * ny / denom, -nx * ny / denom, -nx,
+    -nx * ny / denom, nz + nx * nx / denom, -ny,
+    nx, ny, nz
+  ];
+
+  return (function(transform) {
+    return function(x, y, z) {
+      return [
+        transform[0] * x + transform[3] * y + transform[6] * z,
+        transform[1] * x + transform[4] * y + transform[7] * z,
+        transform[2] * x + transform[5] * y + transform[8] * z
+      ];
+    };
+  })(transform);
+};

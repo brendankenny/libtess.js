@@ -8,6 +8,7 @@ var assert = chai.assert;
 var common = require('./common.js');
 var libtess = common.libtess;
 var createTessellator = common.createInstrumentedTessellator;
+var createPlaneRotation = common.createPlaneRotation;
 
 var basetess = require('./expectations/libtess.baseline.js');
 
@@ -19,7 +20,7 @@ var geometries = Object.keys(geometryFiles).map(function(filename) {
 
 /**
  * Enumeration of supported winding rules.
- * @private {Array.<{name: string, value: boolean}>}
+ * @private {!Array.<{name: string, value: boolean}>}
  * @const
  */
 var WINDING_RULES = Object.keys(libtess.windingRule).map(
@@ -32,7 +33,7 @@ var WINDING_RULES = Object.keys(libtess.windingRule).map(
 
 /**
  * Set of normals for planes in which to test tessellation.
- * @private {Array.<{name: string, value: boolean}>}
+ * @private {!Array.<{name: string, value: !Array.<number>}>}
  * @const
  */
 var NORMALS = [
@@ -40,20 +41,23 @@ var NORMALS = [
     name: 'xyPlane',
     value: [0, 0, 1],
   },
-  { // TODO(bckenny): support other normals
+  {
     name: 'xzPlane',
     value: [0, 1, 0],
   },
   {
     name: 'yzPlane',
     value: [1, 0, 0]
+  },
+  {
+    name: 'tiltedPlane',
+    value: [Math.SQRT1_2, Math.SQRT1_2, 0]
   }
-  // TODO(bckenny): arbitrary orientations? other permutations?
 ];
 
 /**
  * Whether to provide a normal to libtess or make it compute one.
- * @private {Array.<{name: string, value: boolean}>}
+ * @private {!Array.<{name: string, value: boolean}>}
  * @const
  */
 var PROVIDE_NORMALS = [
@@ -69,7 +73,7 @@ var PROVIDE_NORMALS = [
 
 /**
  * Tessellation output types.
- * @private {Array.<{name: string, value: boolean}>}
+ * @private {!Array.<{name: string, value: boolean}>}
  * @const
  */
 var OUTPUT_TYPES = [
@@ -155,6 +159,9 @@ function tessellate(tess, contours, outputType, provideNormal, normal,
   tess.gluTessProperty(libtess.gluEnum.GLU_TESS_WINDING_RULE,
       windingRule.value);
 
+  // transform function to align plane with desired normal
+  var rotate = createPlaneRotation(normal.value);
+
   // provide normal or compute
   if (provideNormal.value) {
     tess.gluTessNormal.apply(tess, normal.value);
@@ -167,8 +174,7 @@ function tessellate(tess, contours, outputType, provideNormal, normal,
     tess.gluTessBeginContour();
     var contour = contours[i];
     for (var j = 0; j < contour.length; j += 3) {
-      var coords = [contour[j], contour[j + 1], contour[j + 2]];
-      // TODO(bckenny): rotate coordinates based on new normal
+      var coords = rotate(contour[j], contour[j + 1], contour[j + 2]);
       tess.gluTessVertex(coords, coords);
     }
     tess.gluTessEndContour();
