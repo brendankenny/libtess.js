@@ -163,6 +163,8 @@ exports.createPlaneRotation = function(normal) {
   }
 
   // arbitrary normal, hopefully not too near nz = -1
+  // special case of vector-to-vector rotation matrix from Real-Time Rendering,
+  // Third Edition
   var denom = 1 + nz;
   var transform = [
     nz + ny * ny / denom, -nx * ny / denom, -nx,
