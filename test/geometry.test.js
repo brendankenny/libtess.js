@@ -148,7 +148,7 @@ function testGeometry(geometry) {
  * @param {!Array.<!Array.<number>>} contours
  * @param {{name: string, value: boolean}} outputType
  * @param {{name: string, value: boolean}} provideNormal
- * @param {{name: string, value: boolean}} normal
+ * @param {{name: string, value: !Array.<number>}} normal
  * @param {{name: string, value: boolean}} windingRule
  * @return {!Array.<!Array.<number>>}
  */

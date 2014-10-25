@@ -50,6 +50,33 @@ suite('Basic Tests', function() {
         boundaryOnly = !boundaryOnly;
       }
     });
+    test('GLU_TESS_MESH callback returns something', function() {
+      // TODO(bckenny): returned mesh is useless in minified form. Decide if
+      // external mesh interface is worthwhile (can test with checkMesh) or if
+      // it should just be hidden within
+      var tess = createTessellator(libtess);
+      var meshCallbackCalled = false;
+      tess.gluTessCallback(libtess.gluEnum.GLU_TESS_MESH,
+          function meshCallback(mesh) {
+            meshCallbackCalled = true;
+            assert.isObject(mesh,
+                'GLU_TESS_MESH callback did not return an object');
+          });
+
+      var resultVerts = [];
+      tess.gluTessBeginPolygon(resultVerts);
+      tess.gluTessBeginContour();
+      tess.gluTessVertex([1, 0, 0], [1, 0, 0]);
+      tess.gluTessVertex([0, 1, 0], [0, 1, 0]);
+      tess.gluTessVertex([0, 0, 0], [0, 0, 0]);
+      tess.gluTessEndContour();
+      tess.gluTessEndPolygon();
+
+      assert.deepEqual(resultVerts, [[1, 0, 0, 0, 1, 0, 0, 0, 0]],
+          'triangle was not tessellated to itself in GLU_TESS_MESH test');
+      assert.isTrue(meshCallbackCalled,
+          'GLU_TESS_MESH callback was not called');
+    });
   });
 
   suite('Basic Geometry', function() {
