@@ -518,7 +518,7 @@ var createPlaneRotation = common.createPlaneRotation;
 var basetess = require('./expectations/libtess.baseline.js');
 
 var rfolder = require('./rfolder.js');
-var geometryFiles = {"hourglass": require("./geometry/hourglass.js"),"two-opposite-triangles": require("./geometry/two-opposite-triangles.js"),"two-traingles": require("./geometry/two-traingles.js")};
+var geometryFiles = {"hourglass": require("./geometry/hourglass.js"),"letter-e": require("./geometry/letter-e.js"),"two-opposite-triangles": require("./geometry/two-opposite-triangles.js"),"two-traingles": require("./geometry/two-traingles.js")};
 var geometries = Object.keys(geometryFiles).map(function(filename) {
   return geometryFiles[filename];
 });
@@ -690,7 +690,7 @@ function tessellate(tess, contours, outputType, provideNormal, normal,
   return resultVerts;
 }
 
-},{"./common.js":5,"./expectations/libtess.baseline.js":6,"./geometry/hourglass.js":7,"./geometry/two-opposite-triangles.js":8,"./geometry/two-traingles.js":9,"./rfolder.js":4,"chai":undefined}],4:[function(require,module,exports){
+},{"./common.js":5,"./expectations/libtess.baseline.js":6,"./geometry/hourglass.js":7,"./geometry/letter-e.js":8,"./geometry/two-opposite-triangles.js":9,"./geometry/two-traingles.js":10,"./rfolder.js":4,"chai":undefined}],4:[function(require,module,exports){
 
 },{}],5:[function(require,module,exports){
 /* jshint node: true */
@@ -858,6 +858,8 @@ exports.createPlaneRotation = function(normal) {
   }
 
   // arbitrary normal, hopefully not too near nz = -1
+  // special case of vector-to-vector rotation matrix from Real-Time Rendering,
+  // Third Edition
   var denom = 1 + nz;
   var transform = [
     nz + ny * ny / denom, -nx * ny / denom, -nx,
@@ -966,6 +968,31 @@ module.exports = {
 /* jshint node: true */
 
 module.exports = {
+  // a simple letter E
+  // from discussion at http://www.gamedev.net/topic/584914-polygon-tessellationtriangulation-implementations/
+  name: 'the letter E',
+  value: [
+    [
+      -128, -23, 0,
+      -128, 23, 0,
+      -94, 23, 0,
+      -94, 15, 0,
+      -119, 15, 0,
+      -119, 5, 0,
+      -96, 5, 0,
+      -96, -3, 0,
+      -119, -3, 0,
+      -119, -15, 0,
+      -93, -15, 0,
+      -93, -23, 0
+    ]
+  ]
+};
+
+},{}],9:[function(require,module,exports){
+/* jshint node: true */
+
+module.exports = {
   // two intersecting triangles with opposite winding
   // first is anticlockwise, second is clockwise
   'name': 'Two Opposite Triangles',
@@ -983,7 +1010,7 @@ module.exports = {
   ]
 };
 
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 /* jshint node: true */
 
 module.exports = {
