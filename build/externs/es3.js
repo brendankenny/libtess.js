@@ -18,6 +18,10 @@
  * @fileoverview ECMAScript 3 Built-Ins. This include common extensions so this
  * is actually ES3+Reality.
  * @externs
+ * @author stevey@google.com (Steve Yegge)
+ * @author nicksantos@google.com (Nick Santos)
+ * @author arv@google.com (Erik Arvidsson)
+ * @author johnlenz@google.com (John Lenz)
  */
 
 
@@ -176,6 +180,7 @@ function eval(code) {}
 /**
  * @constructor
  * @param {*=} opt_value
+ * @return {!Object}
  * @nosideeffects
  * @see http://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Object
  */
@@ -391,6 +396,13 @@ Function.prototype.arity;
 Function.prototype.caller;
 
 /**
+ * Nonstandard.
+ * @type {?}
+ * @see http://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/displayName
+ */
+Function.prototype.displayName;
+
+/**
  * Expected number of arguments.
  * @type {number}
  * @see http://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Function/length
@@ -415,8 +427,9 @@ Function.prototype.toString = function() {};
 /**
  * @constructor
  * @param {...*} var_args
- * @return {!Array}
+ * @return {!Array.<?>}
  * @nosideeffects
+ * @template T
  * @see http://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Array
  */
 function Array(var_args) {}
@@ -428,7 +441,7 @@ function Array(var_args) {}
  * and/or value(s).
  *
  * @param {...*} var_args
- * @return {!Array}
+ * @return {!Array.<?>}
  * @this {*}
  * @nosideeffects
  * @see http://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Array/concat
@@ -547,7 +560,7 @@ Array.prototype.splice = function(opt_index, opt_howMany, var_args) {};
 Array.prototype.toSource;
 
 /**
- * @this {Array}
+ * @this {Array.<?>}
  * @return {string}
  * @nosideeffects
  * @override
@@ -701,7 +714,7 @@ Array.every = function(arr, callback, opt_context) {};
  * @param {{length: number}|Array.<T>} arr
  * @param {?function(this:S, T, number, ?) : ?} callback
  * @param {S=} opt_context
- * @return {!Array}
+ * @return {!Array.<T>}
  * @template T,S
  */
 Array.filter = function(arr, callback, opt_context) {};
@@ -746,24 +759,6 @@ Array.lastIndexOf = function(arr, obj, opt_fromIndex) {};
  * @template T,S,R
  */
 Array.map = function(arr, callback, opt_context) {};
-
-/**
- * @param {{length: number}|Array.<T>} arr
- * @param {function(?, T, number, Array) : R} callback
- * @param {?=} opt_initialValue
- * @return {R}
- * @template T,R
- */
-Array.reduce = function(arr, callback, opt_initialValue) {};
-
-/**
- * @param {{length: number}|Array.<T>} arr
- * @param {function(?, T, number, Array) : R} callback
- * @param {?=} opt_initialValue
- * @return {R}
- * @template T,R
- */
-Array.reduceRight = function(arr, callback, opt_initialValue) {};
 
 /**
  * @param {{length: number}|Array.<T>} arr
@@ -1695,12 +1690,15 @@ String.prototype.link = function(hrefAttribute) {};
  * or is the same as the given string in sort order.
  *
  * @this {*}
- * @param {*} other
+ * @param {?string} compareString
+ * @param {string|Array.<string>=} locales
+ * @param {Object=} options
  * @return {number}
  * @nosideeffects
- * @see http://developer.mozilla.org/En/Core_JavaScript_1.5_Reference/Objects/String/Prototype
+ * @see http://developer.mozilla.org/En/Core_JavaScript_1.5_Reference/Objects/String/localeCompare
+ * @see http://www.ecma-international.org/ecma-402/1.0/#sec-13.1.1
  */
-String.prototype.localeCompare = function(other) {};
+String.prototype.localeCompare = function(compareString, locales, options) {};
 
 /**
  * Used to retrieve the matches when matching a string against a regular
@@ -1938,7 +1936,7 @@ RegExp.input;
 
 /**
  * The last matched characters.
- * @type {Array}
+ * @type {string}
  * @see http://www.devguru.com/Technologies/Ecmascript/Quickref/regexp_lastMatch.html
  */
 RegExp.lastMatch;
