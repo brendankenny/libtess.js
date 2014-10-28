@@ -518,7 +518,7 @@ var createPlaneRotation = common.createPlaneRotation;
 var basetess = require('./expectations/libtess.baseline.js');
 
 var rfolder = require('./rfolder.js');
-var geometryFiles = {"hourglass": require("./geometry/hourglass.js"),"letter-e": require("./geometry/letter-e.js"),"poly2tri-dude": require("./geometry/poly2tri-dude.js"),"shared-borders": require("./geometry/shared-borders.js"),"two-opposite-triangles": require("./geometry/two-opposite-triangles.js"),"two-traingles": require("./geometry/two-traingles.js")};
+var geometryFiles = {"hourglass": require("./geometry/hourglass.js"),"letter-e": require("./geometry/letter-e.js"),"poly2tri-dude": require("./geometry/poly2tri-dude.js"),"shared-borders": require("./geometry/shared-borders.js"),"two-opposite-triangles": require("./geometry/two-opposite-triangles.js"),"two-triangles": require("./geometry/two-triangles.js")};
 var geometries = Object.keys(geometryFiles).map(function(filename) {
   return geometryFiles[filename];
 });
@@ -690,7 +690,7 @@ function tessellate(tess, contours, outputType, provideNormal, normal,
   return resultVerts;
 }
 
-},{"./common.js":5,"./expectations/libtess.baseline.js":6,"./geometry/hourglass.js":7,"./geometry/letter-e.js":8,"./geometry/poly2tri-dude.js":9,"./geometry/shared-borders.js":10,"./geometry/two-opposite-triangles.js":11,"./geometry/two-traingles.js":12,"./rfolder.js":4,"chai":undefined}],4:[function(require,module,exports){
+},{"./common.js":5,"./expectations/libtess.baseline.js":6,"./geometry/hourglass.js":7,"./geometry/letter-e.js":8,"./geometry/poly2tri-dude.js":9,"./geometry/shared-borders.js":10,"./geometry/two-opposite-triangles.js":11,"./geometry/two-triangles.js":12,"./rfolder.js":4,"chai":undefined}],4:[function(require,module,exports){
 
 },{}],5:[function(require,module,exports){
 /* jshint node: true */
