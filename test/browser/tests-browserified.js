@@ -502,7 +502,7 @@ suite('Explicit Error States', function() {
   });
 });
 
-},{"./common.js":5,"./geometry/hourglass.js":7,"chai":undefined}],3:[function(require,module,exports){
+},{"./common.js":5,"./geometry/hourglass.js":8,"chai":undefined}],3:[function(require,module,exports){
 /* jshint node: true */
 /* global suite, test */
 'use strict';
@@ -518,7 +518,7 @@ var createPlaneRotation = common.createPlaneRotation;
 var basetess = require('./expectations/libtess.baseline.js');
 
 var rfolder = require('./rfolder.js');
-var geometryFiles = {"hourglass": require("./geometry/hourglass.js"),"letter-e": require("./geometry/letter-e.js"),"poly2tri-dude": require("./geometry/poly2tri-dude.js"),"shared-borders": require("./geometry/shared-borders.js"),"shared-edge-triangles": require("./geometry/shared-edge-triangles.js"),"two-opposite-triangles": require("./geometry/two-opposite-triangles.js"),"two-triangles": require("./geometry/two-triangles.js")};
+var geometryFiles = {"degenerate-hourglass": require("./geometry/degenerate-hourglass.js"),"hourglass": require("./geometry/hourglass.js"),"letter-e": require("./geometry/letter-e.js"),"poly2tri-dude": require("./geometry/poly2tri-dude.js"),"shared-borders": require("./geometry/shared-borders.js"),"shared-edge-triangles": require("./geometry/shared-edge-triangles.js"),"two-opposite-triangles": require("./geometry/two-opposite-triangles.js"),"two-triangles": require("./geometry/two-triangles.js")};
 var geometries = Object.keys(geometryFiles).map(function(filename) {
   return geometryFiles[filename];
 });
@@ -690,7 +690,7 @@ function tessellate(tess, contours, outputType, provideNormal, normal,
   return resultVerts;
 }
 
-},{"./common.js":5,"./expectations/libtess.baseline.js":6,"./geometry/hourglass.js":7,"./geometry/letter-e.js":8,"./geometry/poly2tri-dude.js":9,"./geometry/shared-borders.js":10,"./geometry/shared-edge-triangles.js":11,"./geometry/two-opposite-triangles.js":12,"./geometry/two-triangles.js":13,"./rfolder.js":4,"chai":undefined}],4:[function(require,module,exports){
+},{"./common.js":5,"./expectations/libtess.baseline.js":6,"./geometry/degenerate-hourglass.js":7,"./geometry/hourglass.js":8,"./geometry/letter-e.js":9,"./geometry/poly2tri-dude.js":10,"./geometry/shared-borders.js":11,"./geometry/shared-edge-triangles.js":12,"./geometry/two-opposite-triangles.js":13,"./geometry/two-triangles.js":14,"./rfolder.js":4,"chai":undefined}],4:[function(require,module,exports){
 
 },{}],5:[function(require,module,exports){
 /* jshint node: true */
@@ -951,6 +951,27 @@ Z.prototype.gluTessProperty=Z.prototype.R;Z.prototype.gluGetTessProperty=Z.proto
 /* jshint node: true */
 
 module.exports = {
+  // self-intersecting contour collapsed to a set of edges
+  // should result in no geometry
+  name: 'Degenerate Hourglass',
+  value: [
+    [
+      // coincides with intersection of the two main edges
+      0, 0, 0,
+      1, 1, 0,
+      -1, -1, 0,
+      // also at the intersection
+      0, 0, 0,
+      1, -1, 0,
+      -1, 1, 0
+    ]
+  ]
+};
+
+},{}],8:[function(require,module,exports){
+/* jshint node: true */
+
+module.exports = {
   // short self-intersecting single contour
   // bottom of hourglass is anticlockwise, top is clockwise
   'name': 'Hourglass',
@@ -964,7 +985,7 @@ module.exports = {
   ]
 };
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 /* jshint node: true */
 
 module.exports = {
@@ -989,7 +1010,7 @@ module.exports = {
   ]
 };
 
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 /**
  * Poly2Tri Copyright (c) 2009-2010, Poly2Tri Contributors
  * http://code.google.com/p/poly2tri/
@@ -1142,7 +1163,7 @@ module.exports = {
   ]
 };
 
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 /* jshint node: true */
 
 module.exports = {
@@ -1183,7 +1204,7 @@ module.exports = {
   ]
 };
 
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 /* jshint node: true */
 
 module.exports = {
@@ -1205,7 +1226,7 @@ module.exports = {
   ]
 };
 
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 /* jshint node: true */
 
 module.exports = {
@@ -1226,7 +1247,7 @@ module.exports = {
   ]
 };
 
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 /* jshint node: true */
 
 module.exports = {
