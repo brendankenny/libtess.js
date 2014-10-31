@@ -291,7 +291,9 @@ libtess.GluTesselator = function() {
  * Destory the tesselator object. See README.
  */
 libtess.GluTesselator.prototype.gluDeleteTess = function() {
-  // TODO(bckenny): do we need a public API for this still?
+  // TODO(bckenny): This does nothing but assert that it isn't called while
+  // building the polygon since we rely on GC to handle memory. *If* the public
+  // API changes, this should go.
   this.requireState_(libtess.tessState.T_DORMANT);
   // memFree(tess); TODO(bckenny)
 };

@@ -334,4 +334,41 @@ suite('Explicit Error States', function() {
           'did not throw GLU_INVALID_VALUE');
     });
   });
+
+  // TODO(bckenny): These tests just show that the tessellator is properly
+  // indicating that it is being deleted while in the middle of building up
+  // contours, which makes little sense in the JavaScript port since
+  // gluDeleteTess doesn't actually delete anything (there's no memory that
+  // needs to be manually freed). If/when we change the public API, these tests
+  // will go along with gluDeleteTess.
+  suite('gluDeleteTess called while building polygon', function() {
+    test('GLU_TESS_MISSING_END_CONTOUR thrown while mid contour', function() {
+      var tess = createTessellator(libtess);
+
+      var resultVerts = [];
+      tess.gluTessBeginPolygon(resultVerts);
+      tess.gluTessBeginContour();
+      tess.gluTessVertex([1, 0, 0], [1, 0, 0]);
+
+      assert.throw(tess.gluDeleteTess.bind(tess),
+          'GLU_TESS_MISSING_END_CONTOUR',
+          'did not throw GLU_TESS_MISSING_END_CONTOUR');
+    });
+    test('GLU_TESS_MISSING_END_POLYGON thrown between contours', function() {
+      var tess = createTessellator(libtess);
+
+      var resultVerts = [];
+      tess.gluTessBeginPolygon(resultVerts);
+      tess.gluTessBeginContour();
+      tess.gluTessVertex([1, 0, 0], [1, 0, 0]);
+      tess.gluTessVertex([0, 1, 0], [0, 1, 0]);
+      tess.gluTessVertex([0, 0, 0], [0, 0, 0]);
+      tess.gluTessEndContour();
+
+      assert.throw(tess.gluDeleteTess.bind(tess),
+          'GLU_TESS_MISSING_END_POLYGON',
+          'did not throw GLU_TESS_MISSING_END_POLYGON');
+    });
+
+  });
 });
