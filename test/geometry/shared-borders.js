@@ -2,8 +2,8 @@
 
 module.exports = {
   // three contours with shared edges but no shared vertices
-  'name': 'Shared Borders',
-  'value': [
+  name: 'Shared Borders',
+  value: [
     // anticlockwise
     [
       1, 3, 0,
