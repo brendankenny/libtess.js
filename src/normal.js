@@ -89,6 +89,9 @@ libtess.normal.projectPolygon = function(tess) {
   var tUnit = tess.tUnit;
   var i = libtess.normal.longAxis_(norm);
 
+  // NOTE(bckenny): This branch is never taken. See comment on
+  // libtess.TRUE_PROJECT.
+  /* istanbul ignore if */
   if (libtess.TRUE_PROJECT) {
     // Choose the initial sUnit vector to be approximately perpendicular
     // to the normal.
@@ -149,10 +152,13 @@ libtess.normal.dot_ = function(u, v) {
 };
 
 
+// NOTE(bckenny): only called from within libtess.normal.projectPolygon's
+// TRUE_PROJECT branch, so ignoring for code coverage.
+/* istanbul ignore next */
 /**
- * Normalize vector v
+ * Normalize vector v.
  * @private
- * @param {Array.<number>} v [description].
+ * @param {!Array.<number>} v
  */
 libtess.normal.normalize_ = function(v) {
   var len = v[0] * v[0] + v[1] * v[1] + v[2] * v[2];

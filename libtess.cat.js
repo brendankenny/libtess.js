@@ -79,10 +79,22 @@ libtess.GLU_TESS_MAX_COORD = 1e150;
 
 
 /**
- * [TRUE_PROJECT description]
- * TODO(bckenny): see alg-outline for description
+ * Normally the polygon is projected to a plane perpendicular to one of the
+ * three coordinate axes before tessellating in 2d. This helps numerical
+ * accuracy by forgoing a transformation step by simply dropping one coordinate
+ * dimension.
  *
+ * However, this can affect the placement of intersection points for non-axis-
+ * aligned polygons. Setting TRUE_PROJECT to true will instead project onto a
+ * plane actually perpendicular to the polygon's normal.
+ *
+ * NOTE(bckenny): I can find no instances in which this mode has ever been used,
+ * but it's difficult to search for. This was a compile-time setting in the
+ * original, so setting this as constant. If this is exposed in the public API,
+ * remove the ignore coverage directives on libtess.normal.projectPolygon and
+ * libtess.normal.normalize_.
  * @type {boolean}
+ * @const
  */
 libtess.TRUE_PROJECT = false;
 
@@ -1262,6 +1274,9 @@ libtess.normal.projectPolygon = function(tess) {
   var tUnit = tess.tUnit;
   var i = libtess.normal.longAxis_(norm);
 
+  // NOTE(bckenny): This branch is never taken. See comment on
+  // libtess.TRUE_PROJECT.
+  /* istanbul ignore if */
   if (libtess.TRUE_PROJECT) {
     // Choose the initial sUnit vector to be approximately perpendicular
     // to the normal.
@@ -1322,10 +1337,13 @@ libtess.normal.dot_ = function(u, v) {
 };
 
 
+// NOTE(bckenny): only called from within libtess.normal.projectPolygon's
+// TRUE_PROJECT branch, so ignoring for code coverage.
+/* istanbul ignore next */
 /**
- * Normalize vector v
+ * Normalize vector v.
  * @private
- * @param {Array.<number>} v [description].
+ * @param {!Array.<number>} v
  */
 libtess.normal.normalize_ = function(v) {
   var len = v[0] * v[0] + v[1] * v[1] + v[2] * v[2];
