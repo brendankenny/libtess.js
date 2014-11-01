@@ -64,6 +64,8 @@ var NORMALS = [
     name: 'tiltedPlane',
     value: [Math.SQRT1_2, Math.SQRT1_2, 0]
   }
+  // TODO(bckenny): make this transformations instead, so we can test more than
+  // just rotations about the origin
 ];
 
 /**
