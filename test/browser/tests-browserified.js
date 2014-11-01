@@ -1011,8 +1011,8 @@ module.exports = {
 module.exports = {
   // short self-intersecting single contour
   // bottom of hourglass is anticlockwise, top is clockwise
-  'name': 'Hourglass',
-  'value': [
+  name: 'Hourglass',
+  value: [
     [
       1, 1, 0,
       -1, -1, 0,
@@ -1205,8 +1205,8 @@ module.exports = {
 
 module.exports = {
   // three contours with shared edges but no shared vertices
-  'name': 'Shared Borders',
-  'value': [
+  name: 'Shared Borders',
+  value: [
     // anticlockwise
     [
       1, 3, 0,
@@ -1269,8 +1269,8 @@ module.exports = {
 module.exports = {
   // two intersecting triangles with opposite winding
   // first is anticlockwise, second is clockwise
-  'name': 'Two Opposite Triangles',
-  'value': [
+  name: 'Two Opposite Triangles',
+  value: [
     [
       1, -1, 0,
       0, 1, 0,
@@ -1290,8 +1290,8 @@ module.exports = {
 module.exports = {
   // two intersecting triangles
   // both are anticlockwise (positive winding)
-  'name': 'Two Triangles',
-  'value': [
+  name: 'Two Triangles',
+  value: [
     [
       1, -1, 0,
       0, 1, 0,
