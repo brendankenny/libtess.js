@@ -925,14 +925,16 @@ libtess.mesh.zapFace = function(fZap) {
   // TODO(bckenny): probably null at callsite
 };
 
-
+// TODO(bckenny): meshUnion isn't called within libtess and isn't part of the
+// public API. Could be useful if more mesh manipulation functions are exposed.
+/* istanbul ignore next */
 /**
  * meshUnion() forms the union of all structures in
  * both meshes, and returns the new mesh (the old meshes are destroyed).
  *
- * @param {libtess.GluMesh} mesh1 [description].
- * @param {libtess.GluMesh} mesh2 [description].
- * @return {libtess.GluMesh} [description].
+ * @param {!libtess.GluMesh} mesh1
+ * @param {!libtess.GluMesh} mesh2
+ * @return {!libtess.GluMesh}
  */
 libtess.mesh.meshUnion = function(mesh1, mesh2) {
   // TODO(bceknny): probably move to GluMesh method
@@ -967,7 +969,7 @@ libtess.mesh.meshUnion = function(mesh1, mesh2) {
   }
 
   // TODO(bckenny): memFree(mesh2);
-  // TODO(bckenny): probably null at callsite
+  // TODO(bckenny): If function is kept, remove mesh2's data to enforce.
   return mesh1;
 };
 
