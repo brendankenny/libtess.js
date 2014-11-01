@@ -221,13 +221,15 @@ libtess.PriorityQ.prototype.PQKeyRealloc_ = function(oldArray, size) {
   return newArray;
 };
 
-
+// NOTE(bckenny): libtess.PriorityQ.keyLessThan_ is called nowhere in libtess
+// and isn't part of the public API.
+/* istanbul ignore next */
 /**
- * [keyLessThan_ description]
+ * Whether x is less than y according to this.leq_.
  * @private
- * @param {number} x [description].
- * @param {number} y [description].
- * @return {boolean} [description].
+ * @param {number} x
+ * @param {number} y
+ * @return {boolean}
  */
 libtess.PriorityQ.prototype.keyLessThan_ = function(x, y) {
   // NOTE(bckenny): was macro LT
@@ -236,13 +238,15 @@ libtess.PriorityQ.prototype.keyLessThan_ = function(x, y) {
   return !this.leq_(keyY, keyX);
 };
 
-
+// NOTE(bckenny): libtess.PriorityQ.keyGreaterThan_ is called nowhere in libtess
+// and isn't part of the public API.
+/* istanbul ignore next */
 /**
- * [keyGreaterThan_ description]
+ * Whether x is greater than y according to this.leq_.
  * @private
- * @param {number} x [description].
- * @param {number} y [description].
- * @return {boolean} [description].
+ * @param {number} x
+ * @param {number} y
+ * @return {boolean}
  */
 libtess.PriorityQ.prototype.keyGreaterThan_ = function(x, y) {
   // NOTE(bckenny): was macro GT

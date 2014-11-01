@@ -1139,6 +1139,7 @@ libtess.sweep.connectRightVertex_ = function(tess, regUp, eBottomLeft) {
  */
 libtess.sweep.connectLeftDegenerate_ = function(tess, regUp, vEvent) {
   var e = regUp.eUp;
+  /* istanbul ignore if */
   if (libtess.geom.vertEq(e.org, vEvent)) {
     // NOTE(bckenny): this code is unreachable but remains for a hypothetical
     // future extension of libtess. See docs on libtess.sweep.TOLERANCE_NONZERO_
@@ -1176,8 +1177,10 @@ libtess.sweep.connectLeftDegenerate_ = function(tess, regUp, vEvent) {
   // Compiler eliminate dead code.
   // vEvent coincides with e.dst(), which has already been processed.
   // Splice in the additional right-going edges.
+  /* istanbul ignore next */
   libtess.assert(libtess.sweep.TOLERANCE_NONZERO_);
 
+  /* istanbul ignore next */
   if (libtess.sweep.TOLERANCE_NONZERO_) {
     regUp = libtess.sweep.topRightRegion_(regUp);
     var reg = regUp.regionBelow();

@@ -187,9 +187,13 @@ libtess.GluHalfEdge.prototype.dNext = function() {
 };
 
 
+// NOTE(bckenny): libtess.GluHalfEdge.rNext is called nowhere in libtess and
+// isn't part of the current public API. It could be useful for mesh traversal
+// and manipulation if made public, however.
+/* istanbul ignore next */
 /**
- * [rNext description]
- * @return {libtess.GluHalfEdge} [description].
+ * The edge CCW around the right face (origin of this becomes new dest).
+ * @return {libtess.GluHalfEdge}
  */
 libtess.GluHalfEdge.prototype.rNext = function() {
   return this.oPrev().sym;

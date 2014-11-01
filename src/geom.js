@@ -233,7 +233,9 @@ libtess.geom.vertL1dist = function(u, v) {
   return Math.abs(u.s - v.s) + Math.abs(u.t - v.t);
 };
 
-
+// NOTE(bckenny): vertCCW is called nowhere in libtess and isn't part of the
+// public API.
+/* istanbul ignore next */
 /**
  * For almost-degenerate situations, the results are not reliable.
  * Unless the floating-point arithmetic can be performed without

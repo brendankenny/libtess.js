@@ -431,7 +431,9 @@ libtess.geom.vertL1dist = function(u, v) {
   return Math.abs(u.s - v.s) + Math.abs(u.t - v.t);
 };
 
-
+// NOTE(bckenny): vertCCW is called nowhere in libtess and isn't part of the
+// public API.
+/* istanbul ignore next */
 /**
  * For almost-degenerate situations, the results are not reliable.
  * Unless the floating-point arithmetic can be performed without
@@ -3152,6 +3154,7 @@ libtess.sweep.connectRightVertex_ = function(tess, regUp, eBottomLeft) {
  */
 libtess.sweep.connectLeftDegenerate_ = function(tess, regUp, vEvent) {
   var e = regUp.eUp;
+  /* istanbul ignore if */
   if (libtess.geom.vertEq(e.org, vEvent)) {
     // NOTE(bckenny): this code is unreachable but remains for a hypothetical
     // future extension of libtess. See docs on libtess.sweep.TOLERANCE_NONZERO_
@@ -3189,8 +3192,10 @@ libtess.sweep.connectLeftDegenerate_ = function(tess, regUp, vEvent) {
   // Compiler eliminate dead code.
   // vEvent coincides with e.dst(), which has already been processed.
   // Splice in the additional right-going edges.
+  /* istanbul ignore next */
   libtess.assert(libtess.sweep.TOLERANCE_NONZERO_);
 
+  /* istanbul ignore next */
   if (libtess.sweep.TOLERANCE_NONZERO_) {
     regUp = libtess.sweep.topRightRegion_(regUp);
     var reg = regUp.regionBelow();
@@ -5017,9 +5022,13 @@ libtess.GluHalfEdge.prototype.dNext = function() {
 };
 
 
+// NOTE(bckenny): libtess.GluHalfEdge.rNext is called nowhere in libtess and
+// isn't part of the current public API. It could be useful for mesh traversal
+// and manipulation if made public, however.
+/* istanbul ignore next */
 /**
- * [rNext description]
- * @return {libtess.GluHalfEdge} [description].
+ * The edge CCW around the right face (origin of this becomes new dest).
+ * @return {libtess.GluHalfEdge}
  */
 libtess.GluHalfEdge.prototype.rNext = function() {
   return this.oPrev().sym;
@@ -5514,13 +5523,15 @@ libtess.PriorityQ.prototype.PQKeyRealloc_ = function(oldArray, size) {
   return newArray;
 };
 
-
+// NOTE(bckenny): libtess.PriorityQ.keyLessThan_ is called nowhere in libtess
+// and isn't part of the public API.
+/* istanbul ignore next */
 /**
- * [keyLessThan_ description]
+ * Whether x is less than y according to this.leq_.
  * @private
- * @param {number} x [description].
- * @param {number} y [description].
- * @return {boolean} [description].
+ * @param {number} x
+ * @param {number} y
+ * @return {boolean}
  */
 libtess.PriorityQ.prototype.keyLessThan_ = function(x, y) {
   // NOTE(bckenny): was macro LT
@@ -5529,13 +5540,15 @@ libtess.PriorityQ.prototype.keyLessThan_ = function(x, y) {
   return !this.leq_(keyY, keyX);
 };
 
-
+// NOTE(bckenny): libtess.PriorityQ.keyGreaterThan_ is called nowhere in libtess
+// and isn't part of the public API.
+/* istanbul ignore next */
 /**
- * [keyGreaterThan_ description]
+ * Whether x is greater than y according to this.leq_.
  * @private
- * @param {number} x [description].
- * @param {number} y [description].
- * @return {boolean} [description].
+ * @param {number} x
+ * @param {number} y
+ * @return {boolean}
  */
 libtess.PriorityQ.prototype.keyGreaterThan_ = function(x, y) {
   // NOTE(bckenny): was macro GT
