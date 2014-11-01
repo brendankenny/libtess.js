@@ -6,9 +6,12 @@
 // work, please let me know :)
 
 var fs = require('fs');
+var path = require('path');
 
 module.exports = function rfolder(dirname) {
-  return fs.readdirSync('./test/geometry').map(function(filename) {
-    return require('./geometry/' + filename);
+  var absoluteDirPath = path.join(__dirname, dirname);
+  return fs.readdirSync(absoluteDirPath).map(function(filename) {
+    var filePath = path.join(absoluteDirPath, filename);
+    return require(filePath);
   });
 };

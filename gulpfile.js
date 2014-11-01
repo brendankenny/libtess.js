@@ -18,10 +18,12 @@ var exec = require('child_process').exec;
 
 var COMPILER_PATH = 'node_modules/closurecompiler/compiler/compiler.jar';
 var LIBTESS_SRC = ['./src/libtess.js', './src/**/*.js'];
+// NOTE(bckenny): checking all of third_party for now. Modify if checking in
+// third-party code that doesn't conform to style.
 var LINT_SRC = LIBTESS_SRC.concat([
   './gulpfile.js',
   './libtess.cat.js',
-  './{build,examples,test}/**/*.{js,html}',
+  './{build,examples,test,third_party}/**/*.{js,html}',
   '!./build/externs/*',
   '!./test/browser/tests-browserified.js',
   '!./test/expectations/*'

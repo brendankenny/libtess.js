@@ -592,11 +592,17 @@ var createPlaneRotation = common.createPlaneRotation;
 
 var basetess = require('./expectations/libtess.baseline.js');
 
+// geometry tests are both here and in third_party
 var rfolder = require('./rfolder.js');
-var geometryFiles = {"degenerate-hourglass": require("./geometry/degenerate-hourglass.js"),"hourglass": require("./geometry/hourglass.js"),"letter-e": require("./geometry/letter-e.js"),"poly2tri-dude": require("./geometry/poly2tri-dude.js"),"roboto-registered": require("./geometry/roboto-registered.js"),"shared-borders": require("./geometry/shared-borders.js"),"shared-edge-triangles": require("./geometry/shared-edge-triangles.js"),"two-opposite-triangles": require("./geometry/two-opposite-triangles.js"),"two-triangles": require("./geometry/two-triangles.js")};
+var geometryFiles = {"degenerate-hourglass": require("./geometry/degenerate-hourglass.js"),"hourglass": require("./geometry/hourglass.js"),"letter-e": require("./geometry/letter-e.js"),"shared-borders": require("./geometry/shared-borders.js"),"shared-edge-triangles": require("./geometry/shared-edge-triangles.js"),"two-opposite-triangles": require("./geometry/two-opposite-triangles.js"),"two-triangles": require("./geometry/two-triangles.js")};
 var geometries = Object.keys(geometryFiles).map(function(filename) {
   return geometryFiles[filename];
 });
+var thirdPartyFiles = {"poly2tri-dude": require("./../third_party/test/geometry/poly2tri-dude.js"),"roboto-registered": require("./../third_party/test/geometry/roboto-registered.js")};
+var thirdPartyGeometries = Object.keys(thirdPartyFiles).map(function(filename) {
+  return thirdPartyFiles[filename];
+});
+geometries.push.apply(geometries, thirdPartyGeometries);
 
 /**
  * Enumeration of supported winding rules.
@@ -767,7 +773,7 @@ function tessellate(tess, contours, outputType, provideNormal, normal,
   return resultVerts;
 }
 
-},{"./common.js":5,"./expectations/libtess.baseline.js":6,"./geometry/degenerate-hourglass.js":7,"./geometry/hourglass.js":8,"./geometry/letter-e.js":9,"./geometry/poly2tri-dude.js":10,"./geometry/roboto-registered.js":11,"./geometry/shared-borders.js":12,"./geometry/shared-edge-triangles.js":13,"./geometry/two-opposite-triangles.js":14,"./geometry/two-triangles.js":15,"./rfolder.js":4,"chai":undefined}],4:[function(require,module,exports){
+},{"./../third_party/test/geometry/poly2tri-dude.js":14,"./../third_party/test/geometry/roboto-registered.js":15,"./common.js":5,"./expectations/libtess.baseline.js":6,"./geometry/degenerate-hourglass.js":7,"./geometry/hourglass.js":8,"./geometry/letter-e.js":9,"./geometry/shared-borders.js":10,"./geometry/shared-edge-triangles.js":11,"./geometry/two-opposite-triangles.js":12,"./geometry/two-triangles.js":13,"./rfolder.js":4,"chai":undefined}],4:[function(require,module,exports){
 
 },{}],5:[function(require,module,exports){
 /* jshint node: true */
@@ -1088,6 +1094,111 @@ module.exports = {
 };
 
 },{}],10:[function(require,module,exports){
+/* jshint node: true */
+
+module.exports = {
+  // three contours with shared edges but no shared vertices
+  name: 'Shared Borders',
+  value: [
+    // anticlockwise
+    [
+      1, 3, 0,
+      -4, 3, 0,
+      -4, -3, 0,
+      1, -3, 0
+    ],
+    // anticlockwise
+    [
+      3, 1, 0,
+      1, 1, 0,
+      1, -2, 0
+    ],
+    // clockwise
+    [
+      0, 0, 0,
+      0, -3, 0,
+      -1, -3, 0,
+      -1, 0, 0
+    ],
+    // clockwise
+    [
+      -2, 3, 0,
+      -2, 0, 0,
+      // collinear vertex
+      0, 0, 0,
+      7 / 3, 0, 0,
+      5 / 3, -1, 0,
+      -3, -1, 0,
+      -3, 3, 0
+    ]
+  ]
+};
+
+},{}],11:[function(require,module,exports){
+/* jshint node: true */
+
+module.exports = {
+  // two triangles with a partially-shared edge
+  name: 'Shared-edge triangles',
+  value: [
+    // anticlockwise
+    [
+      0, 2, 0,
+      5, 2, 0,
+      2, 4, 0
+    ],
+    // clockwise
+    [
+      1, 2, 0,
+      7, 2, 0,
+      4, 0, 0
+    ]
+  ]
+};
+
+},{}],12:[function(require,module,exports){
+/* jshint node: true */
+
+module.exports = {
+  // two intersecting triangles with opposite winding
+  // first is anticlockwise, second is clockwise
+  name: 'Two Opposite Triangles',
+  value: [
+    [
+      1, -1, 0,
+      0, 1, 0,
+      -1, -1, 0
+    ],
+    [
+      1, 1, 0,
+      0, -1, 0,
+      -1, 1, 0
+    ]
+  ]
+};
+
+},{}],13:[function(require,module,exports){
+/* jshint node: true */
+
+module.exports = {
+  // two intersecting triangles
+  // both are anticlockwise (positive winding)
+  name: 'Two Triangles',
+  value: [
+    [
+      1, -1, 0,
+      0, 1, 0,
+      -1, -1, 0
+    ],
+    [
+      1, 1, 0,
+      -1, 1, 0,
+      0, -1, 0
+    ]
+  ]
+};
+
+},{}],14:[function(require,module,exports){
 /**
  * Poly2Tri Copyright (c) 2009-2010, Poly2Tri Contributors
  * http://code.google.com/p/poly2tri/
@@ -1240,9 +1351,10 @@ module.exports = {
   ]
 };
 
-},{}],11:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 /**
  * Copyright (C) 2008 The Android Open Source Project
+ * https://developer.android.com/design/style/typography.html
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1651,111 +1763,6 @@ module.exports = {
       -0.24441621157369986, 0.15992356458474674, 0,
       -0.24441621157369986, 0.08880979626227155, 0
     ],
-  ]
-};
-
-},{}],12:[function(require,module,exports){
-/* jshint node: true */
-
-module.exports = {
-  // three contours with shared edges but no shared vertices
-  name: 'Shared Borders',
-  value: [
-    // anticlockwise
-    [
-      1, 3, 0,
-      -4, 3, 0,
-      -4, -3, 0,
-      1, -3, 0
-    ],
-    // anticlockwise
-    [
-      3, 1, 0,
-      1, 1, 0,
-      1, -2, 0
-    ],
-    // clockwise
-    [
-      0, 0, 0,
-      0, -3, 0,
-      -1, -3, 0,
-      -1, 0, 0
-    ],
-    // clockwise
-    [
-      -2, 3, 0,
-      -2, 0, 0,
-      // collinear vertex
-      0, 0, 0,
-      7 / 3, 0, 0,
-      5 / 3, -1, 0,
-      -3, -1, 0,
-      -3, 3, 0
-    ]
-  ]
-};
-
-},{}],13:[function(require,module,exports){
-/* jshint node: true */
-
-module.exports = {
-  // two triangles with a partially-shared edge
-  name: 'Shared-edge triangles',
-  value: [
-    // anticlockwise
-    [
-      0, 2, 0,
-      5, 2, 0,
-      2, 4, 0
-    ],
-    // clockwise
-    [
-      1, 2, 0,
-      7, 2, 0,
-      4, 0, 0
-    ]
-  ]
-};
-
-},{}],14:[function(require,module,exports){
-/* jshint node: true */
-
-module.exports = {
-  // two intersecting triangles with opposite winding
-  // first is anticlockwise, second is clockwise
-  name: 'Two Opposite Triangles',
-  value: [
-    [
-      1, -1, 0,
-      0, 1, 0,
-      -1, -1, 0
-    ],
-    [
-      1, 1, 0,
-      0, -1, 0,
-      -1, 1, 0
-    ]
-  ]
-};
-
-},{}],15:[function(require,module,exports){
-/* jshint node: true */
-
-module.exports = {
-  // two intersecting triangles
-  // both are anticlockwise (positive winding)
-  name: 'Two Triangles',
-  value: [
-    [
-      1, -1, 0,
-      0, 1, 0,
-      -1, -1, 0
-    ],
-    [
-      1, 1, 0,
-      -1, 1, 0,
-      0, -1, 0
-    ]
   ]
 };
 

@@ -23,11 +23,17 @@ var createPlaneRotation = common.createPlaneRotation;
 
 var basetess = require('./expectations/libtess.baseline.js');
 
+// geometry tests are both here and in third_party
 var rfolder = require('./rfolder.js');
 var geometryFiles = rfolder('./geometry');
 var geometries = Object.keys(geometryFiles).map(function(filename) {
   return geometryFiles[filename];
 });
+var thirdPartyFiles = rfolder('../third_party/test/geometry');
+var thirdPartyGeometries = Object.keys(thirdPartyFiles).map(function(filename) {
+  return thirdPartyFiles[filename];
+});
+geometries.push.apply(geometries, thirdPartyGeometries);
 
 /**
  * Enumeration of supported winding rules.
