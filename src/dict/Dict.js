@@ -158,10 +158,12 @@ libtess.Dict.prototype.getMin = function() {
   return this.head.next;
 };
 
-
+// NOTE(bckenny): libtess.Dict.getMax isn't called within libtess and isn't part
+// of the public API. For now, leaving in but ignoring for coverage.
+/* istanbul ignore next */
 /**
- * [getMax description]
- * @return {libtess.DictNode} [description].
+ * Returns the node with the greatest key.
+ * @return {libtess.DictNode}
  */
 libtess.Dict.prototype.getMax = function() {
   // NOTE(bckenny): from a macro in dict.h/dict-list.h
