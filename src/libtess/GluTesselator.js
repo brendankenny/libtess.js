@@ -313,6 +313,8 @@ libtess.GluTesselator.prototype.gluTessProperty = function(which, value) {
       if (value < 0 || value > 1) {
         break;
       }
+      // TODO(bckenny): libtess doesn't support any tolerance but 0. This should
+      // reject any non-zero tolerance accordingly.
       this.relTolerance = /** @type {number} */(value);
       return;
 

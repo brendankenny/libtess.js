@@ -1140,10 +1140,16 @@ libtess.sweep.connectRightVertex_ = function(tess, regUp, eBottomLeft) {
 libtess.sweep.connectLeftDegenerate_ = function(tess, regUp, vEvent) {
   var e = regUp.eUp;
   if (libtess.geom.vertEq(e.org, vEvent)) {
+    // NOTE(bckenny): this code is unreachable but remains for a hypothetical
+    // future extension of libtess. See docs on libtess.sweep.TOLERANCE_NONZERO_
+    // for more information. Conditional on TOLERANCE_NONZERO_ to help Closure
+    // Compiler eliminate dead code.
     // e.org is an unprocessed vertex - just combine them, and wait
     // for e.org to be pulled from the queue
     libtess.assert(libtess.sweep.TOLERANCE_NONZERO_);
-    libtess.sweep.spliceMergeVertices_(tess, e, vEvent.anEdge);
+    if (libtess.sweep.TOLERANCE_NONZERO_) {
+      libtess.sweep.spliceMergeVertices_(tess, e, vEvent.anEdge);
+    }
     return;
   }
 
@@ -1164,34 +1170,41 @@ libtess.sweep.connectLeftDegenerate_ = function(tess, regUp, vEvent) {
     return;
   }
 
+  // NOTE(bckenny): this code is unreachable but remains for a hypothetical
+  // future extension of libtess. See docs on libtess.sweep.TOLERANCE_NONZERO_
+  // for more information. Conditional on TOLERANCE_NONZERO_ to help Closure
+  // Compiler eliminate dead code.
   // vEvent coincides with e.dst(), which has already been processed.
   // Splice in the additional right-going edges.
-  libtess.assert(libtess.sweep.TOLERANCE_NONZERO_); // TODO(bckenny): are we supposed to not reach here?
-  regUp = libtess.sweep.topRightRegion_(regUp);
-  var reg = regUp.regionBelow();
-  var eTopRight = reg.eUp.sym;
-  var eTopLeft = eTopRight.oNext;
-  var eLast = eTopLeft;
+  libtess.assert(libtess.sweep.TOLERANCE_NONZERO_);
 
-  if (reg.fixUpperEdge) {
-    // Here e.dst() has only a single fixable edge going right.
-    // We can delete it since now we have some real right-going edges.
+  if (libtess.sweep.TOLERANCE_NONZERO_) {
+    regUp = libtess.sweep.topRightRegion_(regUp);
+    var reg = regUp.regionBelow();
+    var eTopRight = reg.eUp.sym;
+    var eTopLeft = eTopRight.oNext;
+    var eLast = eTopLeft;
 
-    // there are some left edges too
-    libtess.assert(eTopLeft !== eTopRight);
-    libtess.sweep.deleteRegion_(tess, reg); // TODO(bckenny): something to null?
-    libtess.mesh.deleteEdge(eTopRight);
-    eTopRight = eTopLeft.oPrev();
+    if (reg.fixUpperEdge) {
+      // Here e.dst() has only a single fixable edge going right.
+      // We can delete it since now we have some real right-going edges.
+
+      // there are some left edges too
+      libtess.assert(eTopLeft !== eTopRight);
+      libtess.sweep.deleteRegion_(tess, reg); // TODO(bckenny): something to null?
+      libtess.mesh.deleteEdge(eTopRight);
+      eTopRight = eTopLeft.oPrev();
+    }
+
+    libtess.mesh.meshSplice(vEvent.anEdge, eTopRight);
+    if (!libtess.geom.edgeGoesLeft(eTopLeft)) {
+      // e.dst() had no left-going edges -- indicate this to addRightEdges()
+      eTopLeft = null;
+    }
+
+    libtess.sweep.addRightEdges_(tess, regUp, eTopRight.oNext, eLast, eTopLeft,
+        true);
   }
-
-  libtess.mesh.meshSplice(vEvent.anEdge, eTopRight);
-  if (!libtess.geom.edgeGoesLeft(eTopLeft)) {
-    // e.dst() had no left-going edges -- indicate this to addRightEdges()
-    eTopLeft = null;
-  }
-
-  libtess.sweep.addRightEdges_(tess, regUp, eTopRight.oNext, eLast, eTopLeft,
-      true);
 };
 
 
