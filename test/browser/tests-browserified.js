@@ -213,6 +213,26 @@ suite('Explicit Error States', function() {
           'GLU_TESS_MISSING_BEGIN_POLYGON',
           'did not throw GLU_TESS_MISSING_BEGIN_POLYGON');
     });
+    test('should recover if error caught', function() {
+      var tess = createTessellator(libtess);
+
+      // overwrite error handler
+      var errorValue = -1;
+      var errorHandler = function missingBeginPolygonHandler(errorNumber) {
+        errorValue = errorNumber;
+      };
+      tess.gluTessCallback(libtess.gluEnum.GLU_TESS_ERROR, errorHandler);
+
+      tess.gluTessBeginContour();
+
+      // test that error was correctly generated
+      assert.strictEqual(errorValue,
+          libtess.errorType.GLU_TESS_MISSING_BEGIN_POLYGON,
+          'did not throw GLU_TESS_MISSING_BEGIN_POLYGON');
+
+      // test that tess has recovered and data entry can proceed
+      assert.doesNotThrow(tess.gluTessEndContour.bind(tess));
+    });
   });
 
   // from the original README:
@@ -303,6 +323,13 @@ suite('Explicit Error States', function() {
       var coords = [contour[i], contour[i + 1], contour[i + 2]];
       tess.gluTessVertex(coords, coords);
     }
+    tess.gluTessEndContour();
+
+    // the mesh isn't created until the cache is emptied, so add a dummy contour
+    // to force it to empty (see internal comment in gluTessBeginContour) to
+    // fully cover libtess.GluTesselator.makeDormant_
+    tess.gluTessBeginContour();
+    tess.gluTessVertex([0, 0, 0], [0, 0, 0]);
     tess.gluTessEndContour();
 
     test('should throw if next polygon begun without calling it', function() {
