@@ -604,77 +604,10 @@ var thirdPartyGeometries = Object.keys(thirdPartyFiles).map(function(filename) {
 });
 geometries.push.apply(geometries, thirdPartyGeometries);
 
-/**
- * Enumeration of supported winding rules.
- * @private {!Array.<{name: string, value: boolean}>}
- * @const
- */
-var WINDING_RULES = Object.keys(libtess.windingRule).map(
-  function(windingRuleName) {
-    return {
-      name: windingRuleName.substring(9),
-      value: libtess.windingRule[windingRuleName]
-    };
-  });
-
-/**
- * Set of normals for planes in which to test tessellation.
- * @private {!Array.<{name: string, value: !Array.<number>}>}
- * @const
- */
-var NORMALS = [
-  {
-    name: 'xyPlane',
-    value: [0, 0, 1],
-  },
-  {
-    name: 'xzPlane',
-    value: [0, 1, 0],
-  },
-  {
-    name: 'yzPlane',
-    value: [1, 0, 0]
-  },
-  {
-    name: 'tiltedPlane',
-    value: [Math.SQRT1_2, Math.SQRT1_2, 0]
-  }
-  // TODO(bckenny): make this transformations instead, so we can test more than
-  // just rotations about the origin
-];
-
-/**
- * Whether to provide a normal to libtess or make it compute one.
- * @private {!Array.<{name: string, value: boolean}>}
- * @const
- */
-var PROVIDE_NORMALS = [
-  {
-    name: 'explicitNormal',
-    value: true
-  },
-  {
-    name: 'computedNormal',
-    value: false
-  }
-];
-
-/**
- * Tessellation output types.
- * @private {!Array.<{name: string, value: boolean}>}
- * @const
- */
-var OUTPUT_TYPES = [
-  {
-    name: 'triangulation',
-    value: false
-  },
-  {
-    name: 'boundaries',
-    value: true
-  }
-  // TODO(bckenny): check mesh as well?
-];
+var OUTPUT_TYPES = common.OUTPUT_TYPES;
+var PROVIDE_NORMALS = common.PROVIDE_NORMALS;
+var NORMALS = common.NORMALS;
+var WINDING_RULES = common.WINDING_RULES;
 
 suite('Geometry tests', function() {
   for (var i = 0; i < geometries.length; i++) {
@@ -845,6 +778,65 @@ var OUTPUT_TYPES_ = [
     value: true
   }
 ];
+exports.OUTPUT_TYPES = OUTPUT_TYPES_;
+
+/**
+ * Whether to provide a normal to libtess or make it compute one.
+ * @private {!Array.<{name: string, value: boolean}>}
+ * @const
+ */
+var PROVIDE_NORMALS_ = [
+  {
+    name: 'explicitNormal',
+    value: true
+  },
+  {
+    name: 'computedNormal',
+    value: false
+  }
+];
+exports.PROVIDE_NORMALS = PROVIDE_NORMALS_;
+
+/**
+ * Set of normals for planes in which to test tessellation.
+ * @private {!Array.<{name: string, value: !Array.<number>}>}
+ * @const
+ */
+var NORMALS_ = [
+  {
+    name: 'xyPlane',
+    value: [0, 0, 1],
+  },
+  {
+    name: 'xzPlane',
+    value: [0, 1, 0],
+  },
+  {
+    name: 'yzPlane',
+    value: [1, 0, 0]
+  },
+  {
+    name: 'tiltedPlane',
+    value: [Math.SQRT1_2, Math.SQRT1_2, 0]
+  }
+  // TODO(bckenny): make this transformations instead, so we can test more than
+  // just rotations about the origin
+];
+exports.NORMALS = NORMALS_;
+
+/**
+ * Enumeration of supported winding rules.
+ * @private {!Array.<{name: string, value: boolean}>}
+ * @const
+ */
+var WINDING_RULES_ = Object.keys(exports.libtess.windingRule).map(
+  function(windingRuleName) {
+    return {
+      name: windingRuleName.substring(9),
+      value: exports.libtess.windingRule[windingRuleName]
+    };
+  });
+exports.WINDING_RULES = WINDING_RULES_;
 
 /**
  * Creates a tessellator instance from the injected libtess implementation,
