@@ -26,7 +26,8 @@ var LINT_SRC = LIBTESS_SRC.concat([
   './{build,examples,test,third_party}/**/*.{js,html}',
   '!./build/externs/*',
   '!./test/browser/tests-browserified.js',
-  '!./test/expectations/*'
+  '!./test/expectations/*',
+  '!./third_party/node_modules/**'
 ]);
 
 gulp.task('build-cat', function() {
@@ -71,7 +72,18 @@ gulp.task('build-min', function() {
     .pipe(gulp.dest('.'));
 });
 
-gulp.task('browserify-tests', function() {
+// copy latest mocha and chai over to third_party for distribution for live
+// testing on gh-pages
+gulp.task('dist-test-libs', function() {
+  return gulp.src([
+    'node_modules/mocha/mocha.{css,js}',
+    'node_modules/mocha/LICENSE',
+    'node_modules/chai/{chai.js,README.md}',
+  ], {base: './'})
+    .pipe(gulp.dest('./third_party'));
+});
+
+gulp.task('browserify-tests', ['dist-test-libs'], function() {
   return browserify(glob.sync('./test/*.test.js'))
     // custom chai and libtess injected on page (for e.g. debug libtess)
     // TODO(bckenny): is there a less-dumb way of doing this?
