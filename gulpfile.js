@@ -83,7 +83,7 @@ gulp.task('dist-test-libs', function() {
     .pipe(gulp.dest('./third_party'));
 });
 
-gulp.task('browserify-tests', ['dist-test-libs'], function() {
+gulp.task('browserify-tests', function() {
   return browserify(glob.sync('./test/*.test.js'))
     // custom chai and libtess injected on page (for e.g. debug libtess)
     // TODO(bckenny): is there a less-dumb way of doing this?
@@ -110,7 +110,12 @@ gulp.task('browserify-tests', ['dist-test-libs'], function() {
 });
 
 // TODO(bckenny): more incremental
-gulp.task('build', ['build-cat', 'build-min', 'browserify-tests']);
+gulp.task('build', [
+  'build-cat',
+  'build-min',
+  'browserify-tests',
+  'dist-test-libs'
+]);
 
 gulp.task('lint', ['build'], function() {
   return gulp.src(LINT_SRC)
