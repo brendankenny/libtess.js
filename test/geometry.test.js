@@ -19,7 +19,7 @@ var assert = chai.assert;
 var common = require('./common.js');
 var libtess = common.libtess;
 var createTessellator = common.createInstrumentedTessellator;
-var createPlaneRotation = common.createPlaneRotation;
+var tessellate = common.tessellate;
 
 var basetess = require('./expectations/libtess.baseline.js');
 
@@ -36,7 +36,7 @@ var thirdPartyGeometries = Object.keys(thirdPartyFiles).map(function(filename) {
 geometries.push.apply(geometries, thirdPartyGeometries);
 
 var OUTPUT_TYPES = common.OUTPUT_TYPES;
-var PROVIDE_NORMALS = common.PROVIDE_NORMALS;
+var PROVIDE_NORMAL = common.PROVIDE_NORMAL;
 var NORMALS = common.NORMALS;
 var WINDING_RULES = common.WINDING_RULES;
 
@@ -57,7 +57,7 @@ function testGeometry(geometry) {
     OUTPUT_TYPES.forEach(function(outputType) {
       suite(outputType.name, function() {
 
-        PROVIDE_NORMALS.forEach(function(provideNormal) {
+        PROVIDE_NORMAL.forEach(function(provideNormal) {
           suite('using ' + provideNormal.name, function() {
 
             NORMALS.forEach(function(normal) {
@@ -91,48 +91,4 @@ function testGeometry(geometry) {
       });
     });
   });
-}
-
-/**
- * Tessellate the polygon made up of contours with the tessellator tess, using
- * the specified options.
- * @param {!libtess.GluTesselator} tess
- * @param {!Array.<!Array.<number>>} contours
- * @param {{name: string, value: boolean}} outputType
- * @param {{name: string, value: boolean}} provideNormal
- * @param {{name: string, value: !Array.<number>}} normal
- * @param {{name: string, value: boolean}} windingRule
- * @return {!Array.<!Array.<number>>}
- */
-function tessellate(tess, contours, outputType, provideNormal, normal,
-    windingRule) {
-
-  // winding rule
-  tess.gluTessProperty(libtess.gluEnum.GLU_TESS_WINDING_RULE,
-      windingRule.value);
-
-  // transform function to align plane with desired normal
-  var rotate = createPlaneRotation(normal.value);
-
-  // provide normal or compute
-  if (provideNormal.value) {
-    tess.gluTessNormal.apply(tess, normal.value);
-  }
-
-  var resultVerts = [];
-  tess.gluTessBeginPolygon(resultVerts);
-
-  for (var i = 0; i < contours.length; i++) {
-    tess.gluTessBeginContour();
-    var contour = contours[i];
-    for (var j = 0; j < contour.length; j += 3) {
-      var coords = rotate(contour[j], contour[j + 1], contour[j + 2]);
-      tess.gluTessVertex(coords, coords);
-    }
-    tess.gluTessEndContour();
-  }
-
-  tess.gluTessEndPolygon();
-
-  return resultVerts;
 }

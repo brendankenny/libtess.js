@@ -74,7 +74,7 @@ exports.OUTPUT_TYPES = OUTPUT_TYPES_;
  * @private {!Array.<{name: string, value: boolean}>}
  * @const
  */
-var PROVIDE_NORMALS_ = [
+var PROVIDE_NORMAL_ = [
   {
     name: 'explicitNormal',
     value: true
@@ -84,7 +84,7 @@ var PROVIDE_NORMALS_ = [
     value: false
   }
 ];
-exports.PROVIDE_NORMALS = PROVIDE_NORMALS_;
+exports.PROVIDE_NORMAL = PROVIDE_NORMAL_;
 
 /**
  * Set of normals for planes in which to test tessellation.
@@ -197,6 +197,50 @@ exports.createInstrumentedTessellator = function(libtess, opt_outputType) {
       outputType.value);
 
   return tess;
+};
+
+/**
+ * Tessellate the polygon made up of contours with the tessellator tess, using
+ * the specified options.
+ * @param {!libtess.GluTesselator} tess
+ * @param {!Array.<!Array.<number>>} contours
+ * @param {{name: string, value: boolean}} outputType
+ * @param {{name: string, value: boolean}} provideNormal
+ * @param {{name: string, value: !Array.<number>}} normal
+ * @param {{name: string, value: boolean}} windingRule
+ * @return {!Array.<!Array.<number>>}
+ */
+exports.tessellate = function(tess, contours, outputType, provideNormal, normal,
+    windingRule) {
+
+  // winding rule
+  tess.gluTessProperty(exports.libtess.gluEnum.GLU_TESS_WINDING_RULE,
+      windingRule.value);
+
+  // transform function to align plane with desired normal
+  var rotate = exports.createPlaneRotation(normal.value);
+
+  // provide normal or compute
+  if (provideNormal.value) {
+    tess.gluTessNormal.apply(tess, normal.value);
+  }
+
+  var resultVerts = [];
+  tess.gluTessBeginPolygon(resultVerts);
+
+  for (var i = 0; i < contours.length; i++) {
+    tess.gluTessBeginContour();
+    var contour = contours[i];
+    for (var j = 0; j < contour.length; j += 3) {
+      var coords = rotate(contour[j], contour[j + 1], contour[j + 2]);
+      tess.gluTessVertex(coords, coords);
+    }
+    tess.gluTessEndContour();
+  }
+
+  tess.gluTessEndPolygon();
+
+  return resultVerts;
 };
 
 /**
