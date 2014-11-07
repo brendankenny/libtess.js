@@ -1,0 +1,50 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Expectations Viewer</title>
+    <style>
+      svg {
+        width: 500px;
+        height: 500px;
+        border: 1px solid red;
+      }
+      #input-contours path {
+        stroke: black;
+        stroke-width: 4;
+        stroke-linejoin: miter;
+        fill: none;
+      }
+      #input-contours path:hover {
+        stroke-width: 6;
+      }
+    </style>
+
+    <script src="../../third_party/node_modules/chai/chai.js"></script>
+    <script src="../../libtess.min.js"></script>
+    <script src="expectations-viewer-browserified.js"></script>
+    <script>
+
+    </script>
+  </head>
+  <body>
+    <section>
+      <label for="test-geometry">Test Geometry:</label>
+      <select id="test-geometry"></select>
+    </section>
+    <section>
+      <label for="output-types">Output Type:</label>
+      <select id="output-types"></select>
+    </section>
+    <section>
+      <label for="provide-normal">Provide Normal:</label>
+      <select id="provide-normal"></select>
+    </section>
+    <section>
+      <label for="winding-rule">Winding Rule:</label>
+      <select id="winding-rule"></select>
+    </section>
+
+    <svg id="input-contours"></svg>
+  </body>
+</html>
