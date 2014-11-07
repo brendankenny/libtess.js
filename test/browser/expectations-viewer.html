@@ -3,20 +3,31 @@
   <head>
     <meta charset="utf-8">
     <title>Expectations Viewer</title>
+    <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
     <style>
+      html {
+        font-family: 'Roboto', sans-serif;
+      }
       svg {
         width: 500px;
         height: 500px;
-        border: 1px solid red;
+        stroke-linejoin: bevel;
+        stroke: black;
+        background-color: #dfd8c6;
       }
       #input-contours path {
-        stroke: black;
-        stroke-width: 4;
-        stroke-linejoin: miter;
+        stroke-width: 1;
         fill: none;
       }
       #input-contours path:hover {
-        stroke-width: 6;
+        stroke-width: 2;
+      }
+      .output {
+        stroke-width: 1;
+        fill: #99a994;
+      }
+      .output path:hover {
+        
       }
     </style>
 
@@ -46,5 +57,9 @@
     </section>
 
     <svg id="input-contours"></svg>
+    <section>
+      <svg id="output-result" class="output"></svg>
+      <svg id="output-expectation" class="output"></svg>
+    </section>
   </body>
 </html>
