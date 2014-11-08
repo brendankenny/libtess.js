@@ -140,6 +140,15 @@ function update() {
   }
 }
 
+/**
+ * Draw triangulation results to the supplied svgCanvas with the specified
+ * transformation.
+ * @param {!SVGElement} svgCanvas
+ * @param {!Array<!Array<number>>} results
+ * @param {number} scale
+ * @param {number} dX
+ * @param {number} dY
+ */
 function drawTriangleResults(svgCanvas, results, scale, dX, dY) {
   // clear current content
   while (svgCanvas.firstChild) {

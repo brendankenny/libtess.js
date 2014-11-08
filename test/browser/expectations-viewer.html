@@ -8,9 +8,18 @@
       html {
         font-family: 'Roboto', sans-serif;
       }
-      svg {
+      .viewer {
         width: 500px;
         height: 500px;
+        display: inline-block;
+      }
+      .viewer span {
+        position: absolute;
+        text-shadow: 0 0 8px #dfd8c6, 0 0 4px #dfd8c6, 0 0 2px #dfd8c6, 0 0 1px #dfd8c6;
+      }
+      svg {
+        width: 100%;
+        height: 100%;
         stroke-linejoin: bevel;
         stroke: black;
         background-color: #dfd8c6;
@@ -25,9 +34,6 @@
       .output {
         stroke-width: 1;
         fill: #99a994;
-      }
-      .output path:hover {
-        
       }
     </style>
 
@@ -56,10 +62,19 @@
       <select id="winding-rule"></select>
     </section>
 
-    <svg id="input-contours"></svg>
+    <div class="viewer">
+      <span>Input Contours</span>
+      <svg id="input-contours"></svg>
+    </div>
     <section>
-      <svg id="output-result" class="output"></svg>
-      <svg id="output-expectation" class="output"></svg>
+      <div class="viewer">
+        <span>Output</span>
+        <svg id="output-result" class="output"></svg>
+      </div>
+      <div class="viewer">
+        <span>Expectation</span>
+        <svg id="output-expectation" class="output"></svg>
+      </div>
     </section>
   </body>
 </html>
