@@ -95,7 +95,7 @@ function update() {
   // size.
   var contoursSize = Math.max(bounds.maxX - bounds.minX,
       bounds.maxY - bounds.minY) * (1 + VIEW_BOUNDS_EXCESS);
-  var scale = inputSvg.offsetWidth / contoursSize;
+  var scale = inputSvg.getBoundingClientRect().width / contoursSize;
   var dX = -scale * (bounds.minX + bounds.maxX - contoursSize) / 2;
   var dY = scale * (bounds.minY + bounds.maxY + contoursSize) / 2;
 
