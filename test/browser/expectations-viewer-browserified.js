@@ -6,584 +6,7 @@ module.exports = window.libtess;
 
 },{}],1:[function(require,module,exports){
 /* jshint node: true */
-/* global suite, test */
 'use strict';
-
-/**
- * Basic tests of the API.
- */
-
-var chai = require('chai');
-var assert = chai.assert;
-
-var common = require('./common.js');
-var libtess = common.libtess;
-var createTessellator = common.createInstrumentedTessellator;
-
-suite('Basic Tests', function() {
-  suite('Getting and Setting Properties', function() {
-    // NOTE(bckenny): libtess doesn't actually do anything with this value
-    test('GLU_TESS_TOLERANCE settable and gettable', function() {
-      var tess = createTessellator(libtess);
-      var tolerance = 0.5;
-      tess.gluTessProperty(libtess.gluEnum.GLU_TESS_TOLERANCE, tolerance);
-      var gotTolerance =
-          tess.gluGetTessProperty(libtess.gluEnum.GLU_TESS_TOLERANCE);
-
-      assert.strictEqual(gotTolerance, tolerance,
-          'GLU_TESS_TOLERANCE did not round trip correctly');
-    });
-    test('GLU_TESS_WINDING_RULE settable and gettable', function() {
-      var tess = createTessellator(libtess);
-      var windingRule = libtess.windingRule.GLU_TESS_WINDING_ABS_GEQ_TWO;
-      tess.gluTessProperty(libtess.gluEnum.GLU_TESS_WINDING_RULE, windingRule);
-      var gotWindingRule =
-          tess.gluGetTessProperty(libtess.gluEnum.GLU_TESS_WINDING_RULE);
-
-      assert.strictEqual(gotWindingRule, windingRule,
-          'GLU_TESS_WINDING_RULE did not round trip correctly');
-    });
-    test('GLU_TESS_BOUNDARY_ONLY settable and gettable', function() {
-      var tess = createTessellator(libtess);
-
-      var boundaryOnly = true;
-      for (var i = 0; i < 2; i++) {
-        tess.gluTessProperty(libtess.gluEnum.GLU_TESS_BOUNDARY_ONLY,
-            boundaryOnly);
-        var gotBoundaryOnly =
-            tess.gluGetTessProperty(libtess.gluEnum.GLU_TESS_BOUNDARY_ONLY);
-        assert.strictEqual(gotBoundaryOnly, boundaryOnly,
-            'GLU_TESS_BOUNDARY_ONLY did not round trip correctly');
-        boundaryOnly = !boundaryOnly;
-      }
-    });
-    test('GLU_TESS_MESH callback returns something', function() {
-      // TODO(bckenny): returned mesh is useless in minified form. Decide if
-      // external mesh interface is worthwhile (can test with checkMesh) or if
-      // it should just be hidden within
-      var tess = createTessellator(libtess);
-      var meshCallbackCalled = false;
-      tess.gluTessCallback(libtess.gluEnum.GLU_TESS_MESH,
-          function meshCallback(mesh) {
-            meshCallbackCalled = true;
-            assert.isObject(mesh,
-                'GLU_TESS_MESH callback did not return an object');
-          });
-
-      var resultVerts = [];
-      tess.gluTessBeginPolygon(resultVerts);
-      tess.gluTessBeginContour();
-      tess.gluTessVertex([1, 0, 0], [1, 0, 0]);
-      tess.gluTessVertex([0, 1, 0], [0, 1, 0]);
-      tess.gluTessVertex([0, 0, 0], [0, 0, 0]);
-      tess.gluTessEndContour();
-      tess.gluTessEndPolygon();
-
-      assert.deepEqual(resultVerts, [[1, 0, 0, 0, 1, 0, 0, 0, 0]],
-          'triangle was not tessellated to itself in GLU_TESS_MESH test');
-      assert.isTrue(meshCallbackCalled,
-          'GLU_TESS_MESH callback was not called');
-    });
-  });
-
-  suite('Basic Geometry', function() {
-    test('a single point should return an empty result', function() {
-      var tess = createTessellator(libtess);
-
-      var resultVerts = [];
-      tess.gluTessBeginPolygon(resultVerts);
-      tess.gluTessBeginContour();
-      tess.gluTessVertex([1, 0, 0], [1, 0, 0]);
-      tess.gluTessEndContour();
-      tess.gluTessEndPolygon();
-
-      assert.deepEqual(resultVerts, [], 'single point resulted in geometry');
-    });
-    test('two points should return an empty result', function() {
-      var tess = createTessellator(libtess);
-
-      var resultVerts = [];
-      tess.gluTessBeginPolygon(resultVerts);
-      tess.gluTessBeginContour();
-      tess.gluTessVertex([1, 0, 0], [1, 0, 0]);
-      tess.gluTessVertex([0, 1, 0], [0, 1, 0]);
-      tess.gluTessEndContour();
-      tess.gluTessEndPolygon();
-
-      assert.deepEqual(resultVerts, [], 'two points resulted in geometry');
-    });
-    test('three distinct points should result in itself', function() {
-      var tess = createTessellator(libtess);
-
-      var resultVerts = [];
-      tess.gluTessBeginPolygon(resultVerts);
-      tess.gluTessBeginContour();
-      tess.gluTessVertex([1, 0, 0], [1, 0, 0]);
-      tess.gluTessVertex([0, 1, 0], [0, 1, 0]);
-      tess.gluTessVertex([0, 0, 0], [0, 0, 0]);
-      tess.gluTessEndContour();
-      tess.gluTessEndPolygon();
-
-      assert.deepEqual(resultVerts, [[1, 0, 0, 0, 1, 0, 0, 0, 0]],
-          'triangle was not tessellated to itself');
-    });
-  });
-
-  suite('Degenerate Geometry', function() {
-    test('triangle with collapsed edge should return empty result', function() {
-      var tess = createTessellator(libtess);
-
-      var resultVerts = [];
-      tess.gluTessBeginPolygon(resultVerts);
-      tess.gluTessBeginContour();
-      tess.gluTessVertex([1, 0, 0], [1, 0, 0]);
-      tess.gluTessVertex([0, 1, 0], [0, 1, 0]);
-      tess.gluTessVertex([0, 1, 0], [0, 1, 0]);
-      tess.gluTessEndContour();
-      tess.gluTessEndPolygon();
-
-      assert.deepEqual(resultVerts, [],
-          'degenerate triangle resulted in geometry');
-    });
-    test('triangle collapsed to point should return empty result', function() {
-      var tess = createTessellator(libtess);
-
-      var resultVerts = [];
-      tess.gluTessBeginPolygon(resultVerts);
-      tess.gluTessBeginContour();
-      tess.gluTessVertex([1, 0, 0], [1, 0, 0]);
-      tess.gluTessVertex([1, 0, 0], [1, 0, 0]);
-      tess.gluTessVertex([1, 0, 0], [1, 0, 0]);
-      tess.gluTessEndContour();
-      tess.gluTessEndPolygon();
-
-      assert.deepEqual(resultVerts, [],
-          'degenerate triangle resulted in geometry');
-    });
-  });
-});
-
-},{"./common.js":5,"chai":undefined}],2:[function(require,module,exports){
-/* jshint node: true */
-/* global suite, test */
-'use strict';
-
-var chai = require('chai');
-var assert = chai.assert;
-
-var common = require('./common.js');
-var libtess = common.libtess;
-var createTessellator = common.createInstrumentedTessellator;
-var hourglass = require('./geometry/hourglass.js');
-
-/**
- * The result of triangulating hourglass with the default options.
- * @private {!Array.Array.<number>}
- * @const
- */
-var HOURGLASS_RESULT_ = [
-  [1, 1, 0, 0, 0, 0, -1, 1, 0, 1, -1, 0, -1, -1, 0, 0, 0, 0]
-];
-
-suite('Explicit Error States', function() {
-  var contour = hourglass.value[0];
-
-  suite('GLU_TESS_MISSING_BEGIN_POLYGON', function() {
-    test('should throw when gluTessBeginContour called without it', function() {
-      var tess = createTessellator(libtess);
-      assert.throw(tess.gluTessBeginContour.bind(tess),
-          'GLU_TESS_MISSING_BEGIN_POLYGON',
-          'did not throw GLU_TESS_MISSING_BEGIN_POLYGON');
-    });
-    test('should throw when gluTessVertex called without it', function() {
-      var tess = createTessellator(libtess);
-      assert.throw(tess.gluTessVertex.bind(tess, [0, 0, 1], [0, 0, 1]),
-          'GLU_TESS_MISSING_BEGIN_POLYGON',
-          'did not throw GLU_TESS_MISSING_BEGIN_POLYGON');
-    });
-    test('should throw when gluTessEndContour called without it', function() {
-      var tess = createTessellator(libtess);
-      assert.throw(tess.gluTessEndContour.bind(tess),
-          'GLU_TESS_MISSING_BEGIN_POLYGON',
-          'did not throw GLU_TESS_MISSING_BEGIN_POLYGON');
-    });
-    test('should throw when gluTessEndPolygon called without it', function() {
-      var tess = createTessellator(libtess);
-      assert.throw(tess.gluTessEndPolygon.bind(tess),
-          'GLU_TESS_MISSING_BEGIN_POLYGON',
-          'did not throw GLU_TESS_MISSING_BEGIN_POLYGON');
-    });
-    test('should recover if error caught', function() {
-      var tess = createTessellator(libtess);
-
-      // overwrite error handler
-      var errorValue = -1;
-      var errorHandler = function missingBeginPolygonHandler(errorNumber) {
-        errorValue = errorNumber;
-      };
-      tess.gluTessCallback(libtess.gluEnum.GLU_TESS_ERROR, errorHandler);
-
-      tess.gluTessBeginContour();
-
-      // test that error was correctly generated
-      assert.strictEqual(errorValue,
-          libtess.errorType.GLU_TESS_MISSING_BEGIN_POLYGON,
-          'did not throw GLU_TESS_MISSING_BEGIN_POLYGON');
-
-      // test that tess has recovered and data entry can proceed
-      assert.doesNotThrow(tess.gluTessEndContour.bind(tess));
-    });
-  });
-
-  // from the original README:
-  // The interface recovers from these errors by inserting the missing call(s).
-
-  suite('GLU_TESS_MISSING_BEGIN_CONTOUR', function() {
-    var resultVerts = [];
-    var tess = createTessellator(libtess);
-
-    // overwrite error handler
-    var errorValue = -1;
-    var errorHandler = function missingBeginContourHandler(errorNumber) {
-      errorValue = errorNumber;
-    };
-    tess.gluTessCallback(libtess.gluEnum.GLU_TESS_ERROR, errorHandler);
-
-    test('should throw when gluTessVertex called without it', function() {
-      tess.gluTessBeginPolygon(resultVerts);
-      var coords = [contour[0], contour[1], contour[2]];
-      tess.gluTessVertex(coords, coords);
-      assert.strictEqual(errorValue,
-          libtess.errorType.GLU_TESS_MISSING_BEGIN_CONTOUR,
-          'did not throw GLU_TESS_MISSING_BEGIN_CONTOUR');
-    });
-    test('tessellator should recover and produce a correct result', function() {
-      for (var i = 3; i < contour.length; i += 3) {
-        var coords = [contour[i], contour[i + 1], contour[i + 2]];
-        tess.gluTessVertex(coords, coords);
-      }
-      tess.gluTessEndContour();
-      tess.gluTessEndPolygon();
-      assert.deepEqual(resultVerts, HOURGLASS_RESULT_,
-          'tessellation incorrect after GLU_TESS_MISSING_BEGIN_CONTOUR error');
-    });
-    test('should throw when gluTessEndContour called without it', function() {
-      var tess = createTessellator(libtess);
-      tess.gluTessBeginPolygon(resultVerts);
-      assert.throw(tess.gluTessEndContour.bind(tess),
-          'GLU_TESS_MISSING_BEGIN_CONTOUR',
-          'did not throw GLU_TESS_MISSING_BEGIN_CONTOUR');
-    });
-  });
-
-  suite('GLU_TESS_MISSING_END_CONTOUR', function() {
-    var resultVerts = [];
-    var tess = createTessellator(libtess);
-
-    // overwrite error handler
-    var errorValue = -1;
-    var errorHandler = function missingEndContourHandler(errorNumber) {
-      errorValue = errorNumber;
-    };
-    tess.gluTessCallback(libtess.gluEnum.GLU_TESS_ERROR, errorHandler);
-
-    test('should throw when gluTessEndPolygon called without it', function() {
-      tess.gluTessBeginPolygon(resultVerts);
-      tess.gluTessBeginContour();
-      for (var i = 0; i < contour.length; i += 3) {
-        var coords = [contour[i], contour[i + 1], contour[i + 2]];
-        tess.gluTessVertex(coords, coords);
-      }
-      tess.gluTessEndPolygon();
-      assert.strictEqual(errorValue,
-          libtess.errorType.GLU_TESS_MISSING_END_CONTOUR,
-          'did not throw GLU_TESS_MISSING_END_CONTOUR');
-    });
-    test('tessellator should recover and produce a correct result', function() {
-      assert.deepEqual(resultVerts, HOURGLASS_RESULT_,
-          'tessellation incorrect after GLU_TESS_MISSING_END_CONTOUR error');
-    });
-  });
-
-  suite('GLU_TESS_MISSING_END_POLYGON', function() {
-    var resultVerts = [];
-    var tess = createTessellator(libtess);
-
-    // overwrite error handler
-    var errorValue = -1;
-    var errorHandler = function missingEndPolygonHandler(errorNumber) {
-      errorValue = errorNumber;
-    };
-    tess.gluTessCallback(libtess.gluEnum.GLU_TESS_ERROR, errorHandler);
-
-    tess.gluTessBeginPolygon(resultVerts);
-
-    tess.gluTessBeginContour();
-    for (var i = 0; i < contour.length; i += 3) {
-      var coords = [contour[i], contour[i + 1], contour[i + 2]];
-      tess.gluTessVertex(coords, coords);
-    }
-    tess.gluTessEndContour();
-
-    // the mesh isn't created until the cache is emptied, so add a dummy contour
-    // to force it to empty (see internal comment in gluTessBeginContour) to
-    // fully cover libtess.GluTesselator.makeDormant_
-    tess.gluTessBeginContour();
-    tess.gluTessVertex([0, 0, 0], [0, 0, 0]);
-    tess.gluTessEndContour();
-
-    test('should throw if next polygon begun without calling it', function() {
-      tess.gluTessBeginPolygon();
-      assert.strictEqual(errorValue,
-          libtess.errorType.GLU_TESS_MISSING_END_POLYGON,
-          'did not throw GLU_TESS_MISSING_END_POLYGON');
-    });
-    // NOTE(bckenny): according to readme, libtess should recover and spit out
-    // the tessellated result. However, in tess.c, MakeDormant is called
-    // instead, deleting the mesh and resetting the tessellator
-    // (see http://cgit.freedesktop.org/mesa/glu/tree/src/libtess/tess.c#n180)
-    // test('tessellator should recover and produce a correct result', function() {
-    //   assert.deepEqual(resultVerts, HOURGLASS_RESULT_,
-    //       'tessellation incorrect after GLU_TESS_MISSING_END_POLYGON error');
-    // });
-  });
-
-  // from the readme:
-  // GLU_TESS_COORD_TOO_LARGE says that some vertex coordinate exceeded
-  // the predefined constant GLU_TESS_MAX_COORD in absolute value, and
-  // that the value has been clamped (Coordinate values must be small
-  // enough so that two can be multiplied together without overflow).
-  suite('GLU_TESS_COORD_TOO_LARGE', function() {
-    test('should throw if x coordinate is too large or small', function() {
-      var tess = createTessellator(libtess);
-      tess.gluTessBeginPolygon();
-      tess.gluTessBeginContour();
-
-      assert.throws(tess.gluTessVertex.bind(tess, [1e151, 0, 0]),
-          'GLU_TESS_COORD_TOO_LARGE', 'did not throw GLU_TESS_COORD_TOO_LARGE');
-
-      tess = createTessellator(libtess);
-      tess.gluTessBeginPolygon();
-      tess.gluTessBeginContour();
-
-      assert.throws(tess.gluTessVertex.bind(tess, [-1e151, 0, 0]),
-          'GLU_TESS_COORD_TOO_LARGE', 'did not throw GLU_TESS_COORD_TOO_LARGE');
-    });
-    test('should throw if y coordinate is too large or small', function() {
-      var tess = createTessellator(libtess);
-      tess.gluTessBeginPolygon();
-      tess.gluTessBeginContour();
-
-      assert.throws(tess.gluTessVertex.bind(tess, [0, 1e151, 0]),
-          'GLU_TESS_COORD_TOO_LARGE', 'did not throw GLU_TESS_COORD_TOO_LARGE');
-
-      tess = createTessellator(libtess);
-      tess.gluTessBeginPolygon();
-      tess.gluTessBeginContour();
-
-      assert.throws(tess.gluTessVertex.bind(tess, [0, -1e151, 0]),
-          'GLU_TESS_COORD_TOO_LARGE', 'did not throw GLU_TESS_COORD_TOO_LARGE');
-    });
-    test('should throw if z coordinate is too large or small', function() {
-      var tess = createTessellator(libtess);
-      tess.gluTessBeginPolygon();
-      tess.gluTessBeginContour();
-
-      assert.throws(tess.gluTessVertex.bind(tess, [0, 0, 1e151]),
-          'GLU_TESS_COORD_TOO_LARGE', 'did not throw GLU_TESS_COORD_TOO_LARGE');
-
-      tess = createTessellator(libtess);
-      tess.gluTessBeginPolygon();
-      tess.gluTessBeginContour();
-
-      assert.throws(tess.gluTessVertex.bind(tess, [0, 0, -1e151]),
-          'GLU_TESS_COORD_TOO_LARGE', 'did not throw GLU_TESS_COORD_TOO_LARGE');
-    });
-
-    test('should be clamped but too-large values should roundtrip', function() {
-      var tess = createTessellator(libtess);
-
-      // overwrite error handler
-      var errorValue = -1;
-      var errorHandler = function tooLargeHandler(errorNumber) {
-        errorValue = errorNumber;
-      };
-      tess.gluTessCallback(libtess.gluEnum.GLU_TESS_ERROR, errorHandler);
-
-      var tooLargeContour = [
-        1, 0, 1e151,
-        0, 1, -1e151,
-        0, 0, 1e151
-      ];
-      var resultVerts = [];
-
-      tess.gluTessBeginPolygon(resultVerts);
-      tess.gluTessBeginContour();
-      for (var i = 0; i < tooLargeContour.length; i += 3) {
-        var coords = [
-          tooLargeContour[i],
-          tooLargeContour[i + 1],
-          tooLargeContour[i + 2]
-        ];
-        tess.gluTessVertex(coords, coords);
-        assert.strictEqual(errorValue,
-            libtess.errorType.GLU_TESS_COORD_TOO_LARGE,
-            'did not throw GLU_TESS_COORD_TOO_LARGE');
-
-        // reset error state
-        errorValue = -1;
-      }
-      tess.gluTessEndContour();
-      tess.gluTessEndPolygon();
-
-      assert.deepEqual(resultVerts, [tooLargeContour],
-          'tessellation incorrect after GLU_TESS_COORD_TOO_LARGE error');
-    });
-  });
-
-  // from the readme:
-  // GLU_TESS_NEED_COMBINE_CALLBACK says that the algorithm detected an
-  // intersection between two edges in the input data, and the "combine"
-  // callback (below) was not provided. No output will be generated.
-  //
-  // This is the only error that can occur during tesselation and rendering.
-  suite('GLU_TESS_NEED_COMBINE_CALLBACK', function() {
-    var resultVerts = [];
-
-    test('should throw if no combine callback is provided', function() {
-      var tess = createTessellator(libtess);
-
-      // overwrite combine callback
-      tess.gluTessCallback(libtess.gluEnum.GLU_TESS_COMBINE, null);
-
-      // overwrite error handler
-      var errorValue = -1;
-      var errorHandler = function needCombineHandler(errorNumber) {
-        errorValue = errorNumber;
-      };
-      tess.gluTessCallback(libtess.gluEnum.GLU_TESS_ERROR, errorHandler);
-
-      tess.gluTessBeginPolygon(resultVerts);
-      tess.gluTessBeginContour();
-      for (var i = 0; i < contour.length; i += 3) {
-        var coords = [contour[i], contour[i + 1], contour[i + 2]];
-        tess.gluTessVertex(coords, coords);
-      }
-      tess.gluTessEndContour();
-
-      assert.strictEqual(errorValue, -1,
-          'no error should be thrown until tessellation time');
-
-      tess.gluTessEndPolygon();
-
-      assert.strictEqual(errorValue,
-          libtess.errorType.GLU_TESS_NEED_COMBINE_CALLBACK,
-          'no error should be thrown until tessellation time');
-    });
-
-    test('no output should be generated', function() {
-      assert.deepEqual(resultVerts, [], 'no output should be generated');
-    });
-  });
-
-  // not technically one of the main errors; possibly this should live in
-  // basics.test.js
-  suite('GLU_INVALID_ENUM', function() {
-    test('should throw on setting non-existent property', function() {
-      var tess = createTessellator(libtess);
-      assert.throw(tess.gluTessProperty.bind(tess,
-          libtess.gluEnum.GLU_TESS_MESH, 5), 'GLU_INVALID_ENUM',
-          'did not throw GLU_INVALID_ENUM');
-    });
-    test('should throw on getting non-existent property', function() {
-      var tess = createTessellator(libtess);
-      assert.throw(tess.gluGetTessProperty.bind(tess,
-          libtess.gluEnum.GLU_TESS_END), 'GLU_INVALID_ENUM',
-          'did not throw GLU_INVALID_ENUM');
-    });
-    test('should throw on setting non-existent callback', function() {
-      var tess = createTessellator(libtess);
-      assert.throw(tess.gluTessCallback.bind(tess,
-          libtess.gluEnum.GLU_TESS_TOLERANCE), 'GLU_INVALID_ENUM',
-          'did not throw GLU_INVALID_ENUM');
-    });
-  });
-
-  suite('GLU_INVALID_VALUE', function() {
-    test('should throw on out-of-range tolerance', function() {
-      var tess = createTessellator(libtess);
-      assert.throw(tess.gluTessProperty.bind(tess,
-          libtess.gluEnum.GLU_TESS_TOLERANCE, 1.1), 'GLU_INVALID_VALUE',
-          'did not throw GLU_INVALID_VALUE');
-      assert.throw(tess.gluTessProperty.bind(tess,
-          libtess.gluEnum.GLU_TESS_TOLERANCE, -0.1), 'GLU_INVALID_VALUE',
-          'did not throw GLU_INVALID_VALUE');
-    });
-    test('should throw on invalid winding room', function() {
-      var tess = createTessellator(libtess);
-      assert.throw(tess.gluTessProperty.bind(tess,
-          libtess.gluEnum.GLU_TESS_WINDING_RULE,
-          libtess.gluEnum.GLU_TESS_VERTEX_DATA), 'GLU_INVALID_VALUE',
-          'did not throw GLU_INVALID_VALUE');
-    });
-  });
-
-  // TODO(bckenny): These tests just show that the tessellator is properly
-  // indicating that it is being deleted while in the middle of building up
-  // contours, which makes little sense in the JavaScript port since
-  // gluDeleteTess doesn't actually delete anything (there's no memory that
-  // needs to be manually freed). If/when we change the public API, these tests
-  // will go along with gluDeleteTess.
-  suite('gluDeleteTess called while building polygon', function() {
-    test('GLU_TESS_MISSING_END_CONTOUR thrown while mid contour', function() {
-      var tess = createTessellator(libtess);
-
-      var resultVerts = [];
-      tess.gluTessBeginPolygon(resultVerts);
-      tess.gluTessBeginContour();
-      tess.gluTessVertex([1, 0, 0], [1, 0, 0]);
-
-      assert.throw(tess.gluDeleteTess.bind(tess),
-          'GLU_TESS_MISSING_END_CONTOUR',
-          'did not throw GLU_TESS_MISSING_END_CONTOUR');
-    });
-    test('GLU_TESS_MISSING_END_POLYGON thrown between contours', function() {
-      var tess = createTessellator(libtess);
-
-      var resultVerts = [];
-      tess.gluTessBeginPolygon(resultVerts);
-      tess.gluTessBeginContour();
-      tess.gluTessVertex([1, 0, 0], [1, 0, 0]);
-      tess.gluTessVertex([0, 1, 0], [0, 1, 0]);
-      tess.gluTessVertex([0, 0, 0], [0, 0, 0]);
-      tess.gluTessEndContour();
-
-      assert.throw(tess.gluDeleteTess.bind(tess),
-          'GLU_TESS_MISSING_END_POLYGON',
-          'did not throw GLU_TESS_MISSING_END_POLYGON');
-    });
-
-  });
-});
-
-},{"./common.js":5,"./geometry/hourglass.js":8,"chai":undefined}],3:[function(require,module,exports){
-/* jshint node: true */
-/* global suite, test */
-'use strict';
-
-/**
- * @fileoverview The tests run by this file generally compare the triangles
- * generated by the current version of libtess against a known-good version.
- * Note that the comparison is currently strict deep equality, meaning that not
- * only must the vertices be found at the exact same floating-point coordinates,
- * but the triangle vertices must be emitted in the exact same order. This
- * limits optimizations to transformations that change neither by design.
- * Optimizations that do change that output must be much more carefully
- * considered in light of the careful design around numerical precision limits.
- */
-
-var chai = require('chai');
-var assert = chai.assert;
 
 var common = require('./common.js');
 var libtess = common.libtess;
@@ -592,7 +15,7 @@ var tessellate = common.tessellate;
 
 var basetess = require('./expectations/libtess.baseline.js');
 
-// geometry tests are both here and in third_party
+// geometry tests are both in test/geometry/ and in third_party/test/geometry/
 var rfolder = require('./rfolder.js');
 var geometryFiles = {"degenerate-hourglass": require("./geometry/degenerate-hourglass.js"),"hourglass": require("./geometry/hourglass.js"),"letter-e": require("./geometry/letter-e.js"),"shared-borders": require("./geometry/shared-borders.js"),"shared-edge-triangles": require("./geometry/shared-edge-triangles.js"),"two-opposite-triangles": require("./geometry/two-opposite-triangles.js"),"two-triangles": require("./geometry/two-triangles.js")};
 var geometries = Object.keys(geometryFiles).map(function(filename) {
@@ -604,67 +27,326 @@ var thirdPartyGeometries = Object.keys(thirdPartyFiles).map(function(filename) {
 });
 geometries.push.apply(geometries, thirdPartyGeometries);
 
-var OUTPUT_TYPES = common.OUTPUT_TYPES;
-var PROVIDE_NORMAL = common.PROVIDE_NORMAL;
-var NORMALS = common.NORMALS;
-var WINDING_RULES = common.WINDING_RULES;
+var TRIANGULATION = common.OUTPUT_TYPES[0];
+var BOUNDARIES = common.OUTPUT_TYPES[1];
+var VIEW_BOUNDS_EXCESS = 0.02;
+var PROVIDE_NORMAL = common.PROVIDE_NORMAL[0];
+// TODO(bckenny): maybe add this back when switch to more general transforms
+// optionsToOptions(common.NORMALS, document.querySelector('#test-geometry'));
+var NORMAL = {
+  name: 'xyPlane',
+  value: [0, 0, 1],
+};
+var DEFAULT_SELECTED = 3;
 
-suite('Geometry tests', function() {
-  for (var i = 0; i < geometries.length; i++) {
-    testGeometry(geometries[i]);
-  }
-});
+var updateScheduled = false;
+var geometrySelect;
+var windingSelect;
+var inputSvg;
+var resultSvg;
+var expectationSvg;
+var boundaryResultSvg;
+var boundaryExpectationSvg;
 
-/**
- * Tests multiple permutations of options in tessellating the provided geometry
- * contours against a baseline (ostensibly correct) tessellator.
- * @param {{name: string, value: !Array.<!Array.<number>>}} geometry
- */
-function testGeometry(geometry) {
-  suite(geometry.name, function() {
+function init() {
+  geometrySelect = document.querySelector('#test-geometry');
+  windingSelect = document.querySelector('#winding-rule');
 
-    OUTPUT_TYPES.forEach(function(outputType) {
-      suite(outputType.name, function() {
+  inputSvg = document.querySelector('#input-contours');
+  resultSvg = document.querySelector('#triangulation-result');
+  expectationSvg = document.querySelector('#triangulation-expectation');
+  boundaryResultSvg = document.querySelector('#boundaries-result');
+  boundaryExpectationSvg = document.querySelector('#boundaries-expectation');
 
-        PROVIDE_NORMAL.forEach(function(provideNormal) {
-          suite('using ' + provideNormal.name, function() {
+  optionsToOptions(geometries, geometrySelect);
+  optionsToOptions(common.WINDING_RULES, windingSelect);
 
-            NORMALS.forEach(function(normal) {
-              suite('in the ' + normal.name, function() {
+  // pick a more interesting default geometry
+  geometrySelect.children[DEFAULT_SELECTED].selected = true;
 
-                WINDING_RULES.forEach(function(windingRule) {
-
-                  var baselineTessellator = createTessellator(basetess,
-                      outputType);
-                  var expectation = tessellate(baselineTessellator,
-                      geometry.value, outputType, provideNormal, normal,
-                      windingRule);
-
-                  var testDescription = 'should generate correct ' +
-                    outputType.name + ' with winding rule ' + windingRule.name;
-
-                  test(testDescription, function() {
-                    var tessellator = createTessellator(libtess, outputType);
-                    var result = tessellate(tessellator, geometry.value,
-                      outputType, provideNormal, normal, windingRule);
-
-                    assert.isArray(result, 'tessellation result not an array');
-                    assert.deepEqual(result, expectation,
-                        'tessellation result not as expected');
-                  });
-                });
-              });
-            });
-          });
-        });
-      });
-    });
-  });
+  scheduleUpdate();
 }
 
-},{"./../third_party/test/geometry/poly2tri-dude.js":14,"./../third_party/test/geometry/roboto-registered.js":15,"./common.js":5,"./expectations/libtess.baseline.js":6,"./geometry/degenerate-hourglass.js":7,"./geometry/hourglass.js":8,"./geometry/letter-e.js":9,"./geometry/shared-borders.js":10,"./geometry/shared-edge-triangles.js":11,"./geometry/two-opposite-triangles.js":12,"./geometry/two-triangles.js":13,"./rfolder.js":4,"chai":undefined}],4:[function(require,module,exports){
+/**
+ * Schedule a redraw on next rAF. Coalesces multiple calls per frame.
+ */
+function scheduleUpdate() {
+  if (updateScheduled) {
+    return;
+  }
 
-},{}],5:[function(require,module,exports){
+  updateScheduled = true;
+  window.requestAnimationFrame(update);
+}
+
+/**
+ * Update rendering.
+ */
+function update() {
+  updateScheduled = false;
+
+  var geometry = geometries[parseInt(geometrySelect.value)];
+  var contours = geometry.value;
+
+  var bounds = getContourBounds(contours);
+
+  // NOTE(bckenny): could base this on actual offsetWidth *and* offsetHeight of
+  // element but...squares are easy. Also assumes all svg canvases are the same
+  // size.
+  var contoursSize = Math.max(bounds.maxX - bounds.minX,
+      bounds.maxY - bounds.minY) * (1 + VIEW_BOUNDS_EXCESS);
+  var scale = inputSvg.getBoundingClientRect().width / contoursSize;
+  var dX = -scale * (bounds.minX + bounds.maxX - contoursSize) / 2;
+  var dY = scale * (bounds.minY + bounds.maxY + contoursSize) / 2;
+
+  drawContourInput(inputSvg, contours, scale, dX, dY);
+
+  var windingRule = common.WINDING_RULES[parseInt(windingSelect.value)];
+
+  // triangulation result
+  var tessellator = createTessellator(libtess, TRIANGULATION);
+  var results = tessellate(tessellator, geometry.value, TRIANGULATION,
+      PROVIDE_NORMAL, NORMAL, windingRule);
+  drawTriangleResults(resultSvg, results, scale, dX, dY);
+
+  // expectation
+  var baselineTessellator = createTessellator(basetess, TRIANGULATION);
+  var expectation = tessellate(baselineTessellator, geometry.value,
+      TRIANGULATION, PROVIDE_NORMAL, NORMAL, windingRule);
+  drawTriangleResults(expectationSvg, expectation, scale, dX, dY);
+
+  // boundary result
+  tessellator = createTessellator(libtess, BOUNDARIES);
+  var boundaryResults = tessellate(tessellator, geometry.value, BOUNDARIES,
+      PROVIDE_NORMAL, NORMAL, windingRule);
+  drawBoundaryResults(boundaryResultSvg, boundaryResults, scale, dX, dY);
+
+  // boundary expectation
+  baselineTessellator = createTessellator(basetess, BOUNDARIES);
+  var boundaryExpectation = tessellate(baselineTessellator, geometry.value,
+      BOUNDARIES, PROVIDE_NORMAL, NORMAL, windingRule);
+  drawBoundaryResults(boundaryExpectationSvg, boundaryExpectation, scale, dX,
+      dY);
+}
+
+/**
+ * Draw the input contours on the supplied svgCanvas with the specified
+ * transformation.
+ * @param {!SVGElement} svgCanvas
+ * @param {!Array<!Array<number>>} contours
+ * @param {number} scale
+ * @param {number} dX
+ * @param {number} dY
+ */
+function drawContourInput(svgCanvas, contours, scale, dX, dY) {
+  // clear current content
+  while (svgCanvas.firstChild) {
+    svgCanvas.removeChild(svgCanvas.firstChild);
+  }
+  // draw input contours
+  for (var i = 0; i < contours.length; i++) {
+    var contour = contours[i];
+    if (contour.length < 6) {
+      continue;
+    }
+
+    var pathString = 'M' + (contour[0] * scale + dX) + ',' +
+        (contour[1] * -scale + dY);
+    for (var j = 3; j < contour.length; j += 3) {
+      pathString += 'L' + (contour[j] * scale + dX) + ',' +
+          (contour[j + 1] * -scale + dY);
+    }
+    pathString += 'Z';
+
+    var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', pathString);
+    svgCanvas.appendChild(path);
+  }
+}
+
+/**
+ * Draw triangulation results to the supplied svgCanvas with the specified
+ * transformation.
+ * @param {!SVGElement} svgCanvas
+ * @param {!Array<!Array<number>>} results
+ * @param {number} scale
+ * @param {number} dX
+ * @param {number} dY
+ */
+function drawTriangleResults(svgCanvas, results, scale, dX, dY) {
+  // clear current content
+  while (svgCanvas.firstChild) {
+    svgCanvas.removeChild(svgCanvas.firstChild);
+  }
+  // draw triangles
+  for (var i = 0; i < results.length; i++) {
+    var result = results[i];
+    if (result.length < 9) {
+      throw new Error('result with invalid geometry emitted');
+    }
+
+    var pathString = '';
+    for (var j = 0; j < result.length; j += 9) {
+      pathString += 'M' + (result[j] * scale + dX) + ',' +
+          (result[j + 1] * -scale + dY) +
+          'L' + (result[j + 3] * scale + dX) + ',' +
+          (result[j + 4] * -scale + dY) +
+          'L' + (result[j + 6] * scale + dX) + ',' +
+          (result[j + 7] * -scale + dY) +
+          'Z';
+    }
+
+    var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', pathString);
+    svgCanvas.appendChild(path);
+  }
+}
+
+/**
+ * Draw boundary results to the supplied svgCanvas with the specified
+ * transformation.
+ * @param {!SVGElement} svgCanvas
+ * @param {!Array<!Array<number>>} results
+ * @param {number} scale
+ * @param {number} dX
+ * @param {number} dY
+ */
+function drawBoundaryResults(svgCanvas, results, scale, dX, dY) {
+  // clear current content
+  while (svgCanvas.firstChild) {
+    svgCanvas.removeChild(svgCanvas.firstChild);
+  }
+  var j;
+  var result;
+  var path;
+  var pathString;
+  var clockwise;
+  var title;
+
+  // draw boundaries
+  for (var i = 0; i < results.length; i++) {
+    result = results[i];
+    if (result.length < 9) {
+      throw new Error('result with invalid geometry emitted');
+    }
+
+    pathString = 'M' + (result[0] * scale + dX) + ',' +
+        (result[1] * -scale + dY);
+    for (j = 3; j < result.length; j += 3) {
+      pathString += 'L' + (result[j] * scale + dX) + ',' +
+          (result[j + 1] * -scale + dY);
+    }
+    pathString += 'Z';
+
+    clockwise = isClockwise(result);
+
+    path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', pathString);
+    path.setAttribute('class', clockwise ? 'clockwise' : 'anticlockwise');
+    title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+    title.textContent = (clockwise ? 'clockwise' : 'anticlockwise') + ' path';
+
+    path.appendChild(title);
+    svgCanvas.appendChild(path);
+  }
+
+  // add a center black stroke
+  for (i = 0; i < results.length; i++) {
+    result = results[i];
+    if (result.length < 9) {
+      throw new Error('result with invalid geometry emitted');
+    }
+
+    pathString = 'M' + (result[0] * scale + dX) + ',' +
+        (result[1] * -scale + dY);
+    for (j = 3; j < result.length; j += 3) {
+      pathString += 'L' + (result[j] * scale + dX) + ',' +
+          (result[j + 1] * -scale + dY);
+    }
+    pathString += 'Z';
+
+    path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', pathString);
+    path.setAttribute('class', 'center-stroke');
+
+    clockwise = isClockwise(result);
+    title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+    title.textContent = (clockwise ? 'clockwise' : 'anticlockwise') + ' path';
+
+    path.appendChild(title);
+    svgCanvas.appendChild(path);
+  }
+}
+
+/**
+ * Returns true if the non-intersecting contour (representing a simple polygon)
+ * is wound clockwise.
+ * @param {!Array<number>} contour
+ * @return {boolean}
+ */
+function isClockwise(contour) {
+  // Gauss's area formula/shoelace formula
+  var area = 0;
+  for (var i = 0; i < contour.length; i += 3) {
+    var x1 = contour[i];
+    var y1 = contour[i + 1];
+    var x2 = contour[(i + 3) % contour.length];
+    var y2 = contour[(i + 4) % contour.length];
+    area += (x1 * y2 - x2 * y1);
+  }
+  return area > 0;
+}
+
+/**
+ * Calculate the xy-bounds of a set of contours.
+ * @param {!Array<!Array<number>>} contours
+ * @return {{minX: number, maxX: number, minY: number, maxY: number}}
+ */
+function getContourBounds(contours) {
+  var minX = Number.MAX_VALUE;
+  var maxX = -Number.MAX_VALUE;
+  var minY = Number.MAX_VALUE;
+  var maxY = -Number.MAX_VALUE;
+
+  for (var i = 0; i < contours.length; i++) {
+    var contour = contours[i];
+    for (var j = 0; j < contour.length; j += 3) {
+      minX = Math.min(minX, contour[j]);
+      maxX = Math.max(maxX, contour[j]);
+      minY = Math.min(minY, contour[j + 1]);
+      maxY = Math.max(maxY, contour[j + 1]);
+    }
+  }
+
+  return {
+    minX: minX,
+    maxX: maxX,
+    minY: minY,
+    maxY: maxY
+  };
+}
+
+/**
+ * Add a set of options as the children of a HTMLSelectElement.
+ * @param {!Array<{name: string, value: *}>} options
+ * @param {!HTMLSelectElement} selectElement
+ */
+function optionsToOptions(options, selectElement) {
+  options.forEach(function(value, index) {
+    var opt = document.createElement('option');
+    opt.value = index;
+    opt.textContent = value.name;
+    selectElement.appendChild(opt);
+  });
+
+  selectElement.addEventListener('change', scheduleUpdate);
+}
+
+document.addEventListener('DOMContentLoaded', init, false);
+
+},{"./../third_party/test/geometry/poly2tri-dude.js":12,"./../third_party/test/geometry/roboto-registered.js":13,"./common.js":3,"./expectations/libtess.baseline.js":4,"./geometry/degenerate-hourglass.js":5,"./geometry/hourglass.js":6,"./geometry/letter-e.js":7,"./geometry/shared-borders.js":8,"./geometry/shared-edge-triangles.js":9,"./geometry/two-opposite-triangles.js":10,"./geometry/two-triangles.js":11,"./rfolder.js":2}],2:[function(require,module,exports){
+
+},{}],3:[function(require,module,exports){
 /* jshint node: true */
 'use strict';
 
@@ -953,7 +635,7 @@ exports.createPlaneRotation = function(normal) {
   })(transform);
 };
 
-},{"../libtess.cat.js":undefined,"../libtess.min.js":undefined,"chai":undefined}],6:[function(require,module,exports){
+},{"../libtess.cat.js":undefined,"../libtess.min.js":undefined,"chai":undefined}],4:[function(require,module,exports){
 /*
 
  Copyright 2000, Silicon Graphics, Inc. All Rights Reserved.
@@ -1022,7 +704,7 @@ function Ia(a,b){for(var c=a.c,d=a.a,e=c[b].a;;){var f=b<<1;f<a.b&&a.g(d[c[f+1].
 gluEnum:{GLU_TESS_MESH:100112,GLU_TESS_TOLERANCE:100142,GLU_TESS_WINDING_RULE:100140,GLU_TESS_BOUNDARY_ONLY:100141,GLU_INVALID_ENUM:100900,GLU_INVALID_VALUE:100901,GLU_TESS_BEGIN:100100,GLU_TESS_VERTEX:100101,GLU_TESS_END:100102,GLU_TESS_ERROR:100103,GLU_TESS_EDGE_FLAG:100104,GLU_TESS_COMBINE:100105,GLU_TESS_BEGIN_DATA:100106,GLU_TESS_VERTEX_DATA:100107,GLU_TESS_END_DATA:100108,GLU_TESS_ERROR_DATA:100109,GLU_TESS_EDGE_FLAG_DATA:100110,GLU_TESS_COMBINE_DATA:100111}};Z.prototype.gluDeleteTess=Z.prototype.M;
 Z.prototype.gluTessProperty=Z.prototype.R;Z.prototype.gluGetTessProperty=Z.prototype.N;Z.prototype.gluTessNormal=Z.prototype.Q;Z.prototype.gluTessCallback=Z.prototype.O;Z.prototype.gluTessVertex=Z.prototype.S;Z.prototype.gluTessBeginPolygon=Z.prototype.J;Z.prototype.gluTessBeginContour=Z.prototype.I;Z.prototype.gluTessEndContour=Z.prototype.K;Z.prototype.gluTessEndPolygon=Z.prototype.P; if (typeof module !== 'undefined') { module.exports = this.libtess; }
 
-},{}],7:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 /* jshint node: true */
 
 module.exports = {
@@ -1043,7 +725,7 @@ module.exports = {
   ]
 };
 
-},{}],8:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 /* jshint node: true */
 
 module.exports = {
@@ -1060,7 +742,7 @@ module.exports = {
   ]
 };
 
-},{}],9:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 /* jshint node: true */
 
 module.exports = {
@@ -1085,7 +767,7 @@ module.exports = {
   ]
 };
 
-},{}],10:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 /* jshint node: true */
 
 module.exports = {
@@ -1126,7 +808,7 @@ module.exports = {
   ]
 };
 
-},{}],11:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 /* jshint node: true */
 
 module.exports = {
@@ -1148,7 +830,7 @@ module.exports = {
   ]
 };
 
-},{}],12:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 /* jshint node: true */
 
 module.exports = {
@@ -1169,7 +851,7 @@ module.exports = {
   ]
 };
 
-},{}],13:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 /* jshint node: true */
 
 module.exports = {
@@ -1190,7 +872,7 @@ module.exports = {
   ]
 };
 
-},{}],14:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 /**
  * Poly2Tri Copyright (c) 2009-2010, Poly2Tri Contributors
  * http://code.google.com/p/poly2tri/
@@ -1343,7 +1025,7 @@ module.exports = {
   ]
 };
 
-},{}],15:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 /**
  * Copyright (C) 2008 The Android Open Source Project
  * https://developer.android.com/design/style/typography.html
@@ -1764,4 +1446,4 @@ module.exports = {
 // stub to let the browserified tests use the page-provided Chai
 module.exports = window.chai;
 
-},{}]},{},[1,2,3]);
+},{}]},{},[1]);

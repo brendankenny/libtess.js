@@ -25,7 +25,7 @@ var LINT_SRC = LIBTESS_SRC.concat([
   './libtess.cat.js',
   './{build,examples,test,third_party}/**/*.{js,html}',
   '!./build/externs/*',
-  '!./test/browser/tests-browserified.js',
+  '!./test/browser/*-browserified.js',
   '!./test/expectations/*',
   '!./third_party/node_modules/**'
 ]);
@@ -84,6 +84,7 @@ gulp.task('dist-test-libs', function() {
 });
 
 gulp.task('browserify-tests', function() {
+  // only includes baseline tess (uses libtess in page), so no prereqs
   return browserify(glob.sync('./test/*.test.js'))
     // custom chai and libtess injected on page (for e.g. debug libtess)
     // TODO(bckenny): is there a less-dumb way of doing this?
@@ -114,7 +115,8 @@ gulp.task('build', [
   'build-cat',
   'build-min',
   'browserify-tests',
-  'dist-test-libs'
+  'dist-test-libs',
+  'browserify-expectations-viewer'
 ]);
 
 gulp.task('lint', ['build'], function() {
@@ -170,6 +172,30 @@ gulp.task('coverage', ['build'], function(doneCallback) {
           }
         });
     });
+});
+
+gulp.task('browserify-expectations-viewer', function() {
+  return browserify('./test/expectations-viewer.js')
+    .require('./test/browser/fake-chai.js', {expose: 'chai'})
+    .require('./test/browser/fake-libtess.js',
+        {expose: '../libtess.cat.js'})
+    .require('./test/browser/fake-libtess.js',
+        {expose: '../libtess.min.js'})
+
+    // expand list of tests in geometry/ at browserify time
+    .ignore('./test/rfolder.js')
+    .transform('rfolderify')
+
+    // eliminate env nonsense in common.js
+    .transform(envify({
+      testType: 'browserify'
+    }))
+
+    .bundle()
+
+    // convert to vinyl stream and output via gulp.dest
+    .pipe(vinylSource('expectations-viewer-browserified.js'))
+    .pipe(gulp.dest('./test/browser'));
 });
 
 gulp.task('default', ['build']);
