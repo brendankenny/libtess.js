@@ -15,6 +15,10 @@ triangulating it, and then drawing it with WebGL.
 ## Tests
 Run the tests locally with `npm test`, or in the browser [here](https://brendankenny.github.io/libtess.js/test/index.html).
 
+See the [expectations viewer](https://brendankenny.github.io/libtess.js/test/browser/expectations-viewer.html)
+to compare the test geometry tessellated with the latest version of the library
+versus the expected (baseline) tessellation.
+
 ## Tesselator or Tessellator?
 
 Probably tessellator, but `GLUtesselator`, etc is in the original GLU API handed
