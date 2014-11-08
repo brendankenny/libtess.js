@@ -15,25 +15,43 @@
       }
       .viewer span {
         position: absolute;
+        margin-left: .25em;
         text-shadow: 0 0 8px #dfd8c6, 0 0 4px #dfd8c6, 0 0 2px #dfd8c6, 0 0 1px #dfd8c6;
       }
       svg {
         width: 100%;
         height: 100%;
-        stroke-linejoin: bevel;
-        stroke: black;
         background-color: #dfd8c6;
-      }
-      #input-contours path {
+        stroke: black;
         stroke-width: 1;
-        fill: none;
+        stroke-linejoin: bevel;
       }
-      #input-contours path:hover {
+      #input-contours {
+        fill: none;
         stroke-width: 2;
       }
-      .output {
-        stroke-width: 1;
+      #input-contours path:hover {
+        stroke-width: 3;
+      }
+      .triangulation {
         fill: #99a994;
+      }
+      .boundaries {
+        fill: none;
+        stroke-width: 8;
+      }
+      .clockwise:hover, .anticlockwise:hover {
+        stroke-width: 10;
+      }
+      .clockwise {
+        stroke: #99a994;
+      }
+      .anticlockwise {
+        stroke: #9f4f45;
+      }
+      .center-stroke {
+        stroke: black;
+        stroke-width: 1;
       }
     </style>
 
@@ -50,14 +68,6 @@
       <select id="test-geometry"></select>
     </section>
     <section>
-      <label for="output-types">Output Type:</label>
-      <select id="output-types"></select>
-    </section>
-    <section>
-      <label for="provide-normal">Provide Normal:</label>
-      <select id="provide-normal"></select>
-    </section>
-    <section>
       <label for="winding-rule">Winding Rule:</label>
       <select id="winding-rule"></select>
     </section>
@@ -69,11 +79,21 @@
     <section>
       <div class="viewer">
         <span>Output</span>
-        <svg id="output-result" class="output"></svg>
+        <svg id="triangulation-result" class="triangulation"></svg>
       </div>
       <div class="viewer">
         <span>Expectation</span>
-        <svg id="output-expectation" class="output"></svg>
+        <svg id="triangulation-expectation" class="triangulation"></svg>
+      </div>
+    </section>
+    <section>
+      <div class="viewer">
+        <span>Output Boundaries</span>
+        <svg id="boundaries-result" class="boundaries"></svg>
+      </div>
+      <div class="viewer">
+        <span>Expectation Boundaries</span>
+        <svg id="boundaries-expectation" class="boundaries"></svg>
       </div>
     </section>
   </body>

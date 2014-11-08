@@ -1,12 +1,6 @@
 /* jshint node: true */
 'use strict';
 
-var VIEW_BOUNDS_EXCESS = 0.02;
-var NORMAL = {
-  name: 'xyPlane',
-  value: [0, 0, 1],
-};
-
 var common = require('./common.js');
 var libtess = common.libtess;
 var createTessellator = common.createInstrumentedTessellator;
@@ -26,34 +20,43 @@ var thirdPartyGeometries = Object.keys(thirdPartyFiles).map(function(filename) {
 });
 geometries.push.apply(geometries, thirdPartyGeometries);
 
+var TRIANGULATION = common.OUTPUT_TYPES[0];
+var BOUNDARIES = common.OUTPUT_TYPES[1];
+var VIEW_BOUNDS_EXCESS = 0.02;
+// NOTE(bckenny): compute the normal for all tests in the expectation viewer.
+var PROVIDE_NORMAL = common.PROVIDE_NORMAL[1];
+// TODO(bckenny): maybe add this back when switch to more general transforms
+// optionsToOptions(common.NORMALS, document.querySelector('#test-geometry'));
+var NORMAL = {
+  name: 'xyPlane',
+  value: [0, 0, 1],
+};
+var DEFAULT_SELECTED = 3;
+
 var updateScheduled = false;
 var geometrySelect;
-var outputSelect;
-var provideNormalSelect;
 var windingSelect;
 var inputSvg;
 var resultSvg;
 var expectationSvg;
+var boundaryResultSvg;
+var boundaryExpectationSvg;
 
 function init() {
   geometrySelect = document.querySelector('#test-geometry');
-  outputSelect = document.querySelector('#output-types');
-  provideNormalSelect = document.querySelector('#provide-normal');
   windingSelect = document.querySelector('#winding-rule');
 
   inputSvg = document.querySelector('#input-contours');
-  resultSvg = document.querySelector('#output-result');
-  expectationSvg = document.querySelector('#output-expectation');
+  resultSvg = document.querySelector('#triangulation-result');
+  expectationSvg = document.querySelector('#triangulation-expectation');
+  boundaryResultSvg = document.querySelector('#boundaries-result');
+  boundaryExpectationSvg = document.querySelector('#boundaries-expectation');
 
   optionsToOptions(geometries, geometrySelect);
-  optionsToOptions(common.OUTPUT_TYPES, outputSelect);
-  optionsToOptions(common.PROVIDE_NORMAL, provideNormalSelect);
-  // TODO(bckenny): maybe add this back when switch to more general transforms
-  // optionsToOptions(common.NORMALS, document.querySelector('#test-geometry'));
   optionsToOptions(common.WINDING_RULES, windingSelect);
 
   // pick a more interesting default geometry
-  geometrySelect.children[2].selected = true;
+  geometrySelect.children[DEFAULT_SELECTED].selected = true;
 
   scheduleUpdate();
 }
@@ -80,10 +83,6 @@ function update() {
   var contours = geometry.value;
 
   var bounds = getContourBounds(contours);
-  var i;
-  var j;
-  var path;
-  var pathString;
 
   // NOTE(bckenny): could base this on actual offsetWidth *and* offsetHeight of
   // element but...squares are easy. Also assumes all svg canvases are the same
@@ -94,49 +93,68 @@ function update() {
   var dX = -scale * (bounds.minX + bounds.maxX - contoursSize) / 2;
   var dY = scale * (bounds.minY + bounds.maxY + contoursSize) / 2;
 
+  drawContourInput(inputSvg, contours, scale, dX, dY);
+
+  var windingRule = common.WINDING_RULES[parseInt(windingSelect.value)];
+
+  // triangulation result
+  var tessellator = createTessellator(libtess, TRIANGULATION);
+  var results = tessellate(tessellator, geometry.value, TRIANGULATION,
+      PROVIDE_NORMAL, NORMAL, windingRule);
+  drawTriangleResults(resultSvg, results, scale, dX, dY);
+
+  // expectation
+  var baselineTessellator = createTessellator(basetess, TRIANGULATION);
+  var expectation = tessellate(baselineTessellator, geometry.value,
+      TRIANGULATION, PROVIDE_NORMAL, NORMAL, windingRule);
+  drawTriangleResults(expectationSvg, expectation, scale, dX, dY);
+
+  // boundary result
+  tessellator = createTessellator(libtess, BOUNDARIES);
+  var boundaryResults = tessellate(tessellator, geometry.value, BOUNDARIES,
+      PROVIDE_NORMAL, NORMAL, windingRule);
+  drawBoundaryResults(boundaryResultSvg, boundaryResults, scale, dX, dY);
+
+  // boundary expectation
+  baselineTessellator = createTessellator(basetess, BOUNDARIES);
+  var boundaryExpectation = tessellate(baselineTessellator, geometry.value,
+      BOUNDARIES, PROVIDE_NORMAL, NORMAL, windingRule);
+  drawBoundaryResults(boundaryExpectationSvg, boundaryExpectation, scale, dX,
+      dY);
+}
+
+/**
+ * Draw the input contours on the supplied svgCanvas with the specified
+ * transformation.
+ * @param {!SVGElement} svgCanvas
+ * @param {!Array<!Array<number>>} contours
+ * @param {number} scale
+ * @param {number} dX
+ * @param {number} dY
+ */
+function drawContourInput(svgCanvas, contours, scale, dX, dY) {
   // clear current content
-  while (inputSvg.firstChild) {
-    inputSvg.removeChild(inputSvg.firstChild);
+  while (svgCanvas.firstChild) {
+    svgCanvas.removeChild(svgCanvas.firstChild);
   }
   // draw input contours
-  for (i = 0; i < contours.length; i++) {
+  for (var i = 0; i < contours.length; i++) {
     var contour = contours[i];
     if (contour.length < 6) {
       continue;
     }
 
-    path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    pathString = 'M' + (contour[0] * scale + dX) + ',' +
+    var pathString = 'M' + (contour[0] * scale + dX) + ',' +
         (contour[1] * -scale + dY);
-    for (j = 3; j < contour.length; j += 3) {
+    for (var j = 3; j < contour.length; j += 3) {
       pathString += 'L' + (contour[j] * scale + dX) + ',' +
           (contour[j + 1] * -scale + dY);
     }
     pathString += 'Z';
+
+    var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     path.setAttribute('d', pathString);
-    inputSvg.appendChild(path);
-  }
-
-  var outputType = common.OUTPUT_TYPES[parseInt(outputSelect.value)];
-  var provideNormal =
-      common.PROVIDE_NORMAL[parseInt(provideNormalSelect.value)];
-  var windingRule = common.WINDING_RULES[parseInt(windingSelect.value)];
-
-  // result
-  var tessellator = createTessellator(libtess, outputType);
-  var results = tessellate(tessellator, geometry.value, outputType,
-      provideNormal, NORMAL, windingRule);
-
-  // expectation
-  var baselineTessellator = createTessellator(basetess, outputType);
-  var expectation = tessellate(baselineTessellator, geometry.value, outputType,
-      provideNormal, NORMAL, windingRule);
-
-  if (outputType.value) {
-    // TODO(bckenny)
-  } else {
-    drawTriangleResults(resultSvg, results, scale, dX, dY);
-    drawTriangleResults(expectationSvg, expectation, scale, dX, dY);
+    svgCanvas.appendChild(path);
   }
 }
 
@@ -154,14 +172,13 @@ function drawTriangleResults(svgCanvas, results, scale, dX, dY) {
   while (svgCanvas.firstChild) {
     svgCanvas.removeChild(svgCanvas.firstChild);
   }
-  // draw input contours
+  // draw triangles
   for (var i = 0; i < results.length; i++) {
     var result = results[i];
     if (result.length < 9) {
       throw new Error('result with invalid geometry emitted');
     }
 
-    var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     var pathString = '';
     for (var j = 0; j < result.length; j += 9) {
       pathString += 'M' + (result[j] * scale + dX) + ',' +
@@ -172,9 +189,106 @@ function drawTriangleResults(svgCanvas, results, scale, dX, dY) {
           (result[j + 7] * -scale + dY) +
           'Z';
     }
+
+    var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     path.setAttribute('d', pathString);
     svgCanvas.appendChild(path);
   }
+}
+
+/**
+ * Draw boundary results to the supplied svgCanvas with the specified
+ * transformation.
+ * @param {!SVGElement} svgCanvas
+ * @param {!Array<!Array<number>>} results
+ * @param {number} scale
+ * @param {number} dX
+ * @param {number} dY
+ */
+function drawBoundaryResults(svgCanvas, results, scale, dX, dY) {
+  // clear current content
+  while (svgCanvas.firstChild) {
+    svgCanvas.removeChild(svgCanvas.firstChild);
+  }
+  var j;
+  var result;
+  var path;
+  var pathString;
+  var clockwise;
+  var title;
+
+  // draw boundaries
+  for (var i = 0; i < results.length; i++) {
+    result = results[i];
+    if (result.length < 9) {
+      throw new Error('result with invalid geometry emitted');
+    }
+
+    pathString = 'M' + (result[0] * scale + dX) + ',' +
+        (result[1] * -scale + dY);
+    for (j = 3; j < result.length; j += 3) {
+      pathString += 'L' + (result[j] * scale + dX) + ',' +
+          (result[j + 1] * -scale + dY);
+    }
+    pathString += 'Z';
+
+    clockwise = isClockwise(result);
+
+    path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', pathString);
+    path.setAttribute('class', clockwise ? 'clockwise' : 'anticlockwise');
+    title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+    title.textContent = (clockwise ? 'clockwise' : 'anticlockwise') + ' path';
+
+    path.appendChild(title);
+    svgCanvas.appendChild(path);
+  }
+
+  // add a center black stroke
+  for (i = 0; i < results.length; i++) {
+    result = results[i];
+    if (result.length < 9) {
+      throw new Error('result with invalid geometry emitted');
+    }
+
+    pathString = 'M' + (result[0] * scale + dX) + ',' +
+        (result[1] * -scale + dY);
+    for (j = 3; j < result.length; j += 3) {
+      pathString += 'L' + (result[j] * scale + dX) + ',' +
+          (result[j + 1] * -scale + dY);
+    }
+    pathString += 'Z';
+
+    path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', pathString);
+    path.setAttribute('class', 'center-stroke');
+
+    clockwise = isClockwise(result);
+    title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+    title.textContent = (clockwise ? 'clockwise' : 'anticlockwise') + ' path';
+
+    path.appendChild(title);
+    svgCanvas.appendChild(path);
+  }
+}
+
+/**
+ * Returns true if the non-intersecting contour (representing a simple polygon)
+ * is wound clockwise.
+ * @param {!Array<number>} contour
+ * @return {boolean}
+ */
+function isClockwise(contour) {
+  // Gauss's area formula/shoelace formula
+  var area = 0;
+  for (var i = 0; i < contour.length; i += 3) {
+    var x1 = contour[i];
+    var y1 = contour[i + 1];
+    var x2 = contour[(i + 3) % contour.length];
+    var y2 = contour[(i + 4) % contour.length];
+    area += (x1 * y2 - x2 * y1);
+  }
+  return area > 0;
 }
 
 /**
