@@ -5,15 +5,20 @@
     <title>Expectations Viewer</title>
     <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
     <style>
-      html {
+      html, body {
         font-family: 'Roboto', sans-serif;
+        margin: 0;
+        padding: 0;
       }
-      .viewer {
+      .viewer-slot {
         width: 500px;
         height: 500px;
         display: inline-block;
+        vertical-align: top;
+        margin-top: 4px;
+        margin-left: 4px;
       }
-      .viewer span {
+      .viewer-slot span {
         position: absolute;
         margin-left: .25em;
         text-shadow: 0 0 8px #dfd8c6, 0 0 4px #dfd8c6, 0 0 2px #dfd8c6, 0 0 1px #dfd8c6;
@@ -27,8 +32,8 @@
         stroke-linejoin: bevel;
       }
       #input-contours {
-        fill: none;
         stroke-width: 2;
+        fill: none;
       }
       #input-contours path:hover {
         stroke-width: 3;
@@ -37,8 +42,8 @@
         fill: #99a994;
       }
       .boundaries {
-        fill: none;
         stroke-width: 8;
+        fill: none;
       }
       .clockwise:hover, .anticlockwise:hover {
         stroke-width: 10;
@@ -64,34 +69,36 @@
   </head>
   <body>
     <section>
-      <label for="test-geometry">Test Geometry:</label>
-      <select id="test-geometry"></select>
-    </section>
-    <section>
-      <label for="winding-rule">Winding Rule:</label>
-      <select id="winding-rule"></select>
+      <div class="viewer-slot">
+        <span>Input Contours</span>
+        <svg id="input-contours"></svg>
+      </div><div class="viewer-slot">
+        <div>
+          <label for="test-geometry">Test Geometry:</label>
+          <select id="test-geometry"></select>
+        </div>
+        <div>
+          <label for="winding-rule">Winding Rule:</label>
+          <select id="winding-rule"></select>
+        </div>
+      </div>
     </section>
 
-    <div class="viewer">
-      <span>Input Contours</span>
-      <svg id="input-contours"></svg>
-    </div>
     <section>
-      <div class="viewer">
+      <div class="viewer-slot">
         <span>Output</span>
         <svg id="triangulation-result" class="triangulation"></svg>
-      </div>
-      <div class="viewer">
+      </div><div class="viewer-slot">
         <span>Expectation</span>
         <svg id="triangulation-expectation" class="triangulation"></svg>
       </div>
     </section>
+
     <section>
-      <div class="viewer">
+      <div class="viewer-slot">
         <span>Output Boundaries</span>
         <svg id="boundaries-result" class="boundaries"></svg>
-      </div>
-      <div class="viewer">
+      </div><div class="viewer-slot">
         <span>Expectation Boundaries</span>
         <svg id="boundaries-expectation" class="boundaries"></svg>
       </div>
