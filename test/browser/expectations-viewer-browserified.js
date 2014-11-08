@@ -30,8 +30,7 @@ geometries.push.apply(geometries, thirdPartyGeometries);
 var TRIANGULATION = common.OUTPUT_TYPES[0];
 var BOUNDARIES = common.OUTPUT_TYPES[1];
 var VIEW_BOUNDS_EXCESS = 0.02;
-// NOTE(bckenny): compute the normal for all tests in the expectation viewer.
-var PROVIDE_NORMAL = common.PROVIDE_NORMAL[1];
+var PROVIDE_NORMAL = common.PROVIDE_NORMAL[0];
 // TODO(bckenny): maybe add this back when switch to more general transforms
 // optionsToOptions(common.NORMALS, document.querySelector('#test-geometry'));
 var NORMAL = {
