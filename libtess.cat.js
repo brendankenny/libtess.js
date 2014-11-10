@@ -3929,15 +3929,11 @@ libtess.GluTesselator.prototype.gluTessCallback = function(which, opt_fn) {
 
     case libtess.gluEnum.GLU_TESS_EDGE_FLAG:
       this.callEdgeFlag_ = /** @type {function(boolean)} */ (fn);
-      // If the client wants boundary edges to be flagged,
-      // we render everything as separate triangles (no strips or fans).
       this.flagBoundary = (!!fn);
       return;
 
     case libtess.gluEnum.GLU_TESS_EDGE_FLAG_DATA:
       this.callEdgeFlagData_ = /** @type {function(boolean, Object)} */ (fn);
-      // If the client wants boundary edges to be flagged,
-      // we render everything as separate triangles (no strips or fans).
       this.flagBoundary = (!!fn);
       return;
 
