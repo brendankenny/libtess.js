@@ -1493,48 +1493,65 @@ libtess.normal.checkOrientation_ = function(tess) {
 // require libtess.GluMesh
 /* global libtess */
 
-libtess.render = function() {
-
-};
-
+libtess.render = function() {};
 
 /**
- * render.renderMesh(tess, mesh) takes a mesh and breaks it into separate
- * triangles.
- *
- * The rendering output is provided as callbacks (see the api).
- *
+ * Takes a mesh, breaks it into separate triangles, and renders them. The
+ * rendering output is provided as callbacks (see the API).
  * @param {!libtess.GluTesselator} tess
  * @param {!libtess.GluMesh} mesh
  */
 libtess.render.renderMesh = function(tess, mesh) {
-  // Make a list of separate triangles so we can render them all at once
-  tess.lonelyTriList = null;
+  var beginOrBeginDataCalled = false;
 
-  var f;
-  for (f = mesh.fHead.next; f !== mesh.fHead; f = f.next) {
-    f.marked = false;
-  }
-  for (f = mesh.fHead.next; f !== mesh.fHead; f = f.next) {
-    // We examine all faces in an arbitrary order.  Whenever we find
-    // an unprocessed face F, we add F to the list of triangles to render.
-    if (f.inside && !f.marked) {
-      libtess.render.renderTriangle_(tess, f);
-      libtess.assert(f.marked);
+  // TODO(bckenny): edgeState needs to be boolean, but !== on first call
+  // force edge state output for first vertex
+  var edgeState = -1;
+
+  // We examine all faces in an arbitrary order. Whenever we find
+  // an inside triangle f, we render f.
+  // NOTE(bckenny): go backwards through face list to match original libtess
+  // triangle order
+  for (var f = mesh.fHead.prev; f !== mesh.fHead; f = f.prev) {
+    if (f.inside) {
+      // We're going to emit a triangle, so call begin callback once
+      if (!beginOrBeginDataCalled) {
+        tess.callBeginOrBeginData(libtess.primitiveType.GL_TRIANGLES);
+        beginOrBeginDataCalled = true;
+      }
+
+      // Loop once for each edge (there will always be 3 edges)
+      // TODO(bckenny): assert that there were three?
+      var e = f.anEdge;
+      do {
+        if (tess.flagBoundary) {
+          // Set the "edge state" to true just before we output the
+          // first vertex of each edge on the polygon boundary.
+          var newState = !e.rFace().inside ? 1 : 0; // TODO(bckenny): total hack to get edgeState working. fix me.
+          if (edgeState !== newState) {
+            edgeState = newState;
+            // TODO(bckenny): edgeState should be boolean now
+            tess.callEdgeFlagOrEdgeFlagData(!!edgeState);
+          }
+        }
+
+        // emit vertex
+        tess.callVertexOrVertexData(e.org.data);
+
+        e = e.lNext;
+      } while (e !== f.anEdge);
     }
   }
-  if (tess.lonelyTriList !== null) {
-    libtess.render.renderLonelyTriangles_(tess, tess.lonelyTriList);
-    tess.lonelyTriList = null;
+
+  // only call end callback if begin was called
+  if (beginOrBeginDataCalled) {
+    tess.callEndOrEndData();
   }
 };
 
-
 /**
- * render.renderBoundary(tess, mesh) takes a mesh, and outputs one
- * contour for each face marked "inside". The rendering output is
- * provided as callbacks (see the api).
- *
+ * Takes a mesh, and outputs one contour for each face marked "inside". The
+ * rendering output is provided as callbacks (see the API).
  * @param {!libtess.GluTesselator} tess
  * @param {!libtess.GluMesh} mesh
  */
@@ -1552,62 +1569,6 @@ libtess.render.renderBoundary = function(tess, mesh) {
       tess.callEndOrEndData();
     }
   }
-};
-
-/**
- * Just add the triangle to a triangle list, so we can render all
- * the separate triangles at once.
- * @private
- * @param {!libtess.GluTesselator} tess
- * @param {!libtess.GluFace} fOrig
- */
-libtess.render.renderTriangle_ = function(tess, fOrig) {
-  var e = fOrig.anEdge;
-
-  // NOTE(bckenny): AddToTrail(e.lFace, tess.lonelyTriList) macro
-  e.lFace.trail = tess.lonelyTriList;
-  tess.lonelyTriList = e.lFace;
-  e.lFace.marked = true;
-};
-
-
-/**
- * Now we render all the separate triangles which could not be
- * grouped into a triangle fan or strip.
- * @private
- * @param {!libtess.GluTesselator} tess
- * @param {libtess.GluFace} head
- */
-libtess.render.renderLonelyTriangles_ = function(tess, head) {
-  // TODO(bckenny): edgeState needs to be boolean, but != on first call
-  // force edge state output for first vertex
-  var edgeState = -1;
-
-  var f = head;
-
-  tess.callBeginOrBeginData(libtess.primitiveType.GL_TRIANGLES);
-
-  for (; f !== null; f = f.trail) {
-    // Loop once for each edge (there will always be 3 edges)
-    var e = f.anEdge;
-    do {
-      if (tess.flagBoundary) {
-        // Set the "edge state" to true just before we output the
-        // first vertex of each edge on the polygon boundary.
-        var newState = !e.rFace().inside ? 1 : 0; // TODO(bckenny): total hack to get edgeState working. fix me.
-        if (edgeState !== newState) {
-          edgeState = newState;
-          // TODO(bckenny): edgeState should be boolean now
-          tess.callEdgeFlagOrEdgeFlagData(!!edgeState);
-        }
-      }
-      tess.callVertexOrVertexData(e.org.data);
-
-      e = e.lNext;
-    } while (e !== f.anEdge);
-  }
-
-  tess.callEndOrEndData();
 };
 
 
