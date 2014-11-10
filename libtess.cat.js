@@ -1487,10 +1487,6 @@ libtess.normal.checkOrientation_ = function(tess) {
 
 
 
-// require libtess
-// require libtess.GluTesselator
-// require libtess.GluFace
-// require libtess.GluMesh
 /* global libtess */
 
 libtess.render = function() {};
@@ -3459,26 +3455,13 @@ libtess.CachedVertex = function() {
 
 
 
-// require libtess
-// require libtess.mesh
-// require libtess.tessmono
-// require libtess.render
-// require libtess.normal
-// require libtess.sweep
-/*global libtess */
+/* global libtess */
 
-// TODO(bckenny): options for just triangles, just tristrips, single tristrip w/ resets
-// other primitives with index buffer? would have to add a better tristrip extractor
-// monotone poly -> tristrip seems possible...
-
-// TODO(bckenny): create more javascript-y API, e.g. make gluTessEndPolygon async,
-// don't require so many temp objects created
-
-
+// TODO(bckenny): create more javascript-y API, e.g. make gluTessEndPolygon
+// async, don't require so many temp objects created
 
 /**
- * [GluTesselator description]
- *
+ * The tesselator main class, providing the public API.
  * @constructor
  */
 libtess.GluTesselator = function() {
@@ -4311,11 +4294,7 @@ libtess.GluTesselator.prototype.callErrorOrErrorData = function(errno) {
 
 
 
-// require libtess
-// requre libtess.GluHalfEdge
-/*global libtess */
-
-
+/* global libtess */
 
 /**
  * Each face has a pointer to the next and previous faces in the
@@ -4323,8 +4302,8 @@ libtess.GluTesselator.prototype.callErrorOrErrorData = function(errno) {
  * the left face (null if this is the dummy header). There is also
  * a field "data" for client data.
  *
- * @param {libtess.GluFace=} opt_nextFace [description].
- * @param {libtess.GluFace=} opt_prevFace [description].
+ * @param {libtess.GluFace=} opt_nextFace
+ * @param {libtess.GluFace=} opt_prevFace
  * @constructor
  */
 libtess.GluFace = function(opt_nextFace, opt_prevFace) {
@@ -4363,13 +4342,7 @@ libtess.GluFace = function(opt_nextFace, opt_prevFace) {
 
 
 
-// require libtess
-// require libtess.GluFace
-// require libtess.GluVertex
-// require libtess.ActiveRegion
-/*global libtess */
-
-
+/* global libtess */
 
 /**
  * The fundamental data structure is the "half-edge". Two half-edges
@@ -4396,7 +4369,7 @@ libtess.GluFace = function(opt_nextFace, opt_prevFace) {
  * e.sym stores a pointer in the opposite direction, thus it is
  * always true that e.sym.next.sym.next === e.
  *
- * @param {libtess.GluHalfEdge=} opt_nextEdge [description].
+ * @param {libtess.GluHalfEdge=} opt_nextEdge
  * @constructor
  */
 libtess.GluHalfEdge = function(opt_nextEdge) {

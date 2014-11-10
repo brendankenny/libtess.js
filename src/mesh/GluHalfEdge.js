@@ -1,6 +1,6 @@
 /**
  * Copyright 2000, Silicon Graphics, Inc. All Rights Reserved.
- * Copyright 2012, Google Inc. All Rights Reserved.
+ * Copyright 2014, Google Inc. All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -27,13 +27,7 @@
  * elsewhere herein. All Rights Reserved.
  */
 
-// require libtess
-// require libtess.GluFace
-// require libtess.GluVertex
-// require libtess.ActiveRegion
-/*global libtess */
-
-
+/* global libtess */
 
 /**
  * The fundamental data structure is the "half-edge". Two half-edges
@@ -60,7 +54,7 @@
  * e.sym stores a pointer in the opposite direction, thus it is
  * always true that e.sym.next.sym.next === e.
  *
- * @param {libtess.GluHalfEdge=} opt_nextEdge [description].
+ * @param {libtess.GluHalfEdge=} opt_nextEdge
  * @constructor
  */
 libtess.GluHalfEdge = function(opt_nextEdge) {

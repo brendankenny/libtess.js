@@ -1,6 +1,6 @@
 /**
  * Copyright 2000, Silicon Graphics, Inc. All Rights Reserved.
- * Copyright 2012, Google Inc. All Rights Reserved.
+ * Copyright 2014, Google Inc. All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -27,26 +27,13 @@
  * elsewhere herein. All Rights Reserved.
  */
 
-// require libtess
-// require libtess.mesh
-// require libtess.tessmono
-// require libtess.render
-// require libtess.normal
-// require libtess.sweep
-/*global libtess */
+/* global libtess */
 
-// TODO(bckenny): options for just triangles, just tristrips, single tristrip w/ resets
-// other primitives with index buffer? would have to add a better tristrip extractor
-// monotone poly -> tristrip seems possible...
-
-// TODO(bckenny): create more javascript-y API, e.g. make gluTessEndPolygon async,
-// don't require so many temp objects created
-
-
+// TODO(bckenny): create more javascript-y API, e.g. make gluTessEndPolygon
+// async, don't require so many temp objects created
 
 /**
- * [GluTesselator description]
- *
+ * The tesselator main class, providing the public API.
  * @constructor
  */
 libtess.GluTesselator = function() {

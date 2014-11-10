@@ -27,10 +27,6 @@
  * elsewhere herein. All Rights Reserved.
  */
 
-// require libtess
-// require libtess.GluTesselator
-// require libtess.GluFace
-// require libtess.GluMesh
 /* global libtess */
 
 libtess.render = function() {};
