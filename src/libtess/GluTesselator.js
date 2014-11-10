@@ -170,12 +170,6 @@ libtess.GluTesselator = function() {
   this.boundaryOnly = false;
 
   /**
-   * list of triangles which could not be rendered as strips or fans
-   * @type {libtess.GluFace}
-   */
-  this.lonelyTriList = null;
-
-  /**
    * Begin callback.
    * @private
    * @type {?function(libtess.primitiveType)}

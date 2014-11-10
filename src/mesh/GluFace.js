@@ -71,18 +71,6 @@ libtess.GluFace = function(opt_nextFace, opt_prevFace) {
   this.data = null;
 
   /**
-   * "stack" for conversion to strips
-   * @type {libtess.GluFace}
-   */
-  this.trail = null;
-
-  /**
-   * Flag for conversion to strips.
-   * @type {boolean}
-   */
-  this.marked = false;
-
-  /**
    * This face is in the polygon interior.
    * @type {boolean}
    */

@@ -3602,12 +3602,6 @@ libtess.GluTesselator = function() {
   this.boundaryOnly = false;
 
   /**
-   * list of triangles which could not be rendered as strips or fans
-   * @type {libtess.GluFace}
-   */
-  this.lonelyTriList = null;
-
-  /**
    * Begin callback.
    * @private
    * @type {?function(libtess.primitiveType)}
@@ -4359,18 +4353,6 @@ libtess.GluFace = function(opt_nextFace, opt_prevFace) {
    * @type {Object}
    */
   this.data = null;
-
-  /**
-   * "stack" for conversion to strips
-   * @type {libtess.GluFace}
-   */
-  this.trail = null;
-
-  /**
-   * Flag for conversion to strips.
-   * @type {boolean}
-   */
-  this.marked = false;
 
   /**
    * This face is in the polygon interior.
