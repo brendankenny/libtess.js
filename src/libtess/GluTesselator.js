@@ -582,17 +582,7 @@ libtess.GluTesselator.prototype.gluTessEndPolygon = function() {
   this.state = libtess.tessState.T_DORMANT;
 
   if (this.mesh === null) {
-    if (!this.flagBoundary && !this.callMesh_) {
-      // Try some special code to make the easy cases go quickly
-      // (eg. convex polygons). This code does NOT handle multiple contours,
-      // intersections, edge flags, and of course it does not generate
-      // an explicit mesh either.
-      if (libtess.render.renderCache(this)) {
-        // TODO(bckenny): why only clear polygonData? does more need to be cleared?
-        this.polygonData_ = null;
-        return;
-      }
-    }
+    // TODO(bckenny): can we eliminate more cache functionality?
     this.emptyCache_();
   }
 
