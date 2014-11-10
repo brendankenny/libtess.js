@@ -1503,15 +1503,6 @@ libtess.render = function() {
 
 
 /**
- * [SIGN_INCONSISTENT_ description]
- * @type {number}
- * @private
- * @const
- */
-libtess.render.SIGN_INCONSISTENT_ = 2;
-
-
-/**
  * render.renderMesh(tess, mesh) takes a mesh and breaks it into triangle
  * fans, strips, and separate triangles. A substantial effort is made
  * to use as few rendering primitives as possible (i.e. to make the fans
