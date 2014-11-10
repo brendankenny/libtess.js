@@ -107,10 +107,8 @@ libtess.render.renderBoundary = function(tess, mesh) {
  * @private
  * @param {libtess.GluTesselator} tess [description].
  * @param {libtess.GluHalfEdge} e [description].
- * @param {number} size [description].
  */
-libtess.render.renderTriangle_ = function(tess, e, size) {
-  libtess.assert(size === 1);
+libtess.render.renderTriangle_ = function(tess, e) {
   // NOTE(bckenny): AddToTrail(e.lFace, tess.lonelyTriList) macro
   e.lFace.trail = tess.lonelyTriList;
   tess.lonelyTriList = e.lFace;
@@ -131,8 +129,7 @@ libtess.render.renderTriangle_ = function(tess, e, size) {
  */
 libtess.render.renderMaximumFaceGroup_ = function(tess, fOrig) {
   var e = fOrig.anEdge;
-  var max = new libtess.FaceCount(1, e, libtess.render.renderTriangle_);
-  max.render(tess, max.eStart, max.size);
+  libtess.render.renderTriangle_(tess, e);
 };
 
 

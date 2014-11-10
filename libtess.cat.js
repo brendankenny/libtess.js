@@ -1567,10 +1567,8 @@ libtess.render.renderBoundary = function(tess, mesh) {
  * @private
  * @param {libtess.GluTesselator} tess [description].
  * @param {libtess.GluHalfEdge} e [description].
- * @param {number} size [description].
  */
-libtess.render.renderTriangle_ = function(tess, e, size) {
-  libtess.assert(size === 1);
+libtess.render.renderTriangle_ = function(tess, e) {
   // NOTE(bckenny): AddToTrail(e.lFace, tess.lonelyTriList) macro
   e.lFace.trail = tess.lonelyTriList;
   tess.lonelyTriList = e.lFace;
@@ -1591,8 +1589,7 @@ libtess.render.renderTriangle_ = function(tess, e, size) {
  */
 libtess.render.renderMaximumFaceGroup_ = function(tess, fOrig) {
   var e = fOrig.anEdge;
-  var max = new libtess.FaceCount(1, e, libtess.render.renderTriangle_);
-  max.render(tess, max.eStart, max.size);
+  libtess.render.renderTriangle_(tess, e);
 };
 
 
@@ -5502,47 +5499,6 @@ libtess.PriorityQHeap.prototype.floatUp_ = function(curr) {
     h[hParent].node = curr;
     curr = parent;
   }
-};
-
-
-
-// require libtess
-// require libtess.GluHalfEdge
-// require libtess.GluTesselator
-/*global libtess */
-
-// TODO(bckenny): Used only in private functions of render.js
-
-
-
-/**
- * This structure remembers the information we need about a primitive
- * to be able to render it later, once we have determined which
- * primitive is able to use the most triangles.
-  *
- * @constructor
- * @param {number} size [description].
- * @param {libtess.GluHalfEdge} eStart [description].
- * @param {!function(libtess.GluTesselator, libtess.GluHalfEdge, number)} renderFunction [description].
- */
-libtess.FaceCount = function(size, eStart, renderFunction) {
-  /**
-   * The number of triangles used.
-   * @type {number}
-   */
-  this.size = size;
-
-  /**
-   * The edge where this primitive starts.
-   * @type {libtess.GluHalfEdge}
-   */
-  this.eStart = eStart;
-
-  /**
-   * The routine to render this primitive.
-   * @type {!function(libtess.GluTesselator, libtess.GluHalfEdge, number)}
-   */
-  this.render = renderFunction;
 };
 
 
