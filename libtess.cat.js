@@ -4552,10 +4552,13 @@ libtess.GluHalfEdge.prototype.lPrev = function() {
   return this.oNext.sym;
 };
 
-
+// NOTE(bckenny): libtess.GluHalfEdge.dPrev is called nowhere in libtess and
+// isn't part of the current public API. It could be useful for mesh traversal
+// and manipulation if made public, however.
+/* istanbul ignore next */
 /**
- * [dPrev description]
- * @return {libtess.GluHalfEdge} [description].
+ * The edge clockwise around destination vertex (keep same dest).
+ * @return {libtess.GluHalfEdge}
  */
 libtess.GluHalfEdge.prototype.dPrev = function() {
   return this.lNext.sym;
