@@ -28,14 +28,10 @@
  */
 
 // require libtess
-// require libtess.CachedVertex
 // require libtess.GluTesselator
 // require libtess.GluFace
-// require libtess.GluHalfEdge
 // require libtess.GluMesh
-/*global libtess */
-
-// TODO(bckenny): most of these doc strings are probably more internal comments
+/* global libtess */
 
 libtess.render = function() {
 
@@ -43,15 +39,13 @@ libtess.render = function() {
 
 
 /**
- * render.renderMesh(tess, mesh) takes a mesh and breaks it into triangle
- * fans, strips, and separate triangles. A substantial effort is made
- * to use as few rendering primitives as possible (i.e. to make the fans
- * and strips as large as possible).
+ * render.renderMesh(tess, mesh) takes a mesh and breaks it into separate
+ * triangles.
  *
  * The rendering output is provided as callbacks (see the api).
  *
- * @param {libtess.GluTesselator} tess [description].
- * @param {libtess.GluMesh} mesh [description].
+ * @param {!libtess.GluTesselator} tess
+ * @param {!libtess.GluMesh} mesh
  */
 libtess.render.renderMesh = function(tess, mesh) {
   // Make a list of separate triangles so we can render them all at once
@@ -63,10 +57,9 @@ libtess.render.renderMesh = function(tess, mesh) {
   }
   for (f = mesh.fHead.next; f !== mesh.fHead; f = f.next) {
     // We examine all faces in an arbitrary order.  Whenever we find
-    // an unprocessed face F, we output a group of faces including F
-    // whose size is maximum.
+    // an unprocessed face F, we add F to the list of triangles to render.
     if (f.inside && !f.marked) {
-      libtess.render.renderMaximumFaceGroup_(tess, f);
+      libtess.render.renderTriangle_(tess, f);
       libtess.assert(f.marked);
     }
   }
@@ -82,8 +75,8 @@ libtess.render.renderMesh = function(tess, mesh) {
  * contour for each face marked "inside". The rendering output is
  * provided as callbacks (see the api).
  *
- * @param {libtess.GluTesselator} tess [description].
- * @param {libtess.GluMesh} mesh [description].
+ * @param {!libtess.GluTesselator} tess
+ * @param {!libtess.GluMesh} mesh
  */
 libtess.render.renderBoundary = function(tess, mesh) {
   for (var f = mesh.fHead.next; f !== mesh.fHead; f = f.next) {
@@ -105,10 +98,12 @@ libtess.render.renderBoundary = function(tess, mesh) {
  * Just add the triangle to a triangle list, so we can render all
  * the separate triangles at once.
  * @private
- * @param {libtess.GluTesselator} tess [description].
- * @param {libtess.GluHalfEdge} e [description].
+ * @param {!libtess.GluTesselator} tess
+ * @param {!libtess.GluFace} fOrig
  */
-libtess.render.renderTriangle_ = function(tess, e) {
+libtess.render.renderTriangle_ = function(tess, fOrig) {
+  var e = fOrig.anEdge;
+
   // NOTE(bckenny): AddToTrail(e.lFace, tess.lonelyTriList) macro
   e.lFace.trail = tess.lonelyTriList;
   tess.lonelyTriList = e.lFace;
@@ -117,28 +112,11 @@ libtess.render.renderTriangle_ = function(tess, e) {
 
 
 /**
- * We want to find the largest triangle fan or strip of unmarked faces
- * which includes the given face fOrig. There are 3 possible fans
- * passing through fOrig (one centered at each vertex), and 3 possible
- * strips (one for each CCW permutation of the vertices). Our strategy
- * is to try all of these, and take the primitive which uses the most
- * triangles (a greedy approach).
- * @private
- * @param {libtess.GluTesselator} tess [description].
- * @param {libtess.GluFace} fOrig [description].
- */
-libtess.render.renderMaximumFaceGroup_ = function(tess, fOrig) {
-  var e = fOrig.anEdge;
-  libtess.render.renderTriangle_(tess, e);
-};
-
-
-/**
  * Now we render all the separate triangles which could not be
  * grouped into a triangle fan or strip.
  * @private
- * @param {libtess.GluTesselator} tess [description].
- * @param {libtess.GluFace} head [description].
+ * @param {!libtess.GluTesselator} tess
+ * @param {libtess.GluFace} head
  */
 libtess.render.renderLonelyTriangles_ = function(tess, head) {
   // TODO(bckenny): edgeState needs to be boolean, but != on first call
