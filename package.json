@@ -1,6 +1,6 @@
 {
   "name": "libtess",
-  "version": "1.0.4",
+  "version": "1.1.0",
   "description": "Polygon tesselation library, ported from SGI's GLU implementation.",
   "homepage": "https://github.com/brendankenny/libtess.js/",
   "repository": {
@@ -8,6 +8,11 @@
     "url": "https://github.com/brendankenny/libtess.js.git"
   },
   "main": "libtess.min.js",
+  "files": [
+    "libtess.min.js",
+    "libtess.cat.js",
+    "LICENSE"
+  ],
   "scripts": {
     "prepublish": "gulp build",
     "test": "gulp test"
