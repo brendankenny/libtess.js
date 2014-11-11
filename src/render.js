@@ -33,11 +33,13 @@ libtess.render = function() {};
 
 /**
  * Takes a mesh, breaks it into separate triangles, and renders them. The
- * rendering output is provided as callbacks (see the API).
+ * rendering output is provided as callbacks (see the API). Set flagEdges to
+ * true to get edgeFlag callbacks (tess.flagBoundary in original libtess).
  * @param {!libtess.GluTesselator} tess
  * @param {!libtess.GluMesh} mesh
+ * @param {boolean} flagEdges
  */
-libtess.render.renderMesh = function(tess, mesh) {
+libtess.render.renderMesh = function(tess, mesh, flagEdges) {
   var beginOrBeginDataCalled = false;
 
   // TODO(bckenny): edgeState needs to be boolean, but !== on first call
@@ -70,7 +72,7 @@ libtess.render.renderMesh = function(tess, mesh) {
       }
       var e = f.anEdge;
       do {
-        if (tess.flagBoundary) {
+        if (flagEdges) {
           // Set the "edge state" to true just before we output the
           // first vertex of each edge on the polygon boundary.
           var newState = !e.rFace().inside ? 1 : 0; // TODO(bckenny): total hack to get edgeState working. fix me.

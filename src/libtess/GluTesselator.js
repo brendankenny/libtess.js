@@ -145,12 +145,6 @@ libtess.GluTesselator = function() {
   /*** state needed for rendering callbacks (see render.js) ***/
 
   /**
-   * mark boundary edges (use EdgeFlag)
-   * @type {boolean}
-   */
-  this.flagBoundary = false;
-
-  /**
    * Extract contours, not triangles
    * @type {boolean}
    */
@@ -405,12 +399,10 @@ libtess.GluTesselator.prototype.gluTessCallback = function(which, opt_fn) {
 
     case libtess.gluEnum.GLU_TESS_EDGE_FLAG:
       this.callEdgeFlag_ = /** @type {function(boolean)} */ (fn);
-      this.flagBoundary = (!!fn);
       return;
 
     case libtess.gluEnum.GLU_TESS_EDGE_FLAG_DATA:
       this.callEdgeFlagData_ = /** @type {function(boolean, Object)} */ (fn);
-      this.flagBoundary = (!!fn);
       return;
 
     case libtess.gluEnum.GLU_TESS_VERTEX:
@@ -596,8 +588,9 @@ libtess.GluTesselator.prototype.gluTessEndPolygon = function() {
         libtess.render.renderBoundary(this, this.mesh);
 
       } else {
-        // output strips and fans
-        libtess.render.renderMesh(this, this.mesh);
+        // output triangles (with edge callback if one is set)
+        var flagEdges = !!(this.callEdgeFlag_ || this.callEdgeFlagData_);
+        libtess.render.renderMesh(this, this.mesh, flagEdges);
       }
     }
 

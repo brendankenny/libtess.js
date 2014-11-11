@@ -1493,11 +1493,13 @@ libtess.render = function() {};
 
 /**
  * Takes a mesh, breaks it into separate triangles, and renders them. The
- * rendering output is provided as callbacks (see the API).
+ * rendering output is provided as callbacks (see the API). Set flagEdges to
+ * true to get edgeFlag callbacks (tess.flagBoundary in original libtess).
  * @param {!libtess.GluTesselator} tess
  * @param {!libtess.GluMesh} mesh
+ * @param {boolean} flagEdges
  */
-libtess.render.renderMesh = function(tess, mesh) {
+libtess.render.renderMesh = function(tess, mesh, flagEdges) {
   var beginOrBeginDataCalled = false;
 
   // TODO(bckenny): edgeState needs to be boolean, but !== on first call
@@ -1530,7 +1532,7 @@ libtess.render.renderMesh = function(tess, mesh) {
       }
       var e = f.anEdge;
       do {
-        if (tess.flagBoundary) {
+        if (flagEdges) {
           // Set the "edge state" to true just before we output the
           // first vertex of each edge on the polygon boundary.
           var newState = !e.rFace().inside ? 1 : 0; // TODO(bckenny): total hack to get edgeState working. fix me.
@@ -3583,12 +3585,6 @@ libtess.GluTesselator = function() {
   /*** state needed for rendering callbacks (see render.js) ***/
 
   /**
-   * mark boundary edges (use EdgeFlag)
-   * @type {boolean}
-   */
-  this.flagBoundary = false;
-
-  /**
    * Extract contours, not triangles
    * @type {boolean}
    */
@@ -3843,12 +3839,10 @@ libtess.GluTesselator.prototype.gluTessCallback = function(which, opt_fn) {
 
     case libtess.gluEnum.GLU_TESS_EDGE_FLAG:
       this.callEdgeFlag_ = /** @type {function(boolean)} */ (fn);
-      this.flagBoundary = (!!fn);
       return;
 
     case libtess.gluEnum.GLU_TESS_EDGE_FLAG_DATA:
       this.callEdgeFlagData_ = /** @type {function(boolean, Object)} */ (fn);
-      this.flagBoundary = (!!fn);
       return;
 
     case libtess.gluEnum.GLU_TESS_VERTEX:
@@ -4034,8 +4028,9 @@ libtess.GluTesselator.prototype.gluTessEndPolygon = function() {
         libtess.render.renderBoundary(this, this.mesh);
 
       } else {
-        // output strips and fans
-        libtess.render.renderMesh(this, this.mesh);
+        // output triangles (with edge callback if one is set)
+        var flagEdges = !!(this.callEdgeFlag_ || this.callEdgeFlagData_);
+        libtess.render.renderMesh(this, this.mesh, flagEdges);
       }
     }
 
