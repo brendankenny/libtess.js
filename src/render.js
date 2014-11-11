@@ -57,7 +57,17 @@ libtess.render.renderMesh = function(tess, mesh) {
       }
 
       // Loop once for each edge (there will always be 3 edges)
-      // TODO(bckenny): assert that there were three?
+      if (libtess.DEBUG) {
+        // check that face has only three edges
+        var edge = f.anEdge;
+        var edgeCount = 0;
+        do {
+          edgeCount++;
+          edge = edge.lNext;
+        } while (edge !== f.anEdge);
+        libtess.assert(edgeCount === 3,
+            'renderMesh called with non-triangulated mesh');
+      }
       var e = f.anEdge;
       do {
         if (tess.flagBoundary) {
