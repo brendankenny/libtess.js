@@ -1,6 +1,6 @@
 /**
  * Copyright 2000, Silicon Graphics, Inc. All Rights Reserved.
- * Copyright 2012, Google Inc. All Rights Reserved.
+ * Copyright 2014, Google Inc. All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -27,26 +27,13 @@
  * elsewhere herein. All Rights Reserved.
  */
 
-// require libtess
-// require libtess.mesh
-// require libtess.tessmono
-// require libtess.render
-// require libtess.normal
-// require libtess.sweep
-/*global libtess */
+/* global libtess */
 
-// TODO(bckenny): options for just triangles, just tristrips, single tristrip w/ resets
-// other primitives with index buffer? would have to add a better tristrip extractor
-// monotone poly -> tristrip seems possible...
-
-// TODO(bckenny): create more javascript-y API, e.g. make gluTessEndPolygon async,
-// don't require so many temp objects created
-
-
+// TODO(bckenny): create more javascript-y API, e.g. make gluTessEndPolygon
+// async, don't require so many temp objects created
 
 /**
- * [GluTesselator description]
- *
+ * The tesselator main class, providing the public API.
  * @constructor
  */
 libtess.GluTesselator = function() {
@@ -158,22 +145,10 @@ libtess.GluTesselator = function() {
   /*** state needed for rendering callbacks (see render.js) ***/
 
   /**
-   * mark boundary edges (use EdgeFlag)
-   * @type {boolean}
-   */
-  this.flagBoundary = false;
-
-  /**
    * Extract contours, not triangles
    * @type {boolean}
    */
   this.boundaryOnly = false;
-
-  /**
-   * list of triangles which could not be rendered as strips or fans
-   * @type {libtess.GluFace}
-   */
-  this.lonelyTriList = null;
 
   /**
    * Begin callback.
@@ -424,16 +399,10 @@ libtess.GluTesselator.prototype.gluTessCallback = function(which, opt_fn) {
 
     case libtess.gluEnum.GLU_TESS_EDGE_FLAG:
       this.callEdgeFlag_ = /** @type {function(boolean)} */ (fn);
-      // If the client wants boundary edges to be flagged,
-      // we render everything as separate triangles (no strips or fans).
-      this.flagBoundary = (!!fn);
       return;
 
     case libtess.gluEnum.GLU_TESS_EDGE_FLAG_DATA:
       this.callEdgeFlagData_ = /** @type {function(boolean, Object)} */ (fn);
-      // If the client wants boundary edges to be flagged,
-      // we render everything as separate triangles (no strips or fans).
-      this.flagBoundary = (!!fn);
       return;
 
     case libtess.gluEnum.GLU_TESS_VERTEX:
@@ -582,17 +551,7 @@ libtess.GluTesselator.prototype.gluTessEndPolygon = function() {
   this.state = libtess.tessState.T_DORMANT;
 
   if (this.mesh === null) {
-    if (!this.flagBoundary && !this.callMesh_) {
-      // Try some special code to make the easy cases go quickly
-      // (eg. convex polygons). This code does NOT handle multiple contours,
-      // intersections, edge flags, and of course it does not generate
-      // an explicit mesh either.
-      if (libtess.render.renderCache(this)) {
-        // TODO(bckenny): why only clear polygonData? does more need to be cleared?
-        this.polygonData_ = null;
-        return;
-      }
-    }
+    // TODO(bckenny): can we eliminate more cache functionality?
     this.emptyCache_();
   }
 
@@ -629,8 +588,9 @@ libtess.GluTesselator.prototype.gluTessEndPolygon = function() {
         libtess.render.renderBoundary(this, this.mesh);
 
       } else {
-        // output strips and fans
-        libtess.render.renderMesh(this, this.mesh);
+        // output triangles (with edge callback if one is set)
+        var flagEdges = !!(this.callEdgeFlag_ || this.callEdgeFlagData_);
+        libtess.render.renderMesh(this, this.mesh, flagEdges);
       }
     }
 

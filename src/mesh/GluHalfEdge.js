@@ -1,6 +1,6 @@
 /**
  * Copyright 2000, Silicon Graphics, Inc. All Rights Reserved.
- * Copyright 2012, Google Inc. All Rights Reserved.
+ * Copyright 2014, Google Inc. All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -27,13 +27,7 @@
  * elsewhere herein. All Rights Reserved.
  */
 
-// require libtess
-// require libtess.GluFace
-// require libtess.GluVertex
-// require libtess.ActiveRegion
-/*global libtess */
-
-
+/* global libtess */
 
 /**
  * The fundamental data structure is the "half-edge". Two half-edges
@@ -60,7 +54,7 @@
  * e.sym stores a pointer in the opposite direction, thus it is
  * always true that e.sym.next.sym.next === e.
  *
- * @param {libtess.GluHalfEdge=} opt_nextEdge [description].
+ * @param {libtess.GluHalfEdge=} opt_nextEdge
  * @constructor
  */
 libtess.GluHalfEdge = function(opt_nextEdge) {
@@ -159,10 +153,13 @@ libtess.GluHalfEdge.prototype.lPrev = function() {
   return this.oNext.sym;
 };
 
-
+// NOTE(bckenny): libtess.GluHalfEdge.dPrev is called nowhere in libtess and
+// isn't part of the current public API. It could be useful for mesh traversal
+// and manipulation if made public, however.
+/* istanbul ignore next */
 /**
- * [dPrev description]
- * @return {libtess.GluHalfEdge} [description].
+ * The edge clockwise around destination vertex (keep same dest).
+ * @return {libtess.GluHalfEdge}
  */
 libtess.GluHalfEdge.prototype.dPrev = function() {
   return this.lNext.sym;

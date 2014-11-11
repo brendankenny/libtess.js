@@ -1,6 +1,6 @@
 /**
  * Copyright 2000, Silicon Graphics, Inc. All Rights Reserved.
- * Copyright 2012, Google Inc. All Rights Reserved.
+ * Copyright 2014, Google Inc. All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -27,11 +27,7 @@
  * elsewhere herein. All Rights Reserved.
  */
 
-// require libtess
-// requre libtess.GluHalfEdge
-/*global libtess */
-
-
+/* global libtess */
 
 /**
  * Each face has a pointer to the next and previous faces in the
@@ -39,8 +35,8 @@
  * the left face (null if this is the dummy header). There is also
  * a field "data" for client data.
  *
- * @param {libtess.GluFace=} opt_nextFace [description].
- * @param {libtess.GluFace=} opt_prevFace [description].
+ * @param {libtess.GluFace=} opt_nextFace
+ * @param {libtess.GluFace=} opt_prevFace
  * @constructor
  */
 libtess.GluFace = function(opt_nextFace, opt_prevFace) {
@@ -69,18 +65,6 @@ libtess.GluFace = function(opt_nextFace, opt_prevFace) {
    * @type {Object}
    */
   this.data = null;
-
-  /**
-   * "stack" for conversion to strips
-   * @type {libtess.GluFace}
-   */
-  this.trail = null;
-
-  /**
-   * Flag for conversion to strips.
-   * @type {boolean}
-   */
-  this.marked = false;
 
   /**
    * This face is in the polygon interior.
