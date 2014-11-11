@@ -40,9 +40,10 @@ var libtess = libtess || {};
 
 
 /**
- * @define {boolean} [DEBUG description].
+ * Whether to run asserts and extra debug checks.
+ * @define {boolean}
  */
-libtess.DEBUG = false;
+libtess.DEBUG = true;
 
 
 /**
