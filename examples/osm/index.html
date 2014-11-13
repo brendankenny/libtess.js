@@ -1,0 +1,70 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>OSM building triangulation</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      #poly-view {
+        width: 800px;
+        height: 800px;
+      }
+    </style>
+
+    <script src="../../libtess.min.js"></script>
+    <script src="triangulate.js"></script>
+
+    <!-- test data -->
+    <script src="nyc_midtown_17.js"></script>
+    <script src="nyc_midtown_16.js"></script>
+    <script src="nyc_midtown_15.js"></script>
+    <script src="nyc_midtown_14.js"></script>
+  </head>
+
+  <body style='padding: 0px 10px'>
+    <h1>OpenStreetMap polygon triangulation benchmark</h1>
+    <p>
+      Polygons were sourced from the <a href='http://mapzen.com/vector'>Mapzen Vector Tile Service</a>, which serves
+      commonly rendered OpenStreetMap features. For each zoom level, polygons are simplified to a precision of 1 pixel
+      (assuming a device pixel density of 1). Higher zoom levels have fewer polygons with more vertices each, lower zoom levels have more polygons with fewer vertices each.
+    </p>
+    <div id='message'></div>
+  </body>
+
+  <script>
+    // performance.now polyfill
+    window.nowish = window.performance.now ?
+    window.performance.now.bind(window.performance) : Date.now;
+
+    var message = document.getElementById('message');
+
+    function tesselate(polys, times, name) {
+      times = times || 1;
+      name = name ? name + ': ' : '';
+      var startTime = window.nowish();
+      for (var i=0; i < times; i++) {
+        var polyTriangles = [];
+        polys.forEach(function(poly) {
+          polyTriangles.push(triangulate(poly));
+        });
+        polyTriangles = new Float32Array(polyTriangles);
+      }
+      var endTime = window.nowish();
+      var log = name + (endTime - startTime).toFixed(2) + 'ms, ' + polys.length + ' polys, ' + times + ' time(s)';
+      console.log(log);
+      message.innerHTML += log + '<br>';
+    }
+
+    // Midtown zoom 14-17
+    // 40.76489265666703, -73.97298574447633
+    var times = 10;
+    tesselate(nyc_midtown_17, times, 'NYC Midtown zoom 17');
+    tesselate(nyc_midtown_16, times, 'NYC Midtown zoom 16');
+    tesselate(nyc_midtown_15, times, 'NYC Midtown zoom 15');
+    tesselate(nyc_midtown_14, times, 'NYC Midtown zoom 14');
+  </script>
+
+</html>
