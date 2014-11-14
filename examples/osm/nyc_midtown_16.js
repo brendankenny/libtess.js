@@ -1,3 +1,4 @@
+/* exported nyc_midtown_16 */
 var nyc_midtown_16 =
 [
   [

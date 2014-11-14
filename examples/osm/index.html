@@ -35,6 +35,8 @@
   </body>
 
   <script>
+    /* global triangulate, nyc_midtown_14, nyc_midtown_15, nyc_midtown_16, nyc_midtown_17 */
+
     // performance.now polyfill
     window.nowish = window.performance.now ?
     window.performance.now.bind(window.performance) : Date.now;
@@ -47,9 +49,9 @@
       var startTime = window.nowish();
       for (var i=0; i < times; i++) {
         var polyTriangles = [];
-        polys.forEach(function(poly) {
-          polyTriangles.push(triangulate(poly));
-        });
+        for (var p=0; p < polys.length; p++) {
+          polyTriangles.push(triangulate(polys[p]));
+        }
         polyTriangles = new Float32Array(polyTriangles);
       }
       var endTime = window.nowish();
