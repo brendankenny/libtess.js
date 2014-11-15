@@ -27,7 +27,10 @@ var LINT_SRC = LIBTESS_SRC.concat([
   '!./build/externs/*',
   '!./test/browser/*-browserified.js',
   '!./test/expectations/*',
-  '!./third_party/node_modules/**'
+  '!./third_party/node_modules/**',
+
+  // NOTE(bckenny): It takes two minutes to lint these. Remove for now.
+  '!./examples/osm/nyc_midtown_*.js'
 ]);
 
 gulp.task('build-cat', function() {
