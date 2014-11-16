@@ -12,7 +12,7 @@
 module.exports = {
   // a selection of polygons that had more than one contour from the Mapzen
   // nyc_midtown_14 benchmark data
-  name: 'NYC midtown multi-contour z14 - OSM',
+  name: 'Mapzen NYC multi-contour z14 - OSM',
   value: [
     [
       2096.372787197828, -1345.1183500196094, 0,

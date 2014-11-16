@@ -21,7 +21,7 @@ var geometryFiles = {"degenerate-hourglass": require("./geometry/degenerate-hour
 var geometries = Object.keys(geometryFiles).map(function(filename) {
   return geometryFiles[filename];
 });
-var thirdPartyFiles = {"osm_nyc_midtown": require("./../third_party/test/geometry/osm_nyc_midtown.js"),"poly2tri-dude": require("./../third_party/test/geometry/poly2tri-dude.js"),"roboto-registered": require("./../third_party/test/geometry/roboto-registered.js")};
+var thirdPartyFiles = {"osm_building": require("./../third_party/test/geometry/osm_building.js"),"osm_nyc_midtown": require("./../third_party/test/geometry/osm_nyc_midtown.js"),"osm_two_buildings": require("./../third_party/test/geometry/osm_two_buildings.js"),"poly2tri-dude": require("./../third_party/test/geometry/poly2tri-dude.js"),"roboto-registered": require("./../third_party/test/geometry/roboto-registered.js")};
 var thirdPartyGeometries = Object.keys(thirdPartyFiles).map(function(filename) {
   return thirdPartyFiles[filename];
 });
@@ -344,7 +344,7 @@ function optionsToOptions(options, selectElement) {
 
 document.addEventListener('DOMContentLoaded', init, false);
 
-},{"./../third_party/test/geometry/osm_nyc_midtown.js":12,"./../third_party/test/geometry/poly2tri-dude.js":13,"./../third_party/test/geometry/roboto-registered.js":14,"./common.js":3,"./expectations/libtess.baseline.js":4,"./geometry/degenerate-hourglass.js":5,"./geometry/hourglass.js":6,"./geometry/letter-e.js":7,"./geometry/shared-borders.js":8,"./geometry/shared-edge-triangles.js":9,"./geometry/two-opposite-triangles.js":10,"./geometry/two-triangles.js":11,"./rfolder.js":2}],2:[function(require,module,exports){
+},{"./../third_party/test/geometry/osm_building.js":12,"./../third_party/test/geometry/osm_nyc_midtown.js":13,"./../third_party/test/geometry/osm_two_buildings.js":14,"./../third_party/test/geometry/poly2tri-dude.js":15,"./../third_party/test/geometry/roboto-registered.js":16,"./common.js":3,"./expectations/libtess.baseline.js":4,"./geometry/degenerate-hourglass.js":5,"./geometry/hourglass.js":6,"./geometry/letter-e.js":7,"./geometry/shared-borders.js":8,"./geometry/shared-edge-triangles.js":9,"./geometry/two-opposite-triangles.js":10,"./geometry/two-triangles.js":11,"./rfolder.js":2}],2:[function(require,module,exports){
 
 },{}],3:[function(require,module,exports){
 /* jshint node: true */
@@ -882,9 +882,59 @@ module.exports = {
 /* jshint node: true */
 
 module.exports = {
+  // a single building from the from the Mapzen nyc_midtown_14 benchmark data
+  // that happens to hit some nice corner cases
+  name: 'Mapzen single building - OSM',
+  value: [
+    [
+      1766.3742691542516, -1401.2586967901234, 0,
+      1795.4547768888094, -1356.2028538183904, 0,
+      1836.465749333181, -1394.6111212094906, 0,
+      1848.7690410664927, -1372.2063095273256, 0,
+      1934.519256179295, -1425.1407052855038, 0,
+      1905.2523349337682, -1478.321134954032, 0,
+      1766.3742691542516, -1401.2586967901234, 0
+    ],
+    [
+      1885.3060892444894, -1439.4206524621932, 0,
+      1901.151237689331, -1448.284061682003, 0,
+      1910.0990862205217, -1431.788268456597, 0,
+      1894.4403512897684, -1423.1710564252976, 0,
+      1885.3060892444894, -1439.4206524621932, 0
+    ],
+    [
+      1823.91778986799, -1380.8235484254265, 0,
+      1876.2999864892688, -1332.8131596033704, 0,
+      1934.0881749348869, -1369.0056196450514, 0,
+      1897.7375402662997, -1426.6179417774301, 0,
+      1823.91778986799, -1380.8235484254265, 0
+    ],
+    [
+      1877.2320540456733, -1399.0428385611244, 0,
+      1883.7565269342672, -1402.7359354405016, 0,
+      1888.789691735109, -1393.380088398586, 0,
+      1882.0788053324268, -1389.9331960377222, 0,
+      1877.2320540456733, -1399.0428385611244, 0
+    ]
+  ]
+};
+
+},{}],13:[function(require,module,exports){
+/**
+ * Copyright 2014, OpenStreetMap contributors.
+ * Copyright 2014, Mapzen.
+ *
+ * This data is made available under the Open Database License:
+ * http://opendatacommons.org/licenses/odbl/1.0/. Any rights in individual
+ * contents of the database are licensed under the Database Contents License:
+ * http://opendatacommons.org/licenses/dbcl/1.0/.
+ */
+/* jshint node: true */
+
+module.exports = {
   // a selection of polygons that had more than one contour from the Mapzen
   // nyc_midtown_14 benchmark data
-  name: 'NYC midtown multi-contour z14 - OSM',
+  name: 'Mapzen NYC multi-contour z14 - OSM',
   value: [
     [
       2096.372787197828, -1345.1183500196094, 0,
@@ -1520,7 +1570,74 @@ module.exports = {
   ]
 };
 
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
+/**
+ * Copyright 2014, OpenStreetMap contributors.
+ * Copyright 2014, Mapzen.
+ *
+ * This data is made available under the Open Database License:
+ * http://opendatacommons.org/licenses/odbl/1.0/. Any rights in individual
+ * contents of the database are licensed under the Database Contents License:
+ * http://opendatacommons.org/licenses/dbcl/1.0/.
+ */
+/* jshint node: true */
+
+module.exports = {
+  // two buildings from the from the Mapzen nyc_midtown_14 benchmark data that,
+  // together, happen to hit some nice corner cases
+  name: 'Mapzen two buildings - OSM',
+  value: [
+    [
+      1862.9511367068185, -959.1581256950363, 0,
+      1920.3664981289392, -839.0238458980297, 0,
+      1962.495951639125, -855.2715406927349, 0,
+      1907.6903793736897, -827.69969021369, 0,
+      1923.7219413295004, -798.6507511606233, 0,
+      2027.74068053442, -856.2562492035164, 0,
+      1946.0915626644953, -1004.9468948868741, 0,
+      1862.9511367068185, -959.1581256950363, 0
+    ],
+    [
+      1854.287109686542, -1032.193138983415, 0,
+      1888.2143687078535, -970.6494130824212, 0,
+      2000.0624753765906, -1035.1472349119042, 0,
+      1967.2536974179739, -1094.7214458874457, 0,
+      1854.287109686542, -1032.193138983415, 0
+    ],
+    [
+      1766.3742691542516, -1131.2586967901234, 0,
+      1795.4547768888094, -1086.2028538183904, 0,
+      1836.465749333181, -1124.6111212094906, 0,
+      1848.7690410664927, -1102.2063095273256, 0,
+      1934.519256179295, -1155.1407052855038, 0,
+      1905.2523349337682, -1208.321134954032, 0,
+      1766.3742691542516, -1131.2586967901234, 0
+    ],
+    [
+      1885.3060892444894, -1169.4206524621932, 0,
+      1901.151237689331, -1178.284061682003, 0,
+      1910.0990862205217, -1161.788268456597, 0,
+      1894.4403512897684, -1153.1710564252976, 0,
+      1885.3060892444894, -1169.4206524621932, 0
+    ],
+    [
+      1823.91778986799, -1110.8235484254265, 0,
+      1876.2999864892688, -1062.8131596033704, 0,
+      1934.0881749348869, -1099.0056196450514, 0,
+      1897.7375402662997, -1156.6179417774301, 0,
+      1823.91778986799, -1110.8235484254265, 0
+    ],
+    [
+      1877.2320540456733, -1129.0428385611244, 0,
+      1883.7565269342672, -1132.7359354405016, 0,
+      1888.789691735109, -1123.380088398586, 0,
+      1882.0788053324268, -1119.9331960377222, 0,
+      1877.2320540456733, -1129.0428385611244, 0
+    ]
+  ]
+};
+
+},{}],15:[function(require,module,exports){
 /**
  * Poly2Tri Copyright (c) 2009-2010, Poly2Tri Contributors
  * http://code.google.com/p/poly2tri/
@@ -1673,7 +1790,7 @@ module.exports = {
   ]
 };
 
-},{}],14:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 /**
  * Copyright (C) 2008 The Android Open Source Project
  * https://developer.android.com/design/style/typography.html
