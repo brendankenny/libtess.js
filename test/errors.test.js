@@ -22,6 +22,32 @@ var HOURGLASS_RESULT_ = [
 suite('Explicit Error States', function() {
   var contour = hourglass.value[0];
 
+  suite('ERROR_DATA', function() {
+    test('polygon data should roundtrip even through error', function() {
+      var resultVerts = [];
+      var tess = createTessellator(libtess);
+
+      // overwrite error handler
+      var errorValue = -1;
+      var errorData = null;
+      var errorHandler = function errorDataHandler(errorNumber, polygonData) {
+        errorValue = errorNumber;
+        errorData = polygonData;
+      };
+      tess.gluTessCallback(libtess.gluEnum.GLU_TESS_ERROR_DATA, errorHandler);
+
+      tess.gluTessBeginPolygon(resultVerts);
+      var coords = [contour[0], contour[1], contour[2]];
+      tess.gluTessVertex(coords, coords);
+      assert.strictEqual(errorValue,
+          libtess.errorType.GLU_TESS_MISSING_BEGIN_CONTOUR,
+          'did not throw GLU_TESS_MISSING_BEGIN_CONTOUR');
+      assert.isNotNull(errorData, 'ERROR_DATA data is null');
+      assert.strictEqual(errorData, resultVerts,
+          'ERROR_DATA did not return polygon data');
+    });
+  });
+
   suite('GLU_TESS_MISSING_BEGIN_POLYGON', function() {
     test('should throw when gluTessBeginContour called without it', function() {
       var tess = createTessellator(libtess);
