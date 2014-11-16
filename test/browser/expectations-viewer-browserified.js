@@ -21,7 +21,7 @@ var geometryFiles = {"degenerate-hourglass": require("./geometry/degenerate-hour
 var geometries = Object.keys(geometryFiles).map(function(filename) {
   return geometryFiles[filename];
 });
-var thirdPartyFiles = {"osm_nyc_midtown_16": require("./../third_party/test/geometry/osm_nyc_midtown_16.js"),"poly2tri-dude": require("./../third_party/test/geometry/poly2tri-dude.js"),"roboto-registered": require("./../third_party/test/geometry/roboto-registered.js")};
+var thirdPartyFiles = {"osm_nyc_midtown": require("./../third_party/test/geometry/osm_nyc_midtown.js"),"poly2tri-dude": require("./../third_party/test/geometry/poly2tri-dude.js"),"roboto-registered": require("./../third_party/test/geometry/roboto-registered.js")};
 var thirdPartyGeometries = Object.keys(thirdPartyFiles).map(function(filename) {
   return thirdPartyFiles[filename];
 });
@@ -344,7 +344,7 @@ function optionsToOptions(options, selectElement) {
 
 document.addEventListener('DOMContentLoaded', init, false);
 
-},{"./../third_party/test/geometry/osm_nyc_midtown_16.js":12,"./../third_party/test/geometry/poly2tri-dude.js":13,"./../third_party/test/geometry/roboto-registered.js":14,"./common.js":3,"./expectations/libtess.baseline.js":4,"./geometry/degenerate-hourglass.js":5,"./geometry/hourglass.js":6,"./geometry/letter-e.js":7,"./geometry/shared-borders.js":8,"./geometry/shared-edge-triangles.js":9,"./geometry/two-opposite-triangles.js":10,"./geometry/two-triangles.js":11,"./rfolder.js":2}],2:[function(require,module,exports){
+},{"./../third_party/test/geometry/osm_nyc_midtown.js":12,"./../third_party/test/geometry/poly2tri-dude.js":13,"./../third_party/test/geometry/roboto-registered.js":14,"./common.js":3,"./expectations/libtess.baseline.js":4,"./geometry/degenerate-hourglass.js":5,"./geometry/hourglass.js":6,"./geometry/letter-e.js":7,"./geometry/shared-borders.js":8,"./geometry/shared-edge-triangles.js":9,"./geometry/two-opposite-triangles.js":10,"./geometry/two-triangles.js":11,"./rfolder.js":2}],2:[function(require,module,exports){
 
 },{}],3:[function(require,module,exports){
 /* jshint node: true */

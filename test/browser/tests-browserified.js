@@ -598,7 +598,7 @@ var geometryFiles = {"degenerate-hourglass": require("./geometry/degenerate-hour
 var geometries = Object.keys(geometryFiles).map(function(filename) {
   return geometryFiles[filename];
 });
-var thirdPartyFiles = {"osm_nyc_midtown_16": require("./../third_party/test/geometry/osm_nyc_midtown_16.js"),"poly2tri-dude": require("./../third_party/test/geometry/poly2tri-dude.js"),"roboto-registered": require("./../third_party/test/geometry/roboto-registered.js")};
+var thirdPartyFiles = {"osm_nyc_midtown": require("./../third_party/test/geometry/osm_nyc_midtown.js"),"poly2tri-dude": require("./../third_party/test/geometry/poly2tri-dude.js"),"roboto-registered": require("./../third_party/test/geometry/roboto-registered.js")};
 var thirdPartyGeometries = Object.keys(thirdPartyFiles).map(function(filename) {
   return thirdPartyFiles[filename];
 });
@@ -662,7 +662,7 @@ function testGeometry(geometry) {
   });
 }
 
-},{"./../third_party/test/geometry/osm_nyc_midtown_16.js":14,"./../third_party/test/geometry/poly2tri-dude.js":15,"./../third_party/test/geometry/roboto-registered.js":16,"./common.js":5,"./expectations/libtess.baseline.js":6,"./geometry/degenerate-hourglass.js":7,"./geometry/hourglass.js":8,"./geometry/letter-e.js":9,"./geometry/shared-borders.js":10,"./geometry/shared-edge-triangles.js":11,"./geometry/two-opposite-triangles.js":12,"./geometry/two-triangles.js":13,"./rfolder.js":4,"chai":undefined}],4:[function(require,module,exports){
+},{"./../third_party/test/geometry/osm_nyc_midtown.js":14,"./../third_party/test/geometry/poly2tri-dude.js":15,"./../third_party/test/geometry/roboto-registered.js":16,"./common.js":5,"./expectations/libtess.baseline.js":6,"./geometry/degenerate-hourglass.js":7,"./geometry/hourglass.js":8,"./geometry/letter-e.js":9,"./geometry/shared-borders.js":10,"./geometry/shared-edge-triangles.js":11,"./geometry/two-opposite-triangles.js":12,"./geometry/two-triangles.js":13,"./rfolder.js":4,"chai":undefined}],4:[function(require,module,exports){
 
 },{}],5:[function(require,module,exports){
 /* jshint node: true */
