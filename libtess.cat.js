@@ -5086,12 +5086,15 @@ libtess.PriorityQ.prototype.minimum = function() {
   return sortMin;
 };
 
-
+// NOTE(bckenny): libtess.PriorityQ.isEmpty_ isn't called within libtess and
+// isn't part of the public API. For now, leaving in but ignoring for coverage.
+/* istanbul ignore next */
 /**
- * [isEmpty description]
- * @return {boolean} [description].
+ * Returns whether the priority queue is empty.
+ * @private
+ * @return {boolean}
  */
-libtess.PriorityQ.prototype.isEmpty = function() {
+libtess.PriorityQ.prototype.isEmpty_ = function() {
   return (this.size_ === 0) && this.heap_.isEmpty();
 };
 
