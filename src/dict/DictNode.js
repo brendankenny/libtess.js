@@ -27,9 +27,7 @@
  * elsewhere herein. All Rights Reserved.
  */
 
-// require libtess
-// require libtess.Dict
-/*global libtess */
+/* global libtess */
 
 // TODO(bckenny): better typing for DictKey?
 

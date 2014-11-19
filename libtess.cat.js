@@ -35,8 +35,9 @@
 
 /**
  * Base namespace.
+ * @const
  */
-var libtess = libtess || {};
+var libtess = {};
 
 
 /**
@@ -241,15 +242,10 @@ libtess.PQKey;
 // TODO(bckenny): get rid of this:
 // NOTE(bckenny): using NO_BRANCH_CONDITIONS = false
 
-// require libtess
-// require libtess.GluHalfEdge
-// require libtess.GluVertex
-/*global libtess */
+/* global libtess */
 
-
-libtess.geom = function() {
-
-};
+/** @const */
+libtess.geom = {};
 
 
 /**
@@ -608,19 +604,13 @@ libtess.geom.edgeIntersect = function(o1, d1, o2, d2, v) {
 
 
 
-// require libtess
-// require libtess.GluFace
-// require libtess.GluHalfEdge
-// require libtess.GluMesh
-// require libtess.GluVertex
-/*global libtess */
+/* global libtess */
 
 // TODO(bckenny): could maybe merge GluMesh and mesh.js since these are
 // operations on the mesh
 
-libtess.mesh = function() {
-
-};
+/** @const */
+libtess.mesh = {};
 
 /****************** Basic Edge Operations **********************/
 
@@ -1213,13 +1203,10 @@ libtess.mesh.killFace_ = function(fDel, newLFace) {
 
 
 
-// require libtess
-// require libtess.GluTesselator
-/*global libtess */
+/* global libtess */
 
-libtess.normal = function() {
-
-};
+/** @const */
+libtess.normal = {};
 
 
 // TODO(bckenny): NOTE:
@@ -1490,7 +1477,8 @@ libtess.normal.checkOrientation_ = function(tess) {
 
 /* global libtess */
 
-libtess.render = function() {};
+/** @const */
+libtess.render = {};
 
 /**
  * Takes a mesh, breaks it into separate triangles, and renders them. The
@@ -1582,11 +1570,7 @@ libtess.render.renderBoundary = function(tess, mesh) {
 
 
 
-// require libtess.mesh
-// require libtess.geom
-// require libtess.Dict
-// require libtess.PriorityQ
-/*global libtess */
+/* global libtess */
 
 // TODO(bckenny): a number of these never return null (as opposed to original) and should be typed appropriately
 
@@ -1620,9 +1604,8 @@ libtess.render.renderBoundary = function(tess, mesh) {
  *   when it is necessary.)
  */
 
-libtess.sweep = function() {
-
-};
+/** @const */
+libtess.sweep = {};
 
 
 /**
@@ -3067,15 +3050,10 @@ libtess.sweep.removeDegenerateFaces_ = function(mesh) {
 
 
 
-// require libtess
-// require libtess.geom
-// require libtess.GluFace
-// require libtess.GluMesh
-/*global libtess */
+/* global libtess */
 
-libtess.tessmono = function() {
-
-};
+/** @const */
+libtess.tessmono = {};
 
 
 /**
@@ -3234,8 +3212,7 @@ libtess.tessmono.setWindingNumber = function(mesh, value, keepOnlyBoundary) {
 
 
 
-// require libtess
-/*global libtess */
+/* global libtess */
 
 
 // TODO(bckenny): better typing for DictKey? actually libtess.ActiveRegion
@@ -3379,9 +3356,7 @@ libtess.Dict.prototype.getMax = function() {
 
 
 
-// require libtess
-// require libtess.Dict
-/*global libtess */
+/* global libtess */
 
 // TODO(bckenny): better typing for DictKey?
 
@@ -3441,10 +3416,7 @@ libtess.DictNode.prototype.getPred = function() {
 
 
 
-// require libtess
-/*global libtess */
-
-
+/* global libtess */
 
 /**
  * Cached vertex data for single-countour polygons for quick-and-dirty
@@ -4519,12 +4491,7 @@ libtess.GluHalfEdge.prototype.rNext = function() {
 
 
 
-// require libtess.GluFace
-// require libtess.GluHalfEdge
-// require libtess.GluVertex
-/*global libtess */
-
-
+/* global libtess */
 
 /**
  * Creates a new mesh with no edges, no vertices,
@@ -4632,10 +4599,7 @@ libtess.GluMesh.prototype.checkMesh = function() {
 
 
 
-// requre libtess.GluHalfEdge
-/*global libtess */
-
-
+/* global libtess */
 
 /**
  * Each vertex has a pointer to next and previous vertices in the
@@ -4705,12 +4669,9 @@ libtess.GluVertex = function(opt_nextVertex, opt_prevVertex) {
 
 
 
-// require libtess
-/*global libtess */
+/* global libtess */
 
 // TODO(bckenny): more specific typing on key
-
-
 
 /**
  * [PQHandleElem description]
@@ -4762,13 +4723,10 @@ libtess.PQHandleElem.realloc = function(oldArray, size) {
 
 
 
-// require libtess
-/*global libtess */
+/* global libtess */
 
 // TODO(bckenny): maybe just have these created inline as literals
 // (or unboxed directly - PQHandle is just an array index number)
-
-
 
 /**
  * [PQNode description]
@@ -4812,14 +4770,10 @@ libtess.PQNode.realloc = function(oldArray, size) {
 
 
 
-// require libtess
-// require libtess.PriorityQHeap
-/*global libtess */
+/* global libtess */
 
 // TODO(bckenny): preallocating arrays may actually be hurting us in sort
 // performance (esp if theres some undefs in there)
-
-
 
 /**
  * [PriorityQ description]
@@ -5120,14 +5074,9 @@ libtess.PriorityQ.prototype.remove = function(curr) {
 
 
 
-// require libtess
-// require libtess.PQNode
-// require libtess.PQHandleElem
-/*global libtess */
+/* global libtess */
 
 // TODO(bckenny): keys appear to always be GluVertex in this case?
-
-
 
 /**
  * [PriorityQHeap description]
@@ -5409,15 +5358,10 @@ libtess.PriorityQHeap.prototype.floatUp_ = function(curr) {
 
 
 
-// require libtess
-// require libtess.DictNode
-// require libtess.GluHalfEdge
-/*global libtess */
+/* global libtess */
 
 // TODO(bckenny): apparently only visible outside of sweep for debugging routines.
 // find out if we can hide
-
-
 
 /**
  * For each pair of adjacent edges crossing the sweep line, there is

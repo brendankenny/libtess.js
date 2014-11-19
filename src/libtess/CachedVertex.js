@@ -27,10 +27,7 @@
  * elsewhere herein. All Rights Reserved.
  */
 
-// require libtess
-/*global libtess */
-
-
+/* global libtess */
 
 /**
  * Cached vertex data for single-countour polygons for quick-and-dirty

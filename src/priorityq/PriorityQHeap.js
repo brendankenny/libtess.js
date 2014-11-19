@@ -27,14 +27,9 @@
  * elsewhere herein. All Rights Reserved.
  */
 
-// require libtess
-// require libtess.PQNode
-// require libtess.PQHandleElem
-/*global libtess */
+/* global libtess */
 
 // TODO(bckenny): keys appear to always be GluVertex in this case?
-
-
 
 /**
  * [PriorityQHeap description]

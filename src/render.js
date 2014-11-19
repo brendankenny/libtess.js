@@ -29,7 +29,8 @@
 
 /* global libtess */
 
-libtess.render = function() {};
+/** @const */
+libtess.render = {};
 
 /**
  * Takes a mesh, breaks it into separate triangles, and renders them. The

@@ -27,10 +27,7 @@
  * elsewhere herein. All Rights Reserved.
  */
 
-// requre libtess.GluHalfEdge
-/*global libtess */
-
-
+/* global libtess */
 
 /**
  * Each vertex has a pointer to next and previous vertices in the

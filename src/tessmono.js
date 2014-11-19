@@ -27,15 +27,10 @@
  * elsewhere herein. All Rights Reserved.
  */
 
-// require libtess
-// require libtess.geom
-// require libtess.GluFace
-// require libtess.GluMesh
-/*global libtess */
+/* global libtess */
 
-libtess.tessmono = function() {
-
-};
+/** @const */
+libtess.tessmono = {};
 
 
 /**

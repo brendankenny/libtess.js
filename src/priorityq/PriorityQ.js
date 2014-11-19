@@ -27,14 +27,10 @@
  * elsewhere herein. All Rights Reserved.
  */
 
-// require libtess
-// require libtess.PriorityQHeap
-/*global libtess */
+/* global libtess */
 
 // TODO(bckenny): preallocating arrays may actually be hurting us in sort
 // performance (esp if theres some undefs in there)
-
-
 
 /**
  * [PriorityQ description]

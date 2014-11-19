@@ -35,8 +35,9 @@
 
 /**
  * Base namespace.
+ * @const
  */
-var libtess = libtess || {};
+var libtess = {};
 
 
 /**

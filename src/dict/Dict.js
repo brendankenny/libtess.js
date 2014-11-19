@@ -27,8 +27,7 @@
  * elsewhere herein. All Rights Reserved.
  */
 
-// require libtess
-/*global libtess */
+/* global libtess */
 
 
 // TODO(bckenny): better typing for DictKey? actually libtess.ActiveRegion

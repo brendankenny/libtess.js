@@ -27,19 +27,13 @@
  * elsewhere herein. All Rights Reserved.
  */
 
-// require libtess
-// require libtess.GluFace
-// require libtess.GluHalfEdge
-// require libtess.GluMesh
-// require libtess.GluVertex
-/*global libtess */
+/* global libtess */
 
 // TODO(bckenny): could maybe merge GluMesh and mesh.js since these are
 // operations on the mesh
 
-libtess.mesh = function() {
-
-};
+/** @const */
+libtess.mesh = {};
 
 /****************** Basic Edge Operations **********************/
 

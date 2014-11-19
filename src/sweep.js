@@ -27,11 +27,7 @@
  * elsewhere herein. All Rights Reserved.
  */
 
-// require libtess.mesh
-// require libtess.geom
-// require libtess.Dict
-// require libtess.PriorityQ
-/*global libtess */
+/* global libtess */
 
 // TODO(bckenny): a number of these never return null (as opposed to original) and should be typed appropriately
 
@@ -65,9 +61,8 @@
  *   when it is necessary.)
  */
 
-libtess.sweep = function() {
-
-};
+/** @const */
+libtess.sweep = {};
 
 
 /**

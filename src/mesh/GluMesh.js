@@ -27,12 +27,7 @@
  * elsewhere herein. All Rights Reserved.
  */
 
-// require libtess.GluFace
-// require libtess.GluHalfEdge
-// require libtess.GluVertex
-/*global libtess */
-
-
+/* global libtess */
 
 /**
  * Creates a new mesh with no edges, no vertices,

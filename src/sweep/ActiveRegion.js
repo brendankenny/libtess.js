@@ -27,15 +27,10 @@
  * elsewhere herein. All Rights Reserved.
  */
 
-// require libtess
-// require libtess.DictNode
-// require libtess.GluHalfEdge
-/*global libtess */
+/* global libtess */
 
 // TODO(bckenny): apparently only visible outside of sweep for debugging routines.
 // find out if we can hide
-
-
 
 /**
  * For each pair of adjacent edges crossing the sweep line, there is

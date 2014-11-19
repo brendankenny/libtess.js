@@ -27,12 +27,9 @@
  * elsewhere herein. All Rights Reserved.
  */
 
-// require libtess
-/*global libtess */
+/* global libtess */
 
 // TODO(bckenny): more specific typing on key
-
-
 
 /**
  * [PQHandleElem description]

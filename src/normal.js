@@ -27,13 +27,10 @@
  * elsewhere herein. All Rights Reserved.
  */
 
-// require libtess
-// require libtess.GluTesselator
-/*global libtess */
+/* global libtess */
 
-libtess.normal = function() {
-
-};
+/** @const */
+libtess.normal = {};
 
 
 // TODO(bckenny): NOTE:

@@ -30,15 +30,10 @@
 // TODO(bckenny): get rid of this:
 // NOTE(bckenny): using NO_BRANCH_CONDITIONS = false
 
-// require libtess
-// require libtess.GluHalfEdge
-// require libtess.GluVertex
-/*global libtess */
+/* global libtess */
 
-
-libtess.geom = function() {
-
-};
+/** @const */
+libtess.geom = {};
 
 
 /**

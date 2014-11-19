@@ -27,13 +27,10 @@
  * elsewhere herein. All Rights Reserved.
  */
 
-// require libtess
-/*global libtess */
+/* global libtess */
 
 // TODO(bckenny): maybe just have these created inline as literals
 // (or unboxed directly - PQHandle is just an array index number)
-
-
 
 /**
  * [PQNode description]
