@@ -34,6 +34,7 @@
  * and no loops (what we usually call a "face").
  *
  * @constructor
+ * @struct
  */
 libtess.GluMesh = function() {
   /**

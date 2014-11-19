@@ -3226,6 +3226,7 @@ libtess.dictKey;
  * [Dict description]
  *
  * @constructor
+ * @struct
  * @param {Object} frame [description].
  * @param {function(Object, Object, Object): boolean} leq [description].
  */
@@ -3363,6 +3364,7 @@ libtess.Dict.prototype.getMax = function() {
 /**
  * [DictNode description]
  * @constructor
+ * @struct
  */
 libtess.DictNode = function() {
   // TODO(bckenny): could probably move all three properties to opt params
@@ -3422,6 +3424,7 @@ libtess.DictNode.prototype.getPred = function() {
  * Cached vertex data for single-countour polygons for quick-and-dirty
  * decomposition.
  * @constructor
+ * @struct
  */
 libtess.CachedVertex = function() {
   /**
@@ -3448,6 +3451,7 @@ libtess.CachedVertex = function() {
 /**
  * The tesselator main class, providing the public API.
  * @constructor
+ * @struct
  */
 libtess.GluTesselator = function() {
   // Only initialize fields which can be changed by the api. Other fields
@@ -4283,6 +4287,7 @@ libtess.GluTesselator.prototype.callErrorOrErrorData = function(errno) {
  * @param {libtess.GluFace=} opt_nextFace
  * @param {libtess.GluFace=} opt_prevFace
  * @constructor
+ * @struct
  */
 libtess.GluFace = function(opt_nextFace, opt_prevFace) {
   // TODO(bckenny): reverse order of params?
@@ -4349,6 +4354,7 @@ libtess.GluFace = function(opt_nextFace, opt_prevFace) {
  *
  * @param {libtess.GluHalfEdge=} opt_nextEdge
  * @constructor
+ * @struct
  */
 libtess.GluHalfEdge = function(opt_nextEdge) {
   // TODO(bckenny): are these the right defaults? (from gl_meshNewMesh requirements)
@@ -4498,6 +4504,7 @@ libtess.GluHalfEdge.prototype.rNext = function() {
  * and no loops (what we usually call a "face").
  *
  * @constructor
+ * @struct
  */
 libtess.GluMesh = function() {
   /**
@@ -4610,6 +4617,7 @@ libtess.GluMesh.prototype.checkMesh = function() {
  * @param {libtess.GluVertex=} opt_nextVertex [description].
  * @param {libtess.GluVertex=} opt_prevVertex [description].
  * @constructor
+ * @struct
  */
 libtess.GluVertex = function(opt_nextVertex, opt_prevVertex) {
   // TODO(bckenny): reverse order of params?
@@ -4676,6 +4684,7 @@ libtess.GluVertex = function(opt_nextVertex, opt_prevVertex) {
 /**
  * [PQHandleElem description]
  * @constructor
+ * @struct
  */
 libtess.PQHandleElem = function() {
   // TODO(bckenny): if key could instead be an indexed into another store, makes heap storage a lot easier
@@ -4731,6 +4740,7 @@ libtess.PQHandleElem.realloc = function(oldArray, size) {
 /**
  * [PQNode description]
  * @constructor
+ * @struct
  */
 libtess.PQNode = function() {
   /**
@@ -4778,6 +4788,7 @@ libtess.PQNode.realloc = function(oldArray, size) {
 /**
  * [PriorityQ description]
  * @constructor
+ * @struct
  * @param {function(Object, Object): boolean} leq [description].
  */
 libtess.PriorityQ = function(leq) {
@@ -5081,6 +5092,7 @@ libtess.PriorityQ.prototype.remove = function(curr) {
 /**
  * [PriorityQHeap description]
  * @constructor
+ * @struct
  * @param {function(libtess.PQKey, libtess.PQKey): boolean} leq [description].
  */
 libtess.PriorityQHeap = function(leq) {
@@ -5370,6 +5382,7 @@ libtess.PriorityQHeap.prototype.floatUp_ = function(curr) {
  * sweep line crosses each vertex, we update the affected regions.
  *
  * @constructor
+ * @struct
  */
 libtess.ActiveRegion = function() {
   // TODO(bckenny): I *think* eUp and nodeUp could be passed in as constructor params

@@ -34,6 +34,7 @@
 /**
  * [DictNode description]
  * @constructor
+ * @struct
  */
 libtess.DictNode = function() {
   // TODO(bckenny): could probably move all three properties to opt params

@@ -33,6 +33,7 @@
  * Cached vertex data for single-countour polygons for quick-and-dirty
  * decomposition.
  * @constructor
+ * @struct
  */
 libtess.CachedVertex = function() {
   /**

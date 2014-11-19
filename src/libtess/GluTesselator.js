@@ -35,6 +35,7 @@
 /**
  * The tesselator main class, providing the public API.
  * @constructor
+ * @struct
  */
 libtess.GluTesselator = function() {
   // Only initialize fields which can be changed by the api. Other fields

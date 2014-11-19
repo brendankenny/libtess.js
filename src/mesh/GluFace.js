@@ -38,6 +38,7 @@
  * @param {libtess.GluFace=} opt_nextFace
  * @param {libtess.GluFace=} opt_prevFace
  * @constructor
+ * @struct
  */
 libtess.GluFace = function(opt_nextFace, opt_prevFace) {
   // TODO(bckenny): reverse order of params?

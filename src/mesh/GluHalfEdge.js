@@ -56,6 +56,7 @@
  *
  * @param {libtess.GluHalfEdge=} opt_nextEdge
  * @constructor
+ * @struct
  */
 libtess.GluHalfEdge = function(opt_nextEdge) {
   // TODO(bckenny): are these the right defaults? (from gl_meshNewMesh requirements)

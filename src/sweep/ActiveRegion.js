@@ -39,6 +39,7 @@
  * sweep line crosses each vertex, we update the affected regions.
  *
  * @constructor
+ * @struct
  */
 libtess.ActiveRegion = function() {
   // TODO(bckenny): I *think* eUp and nodeUp could be passed in as constructor params

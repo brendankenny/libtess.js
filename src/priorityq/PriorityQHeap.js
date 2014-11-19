@@ -34,6 +34,7 @@
 /**
  * [PriorityQHeap description]
  * @constructor
+ * @struct
  * @param {function(libtess.PQKey, libtess.PQKey): boolean} leq [description].
  */
 libtess.PriorityQHeap = function(leq) {

@@ -35,6 +35,7 @@
 /**
  * [PriorityQ description]
  * @constructor
+ * @struct
  * @param {function(Object, Object): boolean} leq [description].
  */
 libtess.PriorityQ = function(leq) {

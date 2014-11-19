@@ -41,6 +41,7 @@ libtess.dictKey;
  * [Dict description]
  *
  * @constructor
+ * @struct
  * @param {Object} frame [description].
  * @param {function(Object, Object, Object): boolean} leq [description].
  */

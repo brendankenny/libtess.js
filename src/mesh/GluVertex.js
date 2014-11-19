@@ -38,6 +38,7 @@
  * @param {libtess.GluVertex=} opt_nextVertex [description].
  * @param {libtess.GluVertex=} opt_prevVertex [description].
  * @constructor
+ * @struct
  */
 libtess.GluVertex = function(opt_nextVertex, opt_prevVertex) {
   // TODO(bckenny): reverse order of params?

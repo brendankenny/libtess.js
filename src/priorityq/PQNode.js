@@ -35,6 +35,7 @@
 /**
  * [PQNode description]
  * @constructor
+ * @struct
  */
 libtess.PQNode = function() {
   /**

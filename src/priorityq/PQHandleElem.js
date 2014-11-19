@@ -34,6 +34,7 @@
 /**
  * [PQHandleElem description]
  * @constructor
+ * @struct
  */
 libtess.PQHandleElem = function() {
   // TODO(bckenny): if key could instead be an indexed into another store, makes heap storage a lot easier
