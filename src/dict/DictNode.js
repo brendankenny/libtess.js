@@ -1,6 +1,6 @@
 /**
  * Copyright 2000, Silicon Graphics, Inc. All Rights Reserved.
- * Copyright 2012, Google Inc. All Rights Reserved.
+ * Copyright 2014, Google Inc. All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -26,62 +26,60 @@
  * Copyright in any portions created by third parties is as indicated
  * elsewhere herein. All Rights Reserved.
  */
-
 /* global libtess */
 
-// TODO(bckenny): better typing for DictKey?
-
 /**
- * [DictNode description]
+ * A doubly-linked-list node with a libtess.ActiveRegion payload.
+ * The key for this node and the next and previous nodes in the parent Dict list
+ * can be provided to insert it into an existing list (or all can be omitted if
+ * this is to be the founding node of the list).
+ * @param {!libtess.ActiveRegion=} opt_key
+ * @param {!libtess.DictNode=} opt_nextNode
+ * @param {!libtess.DictNode=} opt_prevNode
  * @constructor
  * @struct
  */
-libtess.DictNode = function() {
-  // TODO(bckenny): could probably move all three properties to opt params
+libtess.DictNode = function(opt_key, opt_nextNode, opt_prevNode) {
   /**
-   * [key description]
-   * @type {libtess.dictKey}
+   * The ActiveRegion key for this node, or null if the head of the list.
+   * @type {libtess.ActiveRegion}
    */
-  this.key = null;
+  this.key = opt_key || null;
 
   /**
-   * [next description]
-   * @type {libtess.DictNode}
+   * Link to next DictNode in parent list or to self if this is the first node.
+   * @type {!libtess.DictNode}
    */
-  this.next = null;
+  this.next = opt_nextNode || this;
 
   /**
-   * [prev description]
-   * @type {libtess.DictNode}
+   * Link to previous DictNode in parent list or to self if this is the first
+   * node.
+   * @type {!libtess.DictNode}
    */
-  this.prev = null;
+  this.prev = opt_prevNode || this;
 };
 
-
 /**
- * [getKey description]
- * @return {libtess.dictKey} [description].
+ * Get the key from this node.
+ * @return {libtess.ActiveRegion}
  */
 libtess.DictNode.prototype.getKey = function() {
   return this.key;
 };
 
-
 /**
- * [getSucc description]
- * @return {libtess.DictNode} [description].
+ * Get the successor node to this one.
+ * @return {!libtess.DictNode}
  */
-libtess.DictNode.prototype.getSucc = function() {
-  // TODO(bckenny): unabreviated naming?
+libtess.DictNode.prototype.getSuccessor = function() {
   return this.next;
 };
 
-
 /**
- * [getPred description]
- * @return {libtess.DictNode} [description].
+ * Get the predecessor node to this one.
+ * @return {!libtess.DictNode}
  */
-libtess.DictNode.prototype.getPred = function() {
-  // TODO(bckenny): unabreviated naming?
+libtess.DictNode.prototype.getPredecessor = function() {
   return this.prev;
 };
