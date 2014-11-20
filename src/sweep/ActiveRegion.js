@@ -1,6 +1,6 @@
 /**
  * Copyright 2000, Silicon Graphics, Inc. All Rights Reserved.
- * Copyright 2012, Google Inc. All Rights Reserved.
+ * Copyright 2014, Google Inc. All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -26,7 +26,6 @@
  * Copyright in any portions created by third parties is as indicated
  * elsewhere herein. All Rights Reserved.
  */
-
 /* global libtess */
 
 // TODO(bckenny): apparently only visible outside of sweep for debugging routines.
@@ -35,9 +34,8 @@
 /**
  * For each pair of adjacent edges crossing the sweep line, there is
  * an ActiveRegion to represent the region between them. The active
- * regions are kept in sorted order in a dynamic dictionary.  As the
+ * regions are kept in sorted order in a dynamic dictionary. As the
  * sweep line crosses each vertex, we update the affected regions.
- *
  * @constructor
  * @struct
  */
@@ -45,31 +43,31 @@ libtess.ActiveRegion = function() {
   // TODO(bckenny): I *think* eUp and nodeUp could be passed in as constructor params
 
   /**
-   * upper edge, directed right to left
+   * The upper edge of the region, directed right to left
    * @type {libtess.GluHalfEdge}
    */
   this.eUp = null;
 
   /**
-   * dictionary node corresponding to eUp
+   * Dictionary node corresponding to eUp edge.
    * @type {libtess.DictNode}
    */
   this.nodeUp = null;
 
   /**
-   * used to determine which regions are inside the polygon
+   * Used to determine which regions are inside the polygon.
    * @type {number}
    */
   this.windingNumber = 0;
 
   /**
-   * is this region inside the polygon?
+   * Whether this region is inside the polygon.
    * @type {boolean}
    */
   this.inside = false;
 
   /**
-   * marks fake edges at t = +/-infinity
+   * Marks fake edges at t = +/-infinity.
    * @type {boolean}
    */
   this.sentinel = false;
@@ -89,22 +87,18 @@ libtess.ActiveRegion = function() {
   this.fixUpperEdge = false;
 };
 
-
 /**
- * [regionBelow description]
- * @return {libtess.ActiveRegion} [description].
+ * Returns the ActiveRegion below this one.
+ * @return {libtess.ActiveRegion}
  */
 libtess.ActiveRegion.prototype.regionBelow = function() {
-  // TODO(bckenny): better typing? or is cast unavoidable
-  return /** @type {libtess.ActiveRegion} */ (this.nodeUp.getPred().getKey());
+  return this.nodeUp.getPredecessor().getKey();
 };
 
-
 /**
- * [regionAbove description]
- * @return {libtess.ActiveRegion} [description].
+ * Returns the ActiveRegion above this one.
+ * @return {libtess.ActiveRegion}
  */
 libtess.ActiveRegion.prototype.regionAbove = function() {
-  // TODO(bckenny): better typing? or is cast unavoidable
-  return /** @type {libtess.ActiveRegion} */ (this.nodeUp.getSucc().getKey());
+  return this.nodeUp.getSuccessor().getKey();
 };

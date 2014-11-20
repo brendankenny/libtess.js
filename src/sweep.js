@@ -26,7 +26,6 @@
  * Copyright in any portions created by third parties is as indicated
  * elsewhere herein. All Rights Reserved.
  */
-
 /* global libtess */
 
 // TODO(bckenny): a number of these never return null (as opposed to original) and should be typed appropriately
@@ -180,10 +179,10 @@ libtess.sweep.addWinding_ = function(eDst, eSrc) {
  * we sort the edges by slope (they would otherwise compare equally).
  *
  * @private
- * @param {libtess.GluTesselator} tess [description].
- * @param {libtess.ActiveRegion} reg1 [description].
- * @param {libtess.ActiveRegion} reg2 [description].
- * @return {boolean} [description].
+ * @param {!libtess.GluTesselator} tess
+ * @param {!libtess.ActiveRegion} reg1
+ * @param {!libtess.ActiveRegion} reg2
+ * @return {boolean}
  */
 libtess.sweep.edgeLeq_ = function(tess, reg1, reg2) {
   var event = tess.event;
@@ -1365,9 +1364,7 @@ libtess.sweep.addSentinel_ = function(tess, t) {
  * @param {libtess.GluTesselator} tess [description].
  */
 libtess.sweep.initEdgeDict_ = function(tess) {
-  // TODO(bckenny): need to cast edgeLeq_?
-  tess.dict = new libtess.Dict(tess,
-      /** @type {function(Object, Object, Object): boolean} */(libtess.sweep.edgeLeq_));
+  tess.dict = new libtess.Dict(tess, libtess.sweep.edgeLeq_);
 
   libtess.sweep.addSentinel_(tess, -libtess.sweep.SENTINEL_COORD_);
   libtess.sweep.addSentinel_(tess, libtess.sweep.SENTINEL_COORD_);
@@ -1395,7 +1392,7 @@ libtess.sweep.doneEdgeDict_ = function(tess) {
     libtess.sweep.deleteRegion_(tess, reg);
   }
 
-  tess.dict.deleteDict(); // TODO(bckenny): not necessary
+  // NOTE(bckenny): see tess.dict.deleteDict_() for old delete dict function
   tess.dict = null;
 };
 

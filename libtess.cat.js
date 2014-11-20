@@ -1569,7 +1569,6 @@ libtess.render.renderBoundary = function(tess, mesh) {
 };
 
 
-
 /* global libtess */
 
 // TODO(bckenny): a number of these never return null (as opposed to original) and should be typed appropriately
@@ -1723,10 +1722,10 @@ libtess.sweep.addWinding_ = function(eDst, eSrc) {
  * we sort the edges by slope (they would otherwise compare equally).
  *
  * @private
- * @param {libtess.GluTesselator} tess [description].
- * @param {libtess.ActiveRegion} reg1 [description].
- * @param {libtess.ActiveRegion} reg2 [description].
- * @return {boolean} [description].
+ * @param {!libtess.GluTesselator} tess
+ * @param {!libtess.ActiveRegion} reg1
+ * @param {!libtess.ActiveRegion} reg2
+ * @return {boolean}
  */
 libtess.sweep.edgeLeq_ = function(tess, reg1, reg2) {
   var event = tess.event;
@@ -2908,9 +2907,7 @@ libtess.sweep.addSentinel_ = function(tess, t) {
  * @param {libtess.GluTesselator} tess [description].
  */
 libtess.sweep.initEdgeDict_ = function(tess) {
-  // TODO(bckenny): need to cast edgeLeq_?
-  tess.dict = new libtess.Dict(tess,
-      /** @type {function(Object, Object, Object): boolean} */(libtess.sweep.edgeLeq_));
+  tess.dict = new libtess.Dict(tess, libtess.sweep.edgeLeq_);
 
   libtess.sweep.addSentinel_(tess, -libtess.sweep.SENTINEL_COORD_);
   libtess.sweep.addSentinel_(tess, libtess.sweep.SENTINEL_COORD_);
@@ -2938,7 +2935,7 @@ libtess.sweep.doneEdgeDict_ = function(tess) {
     libtess.sweep.deleteRegion_(tess, reg);
   }
 
-  tess.dict.deleteDict(); // TODO(bckenny): not necessary
+  // NOTE(bckenny): see tess.dict.deleteDict_() for old delete dict function
   tess.dict = null;
 };
 
@@ -3211,136 +3208,121 @@ libtess.tessmono.setWindingNumber = function(mesh, value, keepOnlyBoundary) {
 };
 
 
-
 /* global libtess */
 
-
-// TODO(bckenny): better typing for DictKey? actually libtess.ActiveRegion
-/** @typedef {Object} */
-libtess.dictKey;
-
-// TODO(bckenny): better typing for all of this, really. no need not to eg use tess as frame directly
-
-
 /**
- * [Dict description]
- *
+ * A list of edges crossing the sweep line, sorted from top to bottom.
+ * Implementation is a doubly-linked list, sorted by the injected edgeLeq
+ * comparator function. Here it is a simple ordering, but see libtess.sweep for
+ * the list of invariants on the edge dictionary this ordering creates.
  * @constructor
  * @struct
- * @param {Object} frame [description].
- * @param {function(Object, Object, Object): boolean} leq [description].
+ * @param {!libtess.GluTesselator} frame
+ * @param {function(!libtess.GluTesselator, !libtess.ActiveRegion, !libtess.ActiveRegion): boolean} leq
  */
 libtess.Dict = function(frame, leq) {
-  /**
-   * [head description]
-   * @type {libtess.DictNode}
-   */
-  this.head = new libtess.DictNode();
-  this.head.next = this.head;
-  this.head.prev = this.head;
-
-  // TODO(bckenny): better typing? see above
-  /**
-   * [frame description]
-   * @type {Object}
-   */
-  this.frame = frame;
 
   /**
-   * [leq_ description]
+   * The head of the doubly-linked DictNode list. At creation time, links back
+   * and forward only to itself.
+   * @private {!libtess.DictNode}
+   */
+  this.head_ = new libtess.DictNode();
+
+  /**
+   * The GluTesselator used as the frame for edge/event comparisons.
+   * @private {!libtess.GluTesselator}
+   */
+  this.frame_ = frame;
+
+  /**
+   * Comparison function to maintain the invariants of the Dict. See
+   * libtess.sweep.edgeLeq_ for source.
    * @private
-   * @type {function(Object, libtess.dictKey, libtess.dictKey): boolean}
+   * @type {function(!libtess.GluTesselator, !libtess.ActiveRegion, !libtess.ActiveRegion): boolean}
    */
-  this.leq_ = /** @type {function(Object, libtess.dictKey, libtess.dictKey): boolean} */(leq);
+  this.leq_ = leq;
 };
 
-
+/* istanbul ignore next */
 /**
- * [deleteDict description]
+ * Formerly used to delete the dict.
+ * NOTE(bckenny): No longer called but left for memFree documentation. Nulled at
+ * former callsite instead (sweep.doneEdgeDict_)
+ * @private
  */
-libtess.Dict.prototype.deleteDict = function() {
-  // TODO(bckenny): unnecessary, I think.
-  // for (var node = libtess.head.next; node !== libtess.head; node = node.next) {
+libtess.Dict.prototype.deleteDict_ = function() {
+  // for (var node = this.head_.next; node !== this.head_; node = node.next) {
   //   memFree(node);
   // }
   // memFree(dict);
-
-  // NOTE(bckenny): nulled at callsite (sweep.doneEdgeDict_)
 };
 
-
 /**
- * [insertBefore description]
- * @param {libtess.DictNode} node [description].
- * @param {Object} key [description].
- * @return {libtess.DictNode} [description].
+ * Insert the supplied key into the edge list and return its new node.
+ * @param {libtess.DictNode} node
+ * @param {!libtess.ActiveRegion} key
+ * @return {!libtess.DictNode}
  */
 libtess.Dict.prototype.insertBefore = function(node, key) {
   do {
     node = node.prev;
-  } while (node.key !== null && !this.leq_(this.frame, node.key, key));
+  } while (node.key !== null && !this.leq_(this.frame_, node.key, key));
 
-  var newNode = new libtess.DictNode();
-
-  newNode.key = key;
-  newNode.next = node.next;
+  // insert the new node and update the surrounding nodes to point to it
+  var newNode = new libtess.DictNode(key, node.next, node);
   node.next.prev = newNode;
-  newNode.prev = node;
   node.next = newNode;
 
   return newNode;
 };
 
-
 /**
- * [insert description]
- * @param {Object} key [description].
- * @return {libtess.DictNode} [description].
+ * Insert key into the dict and return the new node that contains it.
+ * @param {!libtess.ActiveRegion} key
+ * @return {!libtess.DictNode}
  */
 libtess.Dict.prototype.insert = function(key) {
   // NOTE(bckenny): from a macro in dict.h/dict-list.h
-  return this.insertBefore(this.head, key);
+  return this.insertBefore(this.head_, key);
 };
-
 
 /**
- * [deleteNode description]
- * @param {libtess.DictNode} node [description].
+ * Remove node from the list.
+ * @param {libtess.DictNode} node
  */
 libtess.Dict.prototype.deleteNode = function(node) {
-  // NOTE(bckenny): nulled at callsite (sweep.deleteRegion_)
   node.next.prev = node.prev;
   node.prev.next = node.next;
-  // memFree( node ); TODO(bckenny)
-};
 
+  // NOTE(bckenny): nulled at callsite (sweep.deleteRegion_)
+  // memFree( node );
+};
 
 /**
  * Search returns the node with the smallest key greater than or equal
  * to the given key. If there is no such key, returns a node whose
- * key is null. Similarly, max(d).getSucc() has a null key, etc.
- *
- * @param {Object} key [description].
- * @return {libtess.DictNode} [description].
+ * key is null. Similarly, max(d).getSuccessor() has a null key, etc.
+ * @param {!libtess.ActiveRegion} key
+ * @return {!libtess.DictNode}
  */
 libtess.Dict.prototype.search = function(key) {
-  var node = this.head;
+  var node = this.head_;
 
   do {
     node = node.next;
-  } while (node.key !== null && !this.leq_(this.frame, key, node.key));
+  } while (node.key !== null && !this.leq_(this.frame_, key, node.key));
 
   return node;
 };
 
-
 /**
- * [getMin description]
- * @return {libtess.DictNode} [description].
+ * Return the node with the smallest key.
+ * @return {!libtess.DictNode}
  */
 libtess.Dict.prototype.getMin = function() {
   // NOTE(bckenny): from a macro in dict.h/dict-list.h
-  return this.head.next;
+  return this.head_.next;
 };
 
 // NOTE(bckenny): libtess.Dict.getMax isn't called within libtess and isn't part
@@ -3348,71 +3330,69 @@ libtess.Dict.prototype.getMin = function() {
 /* istanbul ignore next */
 /**
  * Returns the node with the greatest key.
- * @return {libtess.DictNode}
+ * @return {!libtess.DictNode}
  */
 libtess.Dict.prototype.getMax = function() {
   // NOTE(bckenny): from a macro in dict.h/dict-list.h
-  return this.head.prev;
+  return this.head_.prev;
 };
-
 
 
 /* global libtess */
 
-// TODO(bckenny): better typing for DictKey?
-
 /**
- * [DictNode description]
+ * A doubly-linked-list node with a libtess.ActiveRegion payload.
+ * The key for this node and the next and previous nodes in the parent Dict list
+ * can be provided to insert it into an existing list (or all can be omitted if
+ * this is to be the founding node of the list).
+ * @param {!libtess.ActiveRegion=} opt_key
+ * @param {!libtess.DictNode=} opt_nextNode
+ * @param {!libtess.DictNode=} opt_prevNode
  * @constructor
  * @struct
  */
-libtess.DictNode = function() {
-  // TODO(bckenny): could probably move all three properties to opt params
+libtess.DictNode = function(opt_key, opt_nextNode, opt_prevNode) {
   /**
-   * [key description]
-   * @type {libtess.dictKey}
+   * The ActiveRegion key for this node, or null if the head of the list.
+   * @type {libtess.ActiveRegion}
    */
-  this.key = null;
+  this.key = opt_key || null;
 
   /**
-   * [next description]
-   * @type {libtess.DictNode}
+   * Link to next DictNode in parent list or to self if this is the first node.
+   * @type {!libtess.DictNode}
    */
-  this.next = null;
+  this.next = opt_nextNode || this;
 
   /**
-   * [prev description]
-   * @type {libtess.DictNode}
+   * Link to previous DictNode in parent list or to self if this is the first
+   * node.
+   * @type {!libtess.DictNode}
    */
-  this.prev = null;
+  this.prev = opt_prevNode || this;
 };
 
-
 /**
- * [getKey description]
- * @return {libtess.dictKey} [description].
+ * Get the key from this node.
+ * @return {libtess.ActiveRegion}
  */
 libtess.DictNode.prototype.getKey = function() {
   return this.key;
 };
 
-
 /**
- * [getSucc description]
- * @return {libtess.DictNode} [description].
+ * Get the successor node to this one.
+ * @return {!libtess.DictNode}
  */
-libtess.DictNode.prototype.getSucc = function() {
-  // TODO(bckenny): unabreviated naming?
+libtess.DictNode.prototype.getSuccessor = function() {
   return this.next;
 };
 
-
 /**
- * [getPred description]
- * @return {libtess.DictNode} [description].
+ * Get the predecessor node to this one.
+ * @return {!libtess.DictNode}
  */
-libtess.DictNode.prototype.getPred = function() {
-  // TODO(bckenny): unabreviated naming?
+libtess.DictNode.prototype.getPredecessor = function() {
   return this.prev;
 };
 
@@ -5369,7 +5349,6 @@ libtess.PriorityQHeap.prototype.floatUp_ = function(curr) {
 };
 
 
-
 /* global libtess */
 
 // TODO(bckenny): apparently only visible outside of sweep for debugging routines.
@@ -5378,9 +5357,8 @@ libtess.PriorityQHeap.prototype.floatUp_ = function(curr) {
 /**
  * For each pair of adjacent edges crossing the sweep line, there is
  * an ActiveRegion to represent the region between them. The active
- * regions are kept in sorted order in a dynamic dictionary.  As the
+ * regions are kept in sorted order in a dynamic dictionary. As the
  * sweep line crosses each vertex, we update the affected regions.
- *
  * @constructor
  * @struct
  */
@@ -5388,31 +5366,31 @@ libtess.ActiveRegion = function() {
   // TODO(bckenny): I *think* eUp and nodeUp could be passed in as constructor params
 
   /**
-   * upper edge, directed right to left
+   * The upper edge of the region, directed right to left
    * @type {libtess.GluHalfEdge}
    */
   this.eUp = null;
 
   /**
-   * dictionary node corresponding to eUp
+   * Dictionary node corresponding to eUp edge.
    * @type {libtess.DictNode}
    */
   this.nodeUp = null;
 
   /**
-   * used to determine which regions are inside the polygon
+   * Used to determine which regions are inside the polygon.
    * @type {number}
    */
   this.windingNumber = 0;
 
   /**
-   * is this region inside the polygon?
+   * Whether this region is inside the polygon.
    * @type {boolean}
    */
   this.inside = false;
 
   /**
-   * marks fake edges at t = +/-infinity
+   * Marks fake edges at t = +/-infinity.
    * @type {boolean}
    */
   this.sentinel = false;
@@ -5432,24 +5410,20 @@ libtess.ActiveRegion = function() {
   this.fixUpperEdge = false;
 };
 
-
 /**
- * [regionBelow description]
- * @return {libtess.ActiveRegion} [description].
+ * Returns the ActiveRegion below this one.
+ * @return {libtess.ActiveRegion}
  */
 libtess.ActiveRegion.prototype.regionBelow = function() {
-  // TODO(bckenny): better typing? or is cast unavoidable
-  return /** @type {libtess.ActiveRegion} */ (this.nodeUp.getPred().getKey());
+  return this.nodeUp.getPredecessor().getKey();
 };
 
-
 /**
- * [regionAbove description]
- * @return {libtess.ActiveRegion} [description].
+ * Returns the ActiveRegion above this one.
+ * @return {libtess.ActiveRegion}
  */
 libtess.ActiveRegion.prototype.regionAbove = function() {
-  // TODO(bckenny): better typing? or is cast unavoidable
-  return /** @type {libtess.ActiveRegion} */ (this.nodeUp.getSucc().getKey());
+  return this.nodeUp.getSuccessor().getKey();
 };
 
 /* global libtess, module */
