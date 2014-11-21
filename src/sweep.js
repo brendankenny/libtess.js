@@ -141,15 +141,14 @@ libtess.sweep.computeInterior = function(tess) {
 
   // TODO(bckenny): what does the next comment mean? can we eliminate event except when debugging?
   // Set tess.event for debugging purposes
-  // TODO(bckenny): can we elminate cast? intermediate tmpReg added for clarity
-  var tmpReg = /** @type {libtess.ActiveRegion} */(tess.dict.getMin().getKey());
-  tess.event = tmpReg.eUp.org;
+  var minRegion = tess.dict.getMin().getKey();
+  tess.event = minRegion.eUp.org;
   libtess.sweepDebugEvent(tess);
   libtess.sweep.doneEdgeDict_(tess);
   libtess.sweep.donePriorityQ_(tess);
 
   libtess.sweep.removeDegenerateFaces_(tess.mesh);
-  tess.mesh.checkMesh(); // TODO(bckenny): just for debug?
+  tess.mesh.checkMesh();
 };
 
 
@@ -1233,8 +1232,7 @@ libtess.sweep.connectLeftVertex_ = function(tess, vEvent) {
 
   // Get a pointer to the active region containing vEvent
   tmp.eUp = vEvent.anEdge.sym;
-  var regUp =
-      /** @type {libtess.ActiveRegion} */(tess.dict.search(tmp).getKey());
+  var regUp = tess.dict.search(tmp).getKey();
   var regLo = regUp.regionBelow();
   var eUp = regUp.eUp;
   var eLo = regLo.eUp;
@@ -1380,7 +1378,7 @@ libtess.sweep.doneEdgeDict_ = function(tess) {
   var fixedEdges = 0;
 
   var reg;
-  while ((reg = /** @type {libtess.ActiveRegion} */(tess.dict.getMin().getKey())) !== null) {
+  while ((reg = tess.dict.getMin().getKey()) !== null) {
     // At the end of all processing, the dictionary should contain
     // only the two sentinel edges, plus at most one "fixable" edge
     // created by connectRightVertex().
