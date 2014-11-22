@@ -3135,7 +3135,7 @@ libtess.tessmono.tessellateInterior = function(mesh) {
 };
 
 /**
- * Xaps (ie. sets to null) all faces which are not marked "inside" the polygon.
+ * Zaps (i.e. sets to null) all faces which are not marked "inside" the polygon.
  * Since further mesh operations on null faces are not allowed, the main purpose
  * is to clean up the mesh so that exterior loops are not represented in the
  * data structure.
