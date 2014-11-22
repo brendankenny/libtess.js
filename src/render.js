@@ -26,7 +26,6 @@
  * Copyright in any portions created by third parties is as indicated
  * elsewhere herein. All Rights Reserved.
  */
-
 /* global libtess */
 
 /** @const */
@@ -59,19 +58,11 @@ libtess.render.renderMesh = function(tess, mesh, flagEdges) {
         beginOrBeginDataCalled = true;
       }
 
-      // Loop once for each edge (there will always be 3 edges)
-      if (libtess.DEBUG) {
-        // check that face has only three edges
-        var edge = f.anEdge;
-        var edgeCount = 0;
-        do {
-          edgeCount++;
-          edge = edge.lNext;
-        } while (edge !== f.anEdge);
-        libtess.assert(edgeCount === 3,
-            'renderMesh called with non-triangulated mesh');
-      }
+      // check that face has only three edges
       var e = f.anEdge;
+      libtess.assert(e.lNext.lNext.lNext === e,
+          'renderMesh called with non-triangulated mesh');
+      // Loop once for each edge (there will always be 3 edges)
       do {
         if (flagEdges) {
           // Set the "edge state" to true just before we output the
