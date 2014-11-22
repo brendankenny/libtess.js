@@ -78,20 +78,20 @@ libtess.GluTesselator = function() {
 
   /**
    * user-specified normal (if provided)
-   * @type {Array.<number>}
+   * @type {!Array.<number>}
    */
   this.normal = [0, 0, 0];
   // TODO(bckenny): better way to init these arrays?
 
   /**
    * unit vector in s-direction (debugging)
-   * @type {Array.<number>}
+   * @type {!Array.<number>}
    */
   this.sUnit = [0, 0, 0];
 
   /**
    * unit vector in t-direction (debugging)
-   * @type {Array.<number>}
+   * @type {!Array.<number>}
    */
   this.tUnit = [0, 0, 0];
 

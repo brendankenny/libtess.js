@@ -69,7 +69,7 @@ libtess.GluVertex = function(opt_nextVertex, opt_prevVertex) {
 
   /**
    * The vertex location in 3D.
-   * @type {Array.<number>}
+   * @type {!Array.<number>}
    */
   this.coords = [0, 0, 0];
   // TODO(bckenny): we may want to rethink coords, either eliminate (using s
