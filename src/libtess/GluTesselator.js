@@ -571,11 +571,12 @@ libtess.GluTesselator.prototype.gluTessEndPolygon = function() {
     // If the user wants only the boundary contours, we throw away all edges
     // except those which separate the interior from the exterior.
     // Otherwise we tessellate all the regions marked "inside".
+    // NOTE(bckenny): we know this.mesh has been initialized, so help closure out.
+    var mesh = /** @type {!libtess.GluMesh} */(this.mesh);
     if (this.boundaryOnly) {
-      libtess.tessmono.setWindingNumber(this.mesh, 1, true);
-
+      libtess.tessmono.setWindingNumber(mesh, 1, true);
     } else {
-      libtess.tessmono.tessellateInterior(this.mesh);
+      libtess.tessmono.tessellateInterior(mesh);
     }
 
     this.mesh.checkMesh();

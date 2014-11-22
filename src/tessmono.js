@@ -1,6 +1,6 @@
 /**
  * Copyright 2000, Silicon Graphics, Inc. All Rights Reserved.
- * Copyright 2012, Google Inc. All Rights Reserved.
+ * Copyright 2014, Google Inc. All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -26,30 +26,27 @@
  * Copyright in any portions created by third parties is as indicated
  * elsewhere herein. All Rights Reserved.
  */
-
 /* global libtess */
 
 /** @const */
 libtess.tessmono = {};
 
-
 /**
- * tessellateMonoRegion(face) tessellates a monotone region
- * (what else would it do??). The region must consist of a single
- * loop of half-edges (see mesh.js) oriented CCW. "Monotone" in this
- * case means that any vertical line intersects the interior of the
+ * Tessellates a monotone region (what else would it do??). The region must
+ * consist of a single loop of half-edges (see mesh.js) oriented CCW. "Monotone"
+ * in this case means that any vertical line intersects the interior of the
  * region in a single interval.
  *
  * Tessellation consists of adding interior edges (actually pairs of
  * half-edges), to split the region into non-overlapping triangles.
  * @private
- * @param {libtess.GluFace} face [description].
+ * @param {!libtess.GluFace} face
  */
 libtess.tessmono.tessellateMonoRegion_ = function(face) {
-  /* The basic idea is explained in Preparata and Shamos (which I don''t
+  /* The basic idea is explained in Preparata and Shamos (which I don't
    * have handy right now), although their implementation is more
    * complicated than this one. The are two edge chains, an upper chain
-   * and a lower chain.  We process all vertices from both chains in order,
+   * and a lower chain. We process all vertices from both chains in order,
    * from right to left.
    *
    * The algorithm ensures that the following invariant holds after each
@@ -61,7 +58,7 @@ libtess.tessmono.tessellateMonoRegion_ = function(face) {
    * Each step consists of adding the rightmost unprocessed vertex to one
    * of the two chains, and forming a fan of triangles from the rightmost
    * of two chain endpoints. Determining whether we can add each triangle
-   * to the fan is a simple orientation test.  By making the fan as large
+   * to the fan is a simple orientation test. By making the fan as large
    * as possible, we restore the invariant (check it yourself).
    *
    * All edges are oriented CCW around the boundary of the region.
@@ -69,7 +66,6 @@ libtess.tessmono.tessellateMonoRegion_ = function(face) {
    * Since the sweep goes from left to right, face.anEdge should
    * be close to the edge we want.
    */
-
   var up = face.anEdge;
   libtess.assert(up.lNext !== up && up.lNext.lNext !== up);
 
@@ -113,18 +109,15 @@ libtess.tessmono.tessellateMonoRegion_ = function(face) {
   }
 };
 
-
 /**
- * tessellateInterior(mesh) tessellates each region of
- * the mesh which is marked "inside" the polygon. Each such region
- * must be monotone.
- *
- * @param {libtess.GluMesh} mesh [description].
+ * Tessellates each region of the mesh which is marked "inside" the polygon.
+ * Each such region must be monotone.
+ * @param {!libtess.GluMesh} mesh
  */
 libtess.tessmono.tessellateInterior = function(mesh) {
   var next;
   for (var f = mesh.fHead.next; f !== mesh.fHead; f = next) {
-    // Make sure we don''t try to tessellate the new triangles.
+    // Make sure we don't try to tessellate the new triangles.
     next = f.next;
     if (f.inside) {
       libtess.tessmono.tessellateMonoRegion_(f);
@@ -132,14 +125,12 @@ libtess.tessmono.tessellateInterior = function(mesh) {
   }
 };
 
-
 /**
- * discardExterior(mesh) zaps (ie. sets to null) all faces
- * which are not marked "inside" the polygon. Since further mesh operations
- * on null faces are not allowed, the main purpose is to clean up the
- * mesh so that exterior loops are not represented in the data structure.
- *
- * @param {libtess.GluMesh} mesh [description].
+ * Xaps (ie. sets to null) all faces which are not marked "inside" the polygon.
+ * Since further mesh operations on null faces are not allowed, the main purpose
+ * is to clean up the mesh so that exterior loops are not represented in the
+ * data structure.
+ * @param {!libtess.GluMesh} mesh
  */
 libtess.tessmono.discardExterior = function(mesh) {
   var next;
@@ -152,19 +143,17 @@ libtess.tessmono.discardExterior = function(mesh) {
   }
 };
 
-
 /**
- * setWindingNumber(mesh, value, keepOnlyBoundary) resets the
- * winding numbers on all edges so that regions marked "inside" the
- * polygon have a winding number of "value", and regions outside
- * have a winding number of 0.
+ * Resets the winding numbers on all edges so that regions marked "inside" the
+ * polygon have a winding number of "value", and regions outside have a winding
+ * number of 0.
  *
- * If keepOnlyBoundary is true, it also deletes all edges which do not
- * separate an interior region from an exterior one.
+ * If keepOnlyBoundary is true, it also deletes all edges which do not separate
+ * an interior region from an exterior one.
  *
- * @param {libtess.GluMesh} mesh [description].
- * @param {number} value Winding number to set (int).
- * @param {boolean} keepOnlyBoundary Keep only boundary.
+ * @param {!libtess.GluMesh} mesh
+ * @param {number} value
+ * @param {boolean} keepOnlyBoundary
  */
 libtess.tessmono.setWindingNumber = function(mesh, value, keepOnlyBoundary) {
   var eNext;
