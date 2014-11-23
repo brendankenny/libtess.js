@@ -1,4 +1,5 @@
 /* jshint node: true */
+'use strict';
 
 var gulp = require('gulp');
 var replace = require('gulp-replace');
@@ -15,6 +16,10 @@ var jscs = require('gulp-jscs');
 var filter = require('gulp-filter');
 var istanbul = require('gulp-istanbul');
 var exec = require('child_process').exec;
+var rocambole = require('rocambole');
+var rocamboleToken = require('rocambole-token');
+var vinylMap = require('vinyl-map');
+var rename = require('gulp-rename');
 
 var COMPILER_PATH = 'node_modules/closurecompiler/compiler/compiler.jar';
 var LIBTESS_SRC = ['./src/libtess.js', './src/**/*.js'];
@@ -23,21 +28,64 @@ var LIBTESS_SRC = ['./src/libtess.js', './src/**/*.js'];
 var LINT_SRC = LIBTESS_SRC.concat([
   './gulpfile.js',
   './libtess.cat.js',
+  './libtess.debug.js',
   './{build,examples,test,third_party}/**/*.{js,html}',
   '!./build/externs/*',
   '!./test/browser/*-browserified.js',
   '!./test/expectations/*',
   '!./third_party/node_modules/**',
 
-  // NOTE(bckenny): It takes two minutes to lint these. Remove for now.
+  // NOTE(bckenny): It takes two minutes to lint these. Skip them for now.
   '!./examples/osm/nyc_midtown_*.js'
 ]);
 
 gulp.task('build-cat', function() {
+  var removedAsserts = 0;
+  function stripAsserts(node) {
+    // looking only for `libtess.assert` calls
+    if (node.type !== 'CallExpression' ||
+        node.callee.type !== 'MemberExpression' ||
+        node.callee.property.name !== 'assert' ||
+        node.callee.object.type !== 'Identifier' ||
+        node.callee.object.name !== 'libtess') {
+      return;
+    }
+
+    // need to expand [startToken, endToken] to include beginning whitespace and
+    // ending `;`
+    var startToken = node.startToken;
+    if (startToken.prev.type === 'WhiteSpace' &&
+        startToken.prev.prev.type === 'LineBreak') {
+      startToken = startToken.prev.prev;
+    }
+    var endToken = node.endToken;
+    if (endToken.next.value === ';') {
+      endToken = endToken.next;
+    }
+
+    // because our lint rules require things like always using curly braces, we
+    // can safely remove libtess.assert(...) calls without replacing them with
+    // `void 0` or the like.
+    rocamboleToken.eachInBetween(startToken, endToken, rocamboleToken.remove);
+    removedAsserts++;
+  }
+
   return gulp.src(LIBTESS_SRC.concat('./build/node_export.js'))
-    // remove license at top of each file
+    // remove license at top of each file except first (which begins '@license')
     .pipe(replace(/^\/\*[\s\*]+Copyright 2000[\s\S]*?\*\//m, ''))
-    .pipe(concat('libtess.cat.js'))
+    .pipe(concat('libtess.debug.js'))
+    .pipe(gulp.dest('.'))
+
+    // remove asserts
+    .pipe(vinylMap(function(code, filename) {
+      var stripped = rocambole.moonwalk(code.toString(), stripAsserts);
+      console.log('asserts removed: ' + removedAsserts);
+
+      return stripped.toString();
+    }))
+    // turn off debug (for checkMesh, etc)
+    .pipe(replace('libtess.DEBUG = true;', 'libtess.DEBUG = false;'))
+    .pipe(rename('libtess.cat.js'))
     .pipe(gulp.dest('.'));
 });
 
@@ -93,7 +141,7 @@ gulp.task('browserify-tests', function() {
     // TODO(bckenny): is there a less-dumb way of doing this?
     .require('./test/browser/fake-chai.js', {expose: 'chai'})
     .require('./test/browser/fake-libtess.js',
-        {expose: '../libtess.cat.js'})
+        {expose: '../libtess.debug.js'})
     .require('./test/browser/fake-libtess.js',
         {expose: '../libtess.min.js'})
 
@@ -146,10 +194,10 @@ gulp.task('test', ['lint'], function() {
 
 // TODO(bckenny): clean this up
 gulp.task('coverage', ['build'], function(doneCallback) {
-  // use libtess.cat.js for coverage testing (see TODO in test/common.js)
+  // use libtess.debug.js for coverage testing (see TODO in test/common.js)
   process.env.testType = 'coverage';
 
-  gulp.src('libtess.cat.js')
+  gulp.src('libtess.debug.js')
     .pipe(istanbul())
     .on('finish', function() {
       gulp.src('test/*.test.js')
@@ -181,7 +229,7 @@ gulp.task('browserify-expectations-viewer', function() {
   return browserify('./test/expectations-viewer.js')
     .require('./test/browser/fake-chai.js', {expose: 'chai'})
     .require('./test/browser/fake-libtess.js',
-        {expose: '../libtess.cat.js'})
+        {expose: '../libtess.debug.js'})
     .require('./test/browser/fake-libtess.js',
         {expose: '../libtess.min.js'})
 
