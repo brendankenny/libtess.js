@@ -1375,6 +1375,9 @@ libtess.sweep.initEdgeDict_ = function(tess) {
  * @param {libtess.GluTesselator} tess [description].
  */
 libtess.sweep.doneEdgeDict_ = function(tess) {
+  // NOTE(bckenny): fixedEdges is only used in the assert below, so ignore so
+  // when asserts are removed jshint won't error.
+  /* jshint unused:false */
   var fixedEdges = 0;
 
   var reg;

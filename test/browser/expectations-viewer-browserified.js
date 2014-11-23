@@ -354,11 +354,11 @@ var chai = require('chai');
 var assert = chai.assert;
 
 // TODO(bckenny): not sure of a better way of doing this yet. Want to inject
-// libtess.cat.js for coverage, but libtess.min.js for all other runs.
+// libtess.debug.js for coverage, but libtess.min.js for all other runs.
 // gulp-mocha takes file names, though. Write to temp files first?
 exports.libtess = (function() {
   if ("browserify" === 'coverage') {
-    return require('../libtess.cat.js');
+    return require('../libtess.debug.js');
 
   } else {
     return require('../libtess.min.js');
@@ -632,7 +632,7 @@ exports.createPlaneRotation = function(normal) {
   })(transform);
 };
 
-},{"../libtess.cat.js":undefined,"../libtess.min.js":undefined,"chai":undefined}],4:[function(require,module,exports){
+},{"../libtess.debug.js":undefined,"../libtess.min.js":undefined,"chai":undefined}],4:[function(require,module,exports){
 /*
 
  Copyright 2000, Silicon Graphics, Inc. All Rights Reserved.

@@ -44,7 +44,7 @@ var libtess = {};
  * Whether to run asserts and extra debug checks.
  * @define {boolean}
  */
-libtess.DEBUG = false;
+libtess.DEBUG = true;
 
 
 /**
@@ -289,6 +289,7 @@ libtess.geom.vertLeq = function(u, v) {
  * @return {number} double.
  */
 libtess.geom.edgeEval = function(u, v, w) {
+  libtess.assert(libtess.geom.vertLeq(u, v) && libtess.geom.vertLeq(v, w));
 
   var gapL = v.s - u.s;
   var gapR = w.s - v.s;
@@ -317,6 +318,7 @@ libtess.geom.edgeEval = function(u, v, w) {
  * @return {number} double.
  */
 libtess.geom.edgeSign = function(u, v, w) {
+  libtess.assert(libtess.geom.vertLeq(u, v) && libtess.geom.vertLeq(v, w));
 
   var gapL = v.s - u.s;
   var gapR = w.s - v.s;
@@ -361,6 +363,7 @@ libtess.geom.transLeq = function(u, v) {
  * @return {number} double.
  */
 libtess.geom.transEval = function(u, v, w) {
+  libtess.assert(libtess.geom.transLeq(u, v) && libtess.geom.transLeq(v, w));
 
   var gapL = v.t - u.t;
   var gapR = w.t - v.t;
@@ -390,6 +393,7 @@ libtess.geom.transEval = function(u, v, w) {
  * @return {number} double.
  */
 libtess.geom.transSign = function(u, v, w) {
+  libtess.assert(libtess.geom.transLeq(u, v) && libtess.geom.transLeq(v, w));
 
   var gapL = v.t - u.t;
   var gapR = w.t - v.t;
@@ -1326,6 +1330,7 @@ libtess.normal.dot_ = function(u, v) {
 libtess.normal.normalize_ = function(v) {
   var len = v[0] * v[0] + v[1] * v[1] + v[2] * v[2];
 
+  libtess.assert(len > 0);
   len = Math.sqrt(len);
   v[0] /= len;
   v[1] /= len;
@@ -1494,6 +1499,8 @@ libtess.render.renderMesh = function(tess, mesh, flagEdges) {
 
       // check that face has only three edges
       var e = f.anEdge;
+      libtess.assert(e.lNext.lNext.lNext === e,
+          'renderMesh called with non-triangulated mesh');
       // Loop once for each edge (there will always be 3 edges)
       do {
         if (flagEdges) {
@@ -1742,6 +1749,7 @@ libtess.sweep.deleteRegion_ = function(tess, reg) {
     // It was created with zero winding number, so it better be
     // deleted with zero winding number (ie. it better not get merged
     // with a real edge).
+    libtess.assert(reg.eUp.winding === 0);
   }
 
   reg.eUp.activeRegion = null;
@@ -1761,6 +1769,7 @@ libtess.sweep.deleteRegion_ = function(tess, reg) {
  * @param {libtess.GluHalfEdge} newEdge [description].
  */
 libtess.sweep.fixUpperEdge_ = function(reg, newEdge) {
+  libtess.assert(reg.fixUpperEdge);
   libtess.mesh.deleteEdge(reg.eUp);
 
   reg.fixUpperEdge = false;
@@ -1857,6 +1866,7 @@ libtess.sweep.isWindingInside_ = function(tess, n) {
   }
 
   // TODO(bckenny): not reached
+  libtess.assert(false);
   return false;
 };
 
@@ -1982,6 +1992,7 @@ libtess.sweep.addRightEdges_ = function(tess, regUp, eFirst, eLast, eTopLeft,
   // Insert the new right-going edges in the dictionary
   var e = eFirst;
   do {
+    libtess.assert(libtess.geom.vertLeq(e.org, e.dst()));
     libtess.sweep.addRegionBelow_(tess, regUp, e.sym);
     e = e.oNext;
   } while (e !== eLast);
@@ -2025,6 +2036,7 @@ libtess.sweep.addRightEdges_ = function(tess, regUp, eFirst, eLast, eTopLeft,
   }
 
   regPrev.dirty = true;
+  libtess.assert(regPrev.windingNumber - e.winding === reg.windingNumber);
 
   if (cleanUp) {
     // Check for intersections between newly adjacent edges.
@@ -2258,6 +2270,7 @@ libtess.sweep.checkForLeftSplice_ = function(tess, regUp) {
   var eLo = regLo.eUp;
   var e;
 
+  libtess.assert(!libtess.geom.vertEq(eUp.dst(), eLo.dst()));
 
   if (libtess.geom.vertLeq(eUp.dst(), eLo.dst())) {
     if (libtess.geom.edgeSign(eUp.dst(), eLo.dst(), eUp.org) < 0) {
@@ -2311,6 +2324,11 @@ libtess.sweep.checkForIntersect_ = function(tess, regUp) {
 
   var isect = new libtess.GluVertex();
 
+  libtess.assert(!libtess.geom.vertEq(dstLo, dstUp));
+  libtess.assert(libtess.geom.edgeSign(dstUp, tess.event, orgUp) <= 0);
+  libtess.assert(libtess.geom.edgeSign(dstLo, tess.event, orgLo) >= 0);
+  libtess.assert(orgUp !== tess.event && orgLo !== tess.event);
+  libtess.assert(!regUp.fixUpperEdge && !regLo.fixUpperEdge);
 
   if (orgUp === orgLo) {
     // right endpoints are the same
@@ -2340,6 +2358,10 @@ libtess.sweep.checkForIntersect_ = function(tess, regUp) {
   libtess.geom.edgeIntersect(dstUp, orgUp, dstLo, orgLo, isect);
 
   // The following properties are guaranteed:
+  libtess.assert(Math.min(orgUp.t, dstUp.t) <= isect.t);
+  libtess.assert(isect.t <= Math.max(orgLo.t, dstLo.t));
+  libtess.assert(Math.min(dstLo.s, dstUp.s) <= isect.s);
+  libtess.assert(isect.s <= Math.max(orgLo.s, orgUp.s));
 
   if (libtess.geom.vertLeq(isect, tess.event)) {
     /* The intersection point lies slightly to the left of the sweep line,
@@ -2643,6 +2665,7 @@ libtess.sweep.connectLeftDegenerate_ = function(tess, regUp, vEvent) {
     // Compiler eliminate dead code.
     // e.org is an unprocessed vertex - just combine them, and wait
     // for e.org to be pulled from the queue
+    libtess.assert(libtess.sweep.TOLERANCE_NONZERO_);
     if (libtess.sweep.TOLERANCE_NONZERO_) {
       libtess.sweep.spliceMergeVertices_(tess, e, vEvent.anEdge);
     }
@@ -2673,6 +2696,7 @@ libtess.sweep.connectLeftDegenerate_ = function(tess, regUp, vEvent) {
   // vEvent coincides with e.dst(), which has already been processed.
   // Splice in the additional right-going edges.
   /* istanbul ignore next */
+  libtess.assert(libtess.sweep.TOLERANCE_NONZERO_);
 
   /* istanbul ignore next */
   if (libtess.sweep.TOLERANCE_NONZERO_) {
@@ -2687,6 +2711,7 @@ libtess.sweep.connectLeftDegenerate_ = function(tess, regUp, vEvent) {
       // We can delete it since now we have some real right-going edges.
 
       // there are some left edges too
+      libtess.assert(eTopLeft !== eTopRight);
       libtess.sweep.deleteRegion_(tess, reg); // TODO(bckenny): something to null?
       libtess.mesh.deleteEdge(eTopRight);
       eTopRight = eTopLeft.oPrev();
@@ -2886,7 +2911,10 @@ libtess.sweep.doneEdgeDict_ = function(tess) {
     // only the two sentinel edges, plus at most one "fixable" edge
     // created by connectRightVertex().
     if (!reg.sentinel) {
+      libtess.assert(reg.fixUpperEdge);
+      libtess.assert(++fixedEdges === 1);
     }
+    libtess.assert(reg.windingNumber === 0);
     libtess.sweep.deleteRegion_(tess, reg);
   }
 
@@ -2990,6 +3018,7 @@ libtess.sweep.removeDegenerateFaces_ = function(mesh) {
   for (var f = mesh.fHead.next; f !== mesh.fHead; f = fNext) {
     fNext = f.next;
     var e = f.anEdge;
+    libtess.assert(e.lNext !== e);
 
     if (e.lNext.lNext === e) {
       // A face with only two edges
@@ -3041,6 +3070,7 @@ libtess.tessmono.tessellateMonoRegion_ = function(face) {
    * be close to the edge we want.
    */
   var up = face.anEdge;
+  libtess.assert(up.lNext !== up && up.lNext.lNext !== up);
 
   for (; libtess.geom.vertLeq(up.dst(), up.org); up = up.lPrev()) { }
   for (; libtess.geom.vertLeq(up.org, up.dst()); up = up.lNext) { }
@@ -3075,6 +3105,7 @@ libtess.tessmono.tessellateMonoRegion_ = function(face) {
 
   // Now lo.org == up.dst() == the leftmost vertex. The remaining region
   // can be tessellated in a fan from this leftmost vertex.
+  libtess.assert(lo.lNext !== up);
   while (lo.lNext.lNext !== up) {
     tempHalfEdge = libtess.mesh.connect(lo.lNext, lo);
     lo = tempHalfEdge.sym;
@@ -3671,13 +3702,20 @@ libtess.GluTesselator.prototype.gluGetTessProperty = function(which) {
   switch (which) {
     case libtess.gluEnum.GLU_TESS_TOLERANCE:
       // tolerance should be in range [0..1]
+      libtess.assert(0 <= this.relTolerance && this.relTolerance <= 1);
       return this.relTolerance;
 
     case libtess.gluEnum.GLU_TESS_WINDING_RULE:
       var rule = this.windingRule;
+      libtess.assert(rule === libtess.windingRule.GLU_TESS_WINDING_ODD ||
+          rule === libtess.windingRule.GLU_TESS_WINDING_NONZERO ||
+          rule === libtess.windingRule.GLU_TESS_WINDING_POSITIVE ||
+          rule === libtess.windingRule.GLU_TESS_WINDING_NEGATIVE ||
+          rule === libtess.windingRule.GLU_TESS_WINDING_ABS_GEQ_TWO);
       return rule;
 
     case libtess.gluEnum.GLU_TESS_BOUNDARY_ONLY:
+      libtess.assert(this.boundaryOnly === true || this.boundaryOnly === false);
       return this.boundaryOnly;
 
     default:
@@ -4471,26 +4509,52 @@ libtess.GluMesh.prototype.checkMesh = function() {
   var f;
   var fPrev = fHead;
   for (fPrev = fHead; (f = fPrev.next) !== fHead; fPrev = f) {
+    libtess.assert(f.prev === fPrev);
     e = f.anEdge;
     do {
+      libtess.assert(e.sym !== e);
+      libtess.assert(e.sym.sym === e);
+      libtess.assert(e.lNext.oNext.sym === e);
+      libtess.assert(e.oNext.sym.lNext === e);
+      libtess.assert(e.lFace === f);
       e = e.lNext;
     } while (e !== f.anEdge);
   }
+  libtess.assert(f.prev === fPrev && f.anEdge === null && f.data === null);
 
   // vertices
   var v;
   var vPrev = vHead;
   for (vPrev = vHead; (v = vPrev.next) !== vHead; vPrev = v) {
+    libtess.assert(v.prev === vPrev);
     e = v.anEdge;
     do {
+      libtess.assert(e.sym !== e);
+      libtess.assert(e.sym.sym === e);
+      libtess.assert(e.lNext.oNext.sym === e);
+      libtess.assert(e.oNext.sym.lNext === e);
+      libtess.assert(e.org === v);
       e = e.oNext;
     } while (e !== v.anEdge);
   }
+  libtess.assert(v.prev === vPrev && v.anEdge === null && v.data === null);
 
   // edges
   var ePrev = eHead;
   for (ePrev = eHead; (e = ePrev.next) !== eHead; ePrev = e) {
+    libtess.assert(e.sym.next === ePrev.sym);
+    libtess.assert(e.sym !== e);
+    libtess.assert(e.sym.sym === e);
+    libtess.assert(e.org !== null);
+    libtess.assert(e.dst() !== null);
+    libtess.assert(e.lNext.oNext.sym === e);
+    libtess.assert(e.oNext.sym.lNext === e);
   }
+  libtess.assert(e.sym.next === ePrev.sym &&
+      e.sym === this.eHeadSym &&
+      e.sym.sym === e &&
+      e.org === null && e.dst() === null &&
+      e.lFace === null && e.rFace() === null);
 };
 
 
@@ -4796,6 +4860,8 @@ libtess.PriorityQ.prototype.init = function() {
     var p = 0;
     var r = p + this.size_ - 1;
     for (i = p; i < r; ++i) {
+      libtess.assert(this.leq_(this.keys_[this.order_[i + 1]],
+          this.keys_[this.order_[i]]));
     }
   }
   // #endif
@@ -4962,6 +5028,7 @@ libtess.PriorityQ.prototype.remove = function(curr) {
   }
   curr = -(curr + 1);
 
+  libtess.assert(curr < this.max_ && this.keys_[curr] !== null);
 
   this.keys_[curr] = null;
   while (this.size_ > 0 && this.keys_[this.order_[this.size_ - 1]] === null) {
@@ -5172,6 +5239,7 @@ libtess.PriorityQHeap.prototype.remove = function(hCurr) {
   var n = this.nodes_;
   var h = this.handles_;
 
+  libtess.assert(hCurr >= 1 && hCurr <= this.max_ && h[hCurr].key !== null);
 
   var curr = h[hCurr].node;
   n[curr].handle = n[this.size_].handle;
@@ -5213,6 +5281,7 @@ libtess.PriorityQHeap.prototype.floatDown_ = function(curr) {
       ++child;
     }
 
+    libtess.assert(child <= this.max_);
 
     var hChild = n[child].handle;
     if (child > this.size_ || this.leq_(h[hCurr].key, h[hChild].key)) {
