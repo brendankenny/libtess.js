@@ -238,39 +238,30 @@ libtess.PQHandle;
 libtess.PQKey;
 
 
-
-// TODO(bckenny): get rid of this:
-// NOTE(bckenny): using NO_BRANCH_CONDITIONS = false
-
 /* global libtess */
 
 /** @const */
 libtess.geom = {};
 
-
 /**
- * [vertEq description]
- *
- * @param {libtess.GluVertex} u [description].
- * @param {libtess.GluVertex} v [description].
- * @return {boolean} [description].
+ * Returns whether vertex u and vertex v are equal.
+ * @param {libtess.GluVertex} u
+ * @param {libtess.GluVertex} v
+ * @return {boolean}
  */
 libtess.geom.vertEq = function(u, v) {
   return u.s === v.s && u.t === v.t;
 };
 
-
 /**
- * Returns true if u is lexicographically <= v.
- *
- * @param {libtess.GluVertex} u [description].
- * @param {libtess.GluVertex} v [description].
+ * Returns whether vertex u is lexicographically less than or equal to vertex v.
+ * @param {libtess.GluVertex} u
+ * @param {libtess.GluVertex} v
  * @return {boolean}
  */
 libtess.geom.vertLeq = function(u, v) {
   return (u.s < v.s) || (u.s === v.s && u.t <= v.t);
 };
-
 
 /**
  * Given three vertices u,v,w such that geom.vertLeq(u,v) && geom.vertLeq(v,w),
@@ -282,11 +273,10 @@ libtess.geom.vertLeq = function(u, v) {
  * is very close to u or w.  In particular if we set v.t = 0 and
  * let r be the negated result (this evaluates (uw)(v.s)), then
  * r is guaranteed to satisfy MIN(u.t,w.t) <= r <= MAX(u.t,w.t).
- *
- * @param {libtess.GluVertex} u [description].
- * @param {libtess.GluVertex} v [description].
- * @param {libtess.GluVertex} w [description].
- * @return {number} double.
+ * @param {libtess.GluVertex} u
+ * @param {libtess.GluVertex} v
+ * @param {libtess.GluVertex} w
+ * @return {number}
  */
 libtess.geom.edgeEval = function(u, v, w) {
 
@@ -305,16 +295,14 @@ libtess.geom.edgeEval = function(u, v, w) {
   return 0;
 };
 
-
 /**
  * Returns a number whose sign matches geom.edgeEval(u,v,w) but which
  * is cheaper to evaluate.  Returns > 0, == 0 , or < 0
  * as v is above, on, or below the edge uw.
- *
- * @param {libtess.GluVertex} u [description].
- * @param {libtess.GluVertex} v [description].
- * @param {libtess.GluVertex} w [description].
- * @return {number} double.
+ * @param {libtess.GluVertex} u
+ * @param {libtess.GluVertex} v
+ * @param {libtess.GluVertex} w
+ * @return {number}
  */
 libtess.geom.edgeSign = function(u, v, w) {
 
@@ -329,36 +317,32 @@ libtess.geom.edgeSign = function(u, v, w) {
   return 0;
 };
 
-
 /**
  * Version of VertLeq with s and t transposed.
- * Returns true if u is lexicographically <= v.
- *
- * @param {libtess.GluVertex} u [description].
- * @param {libtess.GluVertex} v [description].
+ * Returns whether vertex u is lexicographically less than or equal to vertex v.
+ * @param {libtess.GluVertex} u
+ * @param {libtess.GluVertex} v
  * @return {boolean}
  */
 libtess.geom.transLeq = function(u, v) {
   return (u.t < v.t) || (u.t === v.t && u.s <= v.s);
 };
 
-
 /**
  * Version of geom.edgeEval with s and t transposed.
- * Given three vertices u,v,w such that geom.transLeq(u,v) && geom.transLeq(v,w),
- * evaluates the t-coord of the edge uw at the s-coord of the vertex v.
- * Returns v.s - (uw)(v.t), ie. the signed distance from uw to v.
+ * Given three vertices u,v,w such that geom.transLeq(u,v) &&
+ * geom.transLeq(v,w), evaluates the t-coord of the edge uw at the s-coord of
+ * the vertex v. Returns v.s - (uw)(v.t), ie. the signed distance from uw to v.
  * If uw is vertical (and thus passes thru v), the result is zero.
  *
  * The calculation is extremely accurate and stable, even when v
  * is very close to u or w.  In particular if we set v.s = 0 and
  * let r be the negated result (this evaluates (uw)(v.t)), then
  * r is guaranteed to satisfy MIN(u.s,w.s) <= r <= MAX(u.s,w.s).
- *
- * @param {libtess.GluVertex} u [description].
- * @param {libtess.GluVertex} v [description].
- * @param {libtess.GluVertex} w [description].
- * @return {number} double.
+ * @param {libtess.GluVertex} u
+ * @param {libtess.GluVertex} v
+ * @param {libtess.GluVertex} w
+ * @return {number}
  */
 libtess.geom.transEval = function(u, v, w) {
 
@@ -377,17 +361,15 @@ libtess.geom.transEval = function(u, v, w) {
   return 0;
 };
 
-
 /**
  * Version of geom.edgeSign with s and t transposed.
  * Returns a number whose sign matches geom.transEval(u,v,w) but which
  * is cheaper to evaluate.  Returns > 0, == 0 , or < 0
  * as v is above, on, or below the edge uw.
- *
- * @param {libtess.GluVertex} u [description].
- * @param {libtess.GluVertex} v [description].
- * @param {libtess.GluVertex} w [description].
- * @return {number} double.
+ * @param {libtess.GluVertex} u
+ * @param {libtess.GluVertex} v
+ * @param {libtess.GluVertex} w
+ * @return {number}
  */
 libtess.geom.transSign = function(u, v, w) {
 
@@ -402,35 +384,29 @@ libtess.geom.transSign = function(u, v, w) {
   return 0;
 };
 
-
 /**
- * [edgeGoesLeft description]
- *
- * @param {libtess.GluHalfEdge} e [description].
- * @return {boolean} [description].
+ * Returns whether edge is directed from right to left.
+ * @param {libtess.GluHalfEdge} e
+ * @return {boolean}
  */
 libtess.geom.edgeGoesLeft = function(e) {
   return libtess.geom.vertLeq(e.dst(), e.org);
 };
 
-
 /**
- * [edgeGoesRight description]
- *
- * @param {libtess.GluHalfEdge} e [description].
- * @return {boolean} [description].
+ * Returns whether edge is directed from left to right.
+ * @param {libtess.GluHalfEdge} e
+ * @return {boolean}
  */
 libtess.geom.edgeGoesRight = function(e) {
   return libtess.geom.vertLeq(e.org, e.dst());
 };
 
-
 /**
- * [vertL1dist description]
- *
- * @param {libtess.GluVertex} u [description].
- * @param {libtess.GluVertex} v [description].
- * @return {number} [description].
+ * Calculates the L1 distance between vertices u and v.
+ * @param {libtess.GluVertex} u
+ * @param {libtess.GluVertex} v
+ * @return {number}
  */
 libtess.geom.vertL1dist = function(u, v) {
   return Math.abs(u.s - v.s) + Math.abs(u.t - v.t);
@@ -445,16 +421,14 @@ libtess.geom.vertL1dist = function(u, v) {
  * rounding errors, *any* implementation will give incorrect results
  * on some degenerate inputs, so the client must have some way to
  * handle this situation.
- *
- * @param {libtess.GluVertex} u [description].
- * @param {libtess.GluVertex} v [description].
- * @param {libtess.GluVertex} w [description].
+ * @param {!libtess.GluVertex} u
+ * @param {!libtess.GluVertex} v
+ * @param {!libtess.GluVertex} w
  * @return {boolean}
  */
 libtess.geom.vertCCW = function(u, v, w) {
   return (u.s * (v.t - w.t) + v.s * (w.t - u.t) + w.s * (u.t - v.t)) >= 0;
 };
-
 
 /**
  * Given parameters a,x,b,y returns the value (b*x+a*y)/(a+b),
@@ -464,15 +438,15 @@ libtess.geom.vertCCW = function(u, v, w) {
  * In particular it guarantees that the result r satisfies
  * MIN(x,y) <= r <= MAX(x,y), and the results are very accurate
  * even when a and b differ greatly in magnitude.
- *
  * @private
- * @param {number} a [description].
- * @param {number} x [description].
- * @param {number} b [description].
- * @param {number} y [description].
- * @return {number} [description].
+ * @param {number} a
+ * @param {number} x
+ * @param {number} b
+ * @param {number} y
+ * @return {number}
  */
 libtess.geom.interpolate_ = function(a, x, b, y) {
+  // from Macro RealInterpolate:
   //(a = (a < 0) ? 0 : a, b = (b < 0) ? 0 : b, ((a <= b) ? ((b == 0) ? ((x+y) / 2) : (x + (y-x) * (a/(a+b)))) : (y + (x-y) * (b/(a+b)))))
   a = (a < 0) ? 0 : a;
   b = (b < 0) ? 0 : b;
@@ -488,30 +462,26 @@ libtess.geom.interpolate_ = function(a, x, b, y) {
   }
 };
 
-
 /**
  * Given edges (o1,d1) and (o2,d2), compute their point of intersection.
  * The computed point is guaranteed to lie in the intersection of the
  * bounding rectangles defined by each edge.
- *
- * @param {libtess.GluVertex} o1 [description].
- * @param {libtess.GluVertex} d1 [description].
- * @param {libtess.GluVertex} o2 [description].
- * @param {libtess.GluVertex} d2 [description].
- * @param {libtess.GluVertex} v  output.
+ * @param {!libtess.GluVertex} o1
+ * @param {!libtess.GluVertex} d1
+ * @param {!libtess.GluVertex} o2
+ * @param {!libtess.GluVertex} d2
+ * @param {!libtess.GluVertex} v
  */
 libtess.geom.edgeIntersect = function(o1, d1, o2, d2, v) {
-  /* This is certainly not the most efficient way to find the intersection
-   * of two line segments, but it is very numerically stable.
-   *
-   * Strategy: find the two middle vertices in the VertLeq ordering,
-   * and interpolate the intersection s-value from these.  Then repeat
-   * using the TransLeq ordering to find the intersection t-value.
-   */
+  // This is certainly not the most efficient way to find the intersection
+  // of two line segments, but it is very numerically stable.
+
+  // Strategy: find the two middle vertices in the VertLeq ordering,
+  // and interpolate the intersection s-value from these. Then repeat
+  // using the TransLeq ordering to find the intersection t-value.
   var z1;
   var z2;
   var tmp;
-
   if (!libtess.geom.vertLeq(o1, d1)) {
     // Swap(o1, d1);
     tmp = o1;
