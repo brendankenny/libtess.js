@@ -27,7 +27,6 @@
  * Copyright in any portions created by third parties is as indicated
  * elsewhere herein. All Rights Reserved.
  */
-
 /**
  * @author ericv@cs.stanford.edu (Eric Veach)
  * @author bckenny@google.com (Brendan Kenny)
@@ -39,13 +38,11 @@
  */
 var libtess = {};
 
-
 /**
  * Whether to run asserts and extra debug checks.
  * @define {boolean}
  */
 libtess.DEBUG = false;
-
 
 /**
  * Checks if the condition evaluates to true if libtess.DEBUG is true.
@@ -60,7 +57,6 @@ libtess.assert = function(condition, opt_message) {
   }
 };
 
-
 /**
  * [sweepDebugEvent description]
  * @param {libtess.GluTesselator} tess
@@ -70,15 +66,14 @@ libtess.sweepDebugEvent = function(tess) {
   // sweep event updated
 };
 
-
 /**
- * [GLU_TESS_MAX_COORD description]
- * @type {number}
- * @const
+ * The maximum vertex coordinate size, 1e150. Anything larger will trigger a
+ * GLU_TESS_COORD_TOO_LARGE error callback and the vertex will be clamped to
+ * this value for all tessellation calculations.
+ * @const {number}
  */
 libtess.GLU_TESS_MAX_COORD = 1e150;
-// NOTE(bckenny): from glu.pl generator
-
+// NOTE(bckenny): value from glu.pl generator
 
 /**
  * Normally the polygon is projected to a plane perpendicular to one of the
@@ -90,47 +85,30 @@ libtess.GLU_TESS_MAX_COORD = 1e150;
  * aligned polygons. Setting TRUE_PROJECT to true will instead project onto a
  * plane actually perpendicular to the polygon's normal.
  *
- * NOTE(bckenny): I can find no instances in which this mode has ever been used,
- * but it's difficult to search for. This was a compile-time setting in the
- * original, so setting this as constant. If this is exposed in the public API,
- * remove the ignore coverage directives on libtess.normal.projectPolygon and
- * libtess.normal.normalize_.
- * @type {boolean}
- * @const
+ * NOTE(bckenny): I can find no instances on the internet in which this mode has
+ * been used, but it's difficult to search for. This was a compile-time setting
+ * in the original, so setting this as constant. If this is exposed in the
+ * public API, remove the ignore coverage directives on
+ * libtess.normal.projectPolygon and libtess.normal.normalize_.
+ * @const {boolean}
  */
 libtess.TRUE_PROJECT = false;
 
-
 /**
- * We cache vertex data for single-contour polygons so that we can
- * try a quick-and-dirty decomposition first.
- * @type {number}
- * @const
+ * We cache vertex data for single-contour polygons so that we can try a
+ * quick-and-dirty decomposition first.
+ * @const {number}
  */
 libtess.TESS_MAX_CACHE = 100;
 
-
 /**
- * [GLU_TESS_DEFAULT_TOLERANCE description]
- * @type {number}
- * @const
+ * The default tolerance for merging features, 0, meaning vertices are only
+ * merged if they are exactly coincident
+ * If a higher tolerance is needed, significant rewriting will need to occur.
+ * See libtess.sweep.TOLERANCE_NONZERO_ as a starting place.
+ * @const {number}
  */
-libtess.GLU_TESS_DEFAULT_TOLERANCE = 0.0;
-
-
-/**
- * The begin/end calls must be properly nested. We keep track of
- * the current state to enforce the ordering.
- *
- * @enum {number}
- */
-libtess.tessState = {
-  // TODO(bckenny): only used in GluTesselator, probably move there
-  T_DORMANT: 0,
-  T_IN_POLYGON: 1,
-  T_IN_CONTOUR: 2
-};
-
+libtess.GLU_TESS_DEFAULT_TOLERANCE = 0;
 
 /**
  * The input contours parition the plane into regions. A winding
@@ -139,18 +117,17 @@ libtess.tessState = {
  * For a single contour C, the winding number of a point x is simply
  * the signed number of revolutions we make around x as we travel
  * once around C (where CCW is positive). When there are several
- * contours, the individual winding numbers are summed.  This
+ * contours, the individual winding numbers are summed. This
  * procedure associates a signed integer value with each point x in
  * the plane. Note that the winding number is the same for all
  * points in a single region.
  *
  * The winding rule classifies a region as "inside" if its winding
  * number belongs to the chosen category (odd, nonzero, positive,
- * negative, or absolute value of at least two).  The current GLU
- * tesselator implements the "odd" rule.  The "nonzero" rule is another
+ * negative, or absolute value of at least two). The current GLU
+ * tesselator implements the "odd" rule. The "nonzero" rule is another
  * common way to define the interior. The other three rules are
  * useful for polygon CSG operations.
- *
  * @enum {number}
  */
 libtess.windingRule = {
@@ -162,25 +139,21 @@ libtess.windingRule = {
   GLU_TESS_WINDING_ABS_GEQ_TWO: 100134
 };
 
-
 /**
  * The type of primitive return from a "begin" callback. GL_LINE_LOOP is only
- * returned when GLU_TESS_BOUNDARY_ONLY is true. Values of enum match WebGL
- * constants.
- *
+ * returned when GLU_TESS_BOUNDARY_ONLY is true. GL_TRIANGLE_STRIP and
+ * GL_TRIANGLE_FAN are no longer returned since 1.1.0 (see release notes).
  * @enum {number}
  */
 libtess.primitiveType = {
-  // TODO(bckenny): doc types
   GL_LINE_LOOP: 2,
   GL_TRIANGLES: 4,
   GL_TRIANGLE_STRIP: 5,
   GL_TRIANGLE_FAN: 6
 };
 
-
 /**
- * The types of errors provided to error callback.
+ * The types of errors provided in the error callback.
  * @enum {number}
  */
 libtess.errorType = {
@@ -194,26 +167,15 @@ libtess.errorType = {
   GLU_TESS_NEED_COMBINE_CALLBACK: 100156
 };
 
-
 /**
- * GLU enums necessary for this project.
- * see enumglu.spec
- * TODO(bckenny): better source for these?
- *
+ * Enum values necessary for providing settings and callbacks. See the readme
+ * for details.
  * @enum {number}
  */
 libtess.gluEnum = {
+  // TODO(bckenny): rename so not always typing libtess.gluEnum.*?
+
   // NOTE(bckenny): values from enumglu.spec
-  // TODO(bckenny): most enums under here? drop GLU? or rename in other ways
-  GLU_TESS_MESH: 100112,  // from tess.c
-  GLU_TESS_TOLERANCE: 100142,
-  GLU_TESS_WINDING_RULE: 100140,
-  GLU_TESS_BOUNDARY_ONLY: 100141,
-
-  // TODO(bckenny): should this live in errorType?
-  GLU_INVALID_ENUM: 100900,
-  GLU_INVALID_VALUE: 100901,
-
   GLU_TESS_BEGIN: 100100,
   GLU_TESS_VERTEX: 100101,
   GLU_TESS_END: 100102,
@@ -225,13 +187,20 @@ libtess.gluEnum = {
   GLU_TESS_END_DATA: 100108,
   GLU_TESS_ERROR_DATA: 100109,
   GLU_TESS_EDGE_FLAG_DATA: 100110,
-  GLU_TESS_COMBINE_DATA: 100111
-};
+  GLU_TESS_COMBINE_DATA: 100111,
 
+  GLU_TESS_MESH: 100112,  //  NOTE(bckenny): from tess.c
+  GLU_TESS_TOLERANCE: 100142,
+  GLU_TESS_WINDING_RULE: 100140,
+  GLU_TESS_BOUNDARY_ONLY: 100141,
+
+  // TODO(bckenny): move this to libtess.errorType?
+  GLU_INVALID_ENUM: 100900,
+  GLU_INVALID_VALUE: 100901
+};
 
 /** @typedef {number} */
 libtess.PQHandle;
-
 
 // TODO(bckenny): better typing on key?
 /** @typedef {Object} */
@@ -3353,9 +3322,9 @@ libtess.GluTesselator = function() {
 
   /**
    * what begin/end calls have we seen?
-   * @type {libtess.tessState}
+   * @type {libtess.GluTesselator.tessState_}
    */
-  this.state = libtess.tessState.T_DORMANT;
+  this.state = libtess.GluTesselator.tessState_.T_DORMANT;
 
   /**
    * lastEdge_.org is the most recent vertex
@@ -3567,6 +3536,17 @@ libtess.GluTesselator = function() {
   }
 };
 
+/**
+ * The begin/end calls must be properly nested. We keep track of the current
+ * state to enforce the ordering.
+ * @enum {number}
+ * @private
+ */
+libtess.GluTesselator.tessState_ = {
+  T_DORMANT: 0,
+  T_IN_POLYGON: 1,
+  T_IN_CONTOUR: 2
+};
 
 /**
  * Destory the tesselator object. See README.
@@ -3575,7 +3555,7 @@ libtess.GluTesselator.prototype.gluDeleteTess = function() {
   // TODO(bckenny): This does nothing but assert that it isn't called while
   // building the polygon since we rely on GC to handle memory. *If* the public
   // API changes, this should go.
-  this.requireState_(libtess.tessState.T_DORMANT);
+  this.requireState_(libtess.GluTesselator.tessState_.T_DORMANT);
   // memFree(tess); TODO(bckenny)
 };
 
@@ -3761,7 +3741,7 @@ libtess.GluTesselator.prototype.gluTessVertex = function(coords, data) {
   // TODO(bckenny): pool allocation?
   var clamped = [0, 0, 0];
 
-  this.requireState_(libtess.tessState.T_IN_CONTOUR);
+  this.requireState_(libtess.GluTesselator.tessState_.T_IN_CONTOUR);
 
   if (this.emptyCache) {
     this.emptyCache_();
@@ -3804,9 +3784,9 @@ libtess.GluTesselator.prototype.gluTessVertex = function(coords, data) {
  * @param {Object} data Client data for current polygon.
  */
 libtess.GluTesselator.prototype.gluTessBeginPolygon = function(data) {
-  this.requireState_(libtess.tessState.T_DORMANT);
+  this.requireState_(libtess.GluTesselator.tessState_.T_DORMANT);
 
-  this.state = libtess.tessState.T_IN_POLYGON;
+  this.state = libtess.GluTesselator.tessState_.T_IN_POLYGON;
   this.cacheCount = 0;
   this.emptyCache = false;
   this.mesh = null;
@@ -3819,9 +3799,9 @@ libtess.GluTesselator.prototype.gluTessBeginPolygon = function(data) {
  * [gluTessBeginContour description]
  */
 libtess.GluTesselator.prototype.gluTessBeginContour = function() {
-  this.requireState_(libtess.tessState.T_IN_POLYGON);
+  this.requireState_(libtess.GluTesselator.tessState_.T_IN_POLYGON);
 
-  this.state = libtess.tessState.T_IN_CONTOUR;
+  this.state = libtess.GluTesselator.tessState_.T_IN_CONTOUR;
   this.lastEdge_ = null;
   if (this.cacheCount > 0) {
     // Just set a flag so we don't get confused by empty contours
@@ -3837,8 +3817,8 @@ libtess.GluTesselator.prototype.gluTessBeginContour = function() {
  * [gluTessEndContour description]
  */
 libtess.GluTesselator.prototype.gluTessEndContour = function() {
-  this.requireState_(libtess.tessState.T_IN_CONTOUR);
-  this.state = libtess.tessState.T_IN_POLYGON;
+  this.requireState_(libtess.GluTesselator.tessState_.T_IN_CONTOUR);
+  this.state = libtess.GluTesselator.tessState_.T_IN_POLYGON;
 };
 
 
@@ -3846,8 +3826,8 @@ libtess.GluTesselator.prototype.gluTessEndContour = function() {
  * [gluTessEndPolygon description]
  */
 libtess.GluTesselator.prototype.gluTessEndPolygon = function() {
-  this.requireState_(libtess.tessState.T_IN_POLYGON);
-  this.state = libtess.tessState.T_DORMANT;
+  this.requireState_(libtess.GluTesselator.tessState_.T_IN_POLYGON);
+  this.state = libtess.GluTesselator.tessState_.T_DORMANT;
 
   if (this.mesh === null) {
     // TODO(bckenny): can we eliminate more cache functionality?
@@ -3924,7 +3904,7 @@ libtess.GluTesselator.prototype.makeDormant_ = function() {
   if (this.mesh) {
     libtess.mesh.deleteMesh(this.mesh);
   }
-  this.state = libtess.tessState.T_DORMANT;
+  this.state = libtess.GluTesselator.tessState_.T_DORMANT;
   this.lastEdge_ = null;
   this.mesh = null;
 };
@@ -3933,7 +3913,7 @@ libtess.GluTesselator.prototype.makeDormant_ = function() {
 /**
  * [requireState_ description]
  * @private
- * @param {libtess.tessState} state [description].
+ * @param {libtess.GluTesselator.tessState_} state [description].
  */
 libtess.GluTesselator.prototype.requireState_ = function(state) {
   if (this.state !== state) {
@@ -3945,7 +3925,7 @@ libtess.GluTesselator.prototype.requireState_ = function(state) {
 /**
  * [gotoState_ description]
  * @private
- * @param  {libtess.tessState} newState [description].
+ * @param  {libtess.GluTesselator.tessState_} newState [description].
  */
 libtess.GluTesselator.prototype.gotoState_ = function(newState) {
   while (this.state !== newState) {
@@ -3953,13 +3933,13 @@ libtess.GluTesselator.prototype.gotoState_ = function(newState) {
     // state.
     if (this.state < newState) {
       switch (this.state) {
-        case libtess.tessState.T_DORMANT:
+        case libtess.GluTesselator.tessState_.T_DORMANT:
           this.callErrorOrErrorData(
               libtess.errorType.GLU_TESS_MISSING_BEGIN_POLYGON);
           this.gluTessBeginPolygon(null);
           break;
 
-        case libtess.tessState.T_IN_POLYGON:
+        case libtess.GluTesselator.tessState_.T_IN_POLYGON:
           this.callErrorOrErrorData(
               libtess.errorType.GLU_TESS_MISSING_BEGIN_CONTOUR);
           this.gluTessBeginContour();
@@ -3968,13 +3948,13 @@ libtess.GluTesselator.prototype.gotoState_ = function(newState) {
 
     } else {
       switch (this.state) {
-        case libtess.tessState.T_IN_CONTOUR:
+        case libtess.GluTesselator.tessState_.T_IN_CONTOUR:
           this.callErrorOrErrorData(
               libtess.errorType.GLU_TESS_MISSING_END_CONTOUR);
           this.gluTessEndContour();
           break;
 
-        case libtess.tessState.T_IN_POLYGON:
+        case libtess.GluTesselator.tessState_.T_IN_POLYGON:
           this.callErrorOrErrorData(
               libtess.errorType.GLU_TESS_MISSING_END_POLYGON);
           // this.gluTessEndPolygon() is too much work!

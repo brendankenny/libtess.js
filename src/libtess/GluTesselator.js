@@ -48,9 +48,9 @@ libtess.GluTesselator = function() {
 
   /**
    * what begin/end calls have we seen?
-   * @type {libtess.tessState}
+   * @type {libtess.GluTesselator.tessState_}
    */
-  this.state = libtess.tessState.T_DORMANT;
+  this.state = libtess.GluTesselator.tessState_.T_DORMANT;
 
   /**
    * lastEdge_.org is the most recent vertex
@@ -262,6 +262,17 @@ libtess.GluTesselator = function() {
   }
 };
 
+/**
+ * The begin/end calls must be properly nested. We keep track of the current
+ * state to enforce the ordering.
+ * @enum {number}
+ * @private
+ */
+libtess.GluTesselator.tessState_ = {
+  T_DORMANT: 0,
+  T_IN_POLYGON: 1,
+  T_IN_CONTOUR: 2
+};
 
 /**
  * Destory the tesselator object. See README.
@@ -270,7 +281,7 @@ libtess.GluTesselator.prototype.gluDeleteTess = function() {
   // TODO(bckenny): This does nothing but assert that it isn't called while
   // building the polygon since we rely on GC to handle memory. *If* the public
   // API changes, this should go.
-  this.requireState_(libtess.tessState.T_DORMANT);
+  this.requireState_(libtess.GluTesselator.tessState_.T_DORMANT);
   // memFree(tess); TODO(bckenny)
 };
 
@@ -463,7 +474,7 @@ libtess.GluTesselator.prototype.gluTessVertex = function(coords, data) {
   // TODO(bckenny): pool allocation?
   var clamped = [0, 0, 0];
 
-  this.requireState_(libtess.tessState.T_IN_CONTOUR);
+  this.requireState_(libtess.GluTesselator.tessState_.T_IN_CONTOUR);
 
   if (this.emptyCache) {
     this.emptyCache_();
@@ -506,9 +517,9 @@ libtess.GluTesselator.prototype.gluTessVertex = function(coords, data) {
  * @param {Object} data Client data for current polygon.
  */
 libtess.GluTesselator.prototype.gluTessBeginPolygon = function(data) {
-  this.requireState_(libtess.tessState.T_DORMANT);
+  this.requireState_(libtess.GluTesselator.tessState_.T_DORMANT);
 
-  this.state = libtess.tessState.T_IN_POLYGON;
+  this.state = libtess.GluTesselator.tessState_.T_IN_POLYGON;
   this.cacheCount = 0;
   this.emptyCache = false;
   this.mesh = null;
@@ -521,9 +532,9 @@ libtess.GluTesselator.prototype.gluTessBeginPolygon = function(data) {
  * [gluTessBeginContour description]
  */
 libtess.GluTesselator.prototype.gluTessBeginContour = function() {
-  this.requireState_(libtess.tessState.T_IN_POLYGON);
+  this.requireState_(libtess.GluTesselator.tessState_.T_IN_POLYGON);
 
-  this.state = libtess.tessState.T_IN_CONTOUR;
+  this.state = libtess.GluTesselator.tessState_.T_IN_CONTOUR;
   this.lastEdge_ = null;
   if (this.cacheCount > 0) {
     // Just set a flag so we don't get confused by empty contours
@@ -539,8 +550,8 @@ libtess.GluTesselator.prototype.gluTessBeginContour = function() {
  * [gluTessEndContour description]
  */
 libtess.GluTesselator.prototype.gluTessEndContour = function() {
-  this.requireState_(libtess.tessState.T_IN_CONTOUR);
-  this.state = libtess.tessState.T_IN_POLYGON;
+  this.requireState_(libtess.GluTesselator.tessState_.T_IN_CONTOUR);
+  this.state = libtess.GluTesselator.tessState_.T_IN_POLYGON;
 };
 
 
@@ -548,8 +559,8 @@ libtess.GluTesselator.prototype.gluTessEndContour = function() {
  * [gluTessEndPolygon description]
  */
 libtess.GluTesselator.prototype.gluTessEndPolygon = function() {
-  this.requireState_(libtess.tessState.T_IN_POLYGON);
-  this.state = libtess.tessState.T_DORMANT;
+  this.requireState_(libtess.GluTesselator.tessState_.T_IN_POLYGON);
+  this.state = libtess.GluTesselator.tessState_.T_DORMANT;
 
   if (this.mesh === null) {
     // TODO(bckenny): can we eliminate more cache functionality?
@@ -626,7 +637,7 @@ libtess.GluTesselator.prototype.makeDormant_ = function() {
   if (this.mesh) {
     libtess.mesh.deleteMesh(this.mesh);
   }
-  this.state = libtess.tessState.T_DORMANT;
+  this.state = libtess.GluTesselator.tessState_.T_DORMANT;
   this.lastEdge_ = null;
   this.mesh = null;
 };
@@ -635,7 +646,7 @@ libtess.GluTesselator.prototype.makeDormant_ = function() {
 /**
  * [requireState_ description]
  * @private
- * @param {libtess.tessState} state [description].
+ * @param {libtess.GluTesselator.tessState_} state [description].
  */
 libtess.GluTesselator.prototype.requireState_ = function(state) {
   if (this.state !== state) {
@@ -647,7 +658,7 @@ libtess.GluTesselator.prototype.requireState_ = function(state) {
 /**
  * [gotoState_ description]
  * @private
- * @param  {libtess.tessState} newState [description].
+ * @param  {libtess.GluTesselator.tessState_} newState [description].
  */
 libtess.GluTesselator.prototype.gotoState_ = function(newState) {
   while (this.state !== newState) {
@@ -655,13 +666,13 @@ libtess.GluTesselator.prototype.gotoState_ = function(newState) {
     // state.
     if (this.state < newState) {
       switch (this.state) {
-        case libtess.tessState.T_DORMANT:
+        case libtess.GluTesselator.tessState_.T_DORMANT:
           this.callErrorOrErrorData(
               libtess.errorType.GLU_TESS_MISSING_BEGIN_POLYGON);
           this.gluTessBeginPolygon(null);
           break;
 
-        case libtess.tessState.T_IN_POLYGON:
+        case libtess.GluTesselator.tessState_.T_IN_POLYGON:
           this.callErrorOrErrorData(
               libtess.errorType.GLU_TESS_MISSING_BEGIN_CONTOUR);
           this.gluTessBeginContour();
@@ -670,13 +681,13 @@ libtess.GluTesselator.prototype.gotoState_ = function(newState) {
 
     } else {
       switch (this.state) {
-        case libtess.tessState.T_IN_CONTOUR:
+        case libtess.GluTesselator.tessState_.T_IN_CONTOUR:
           this.callErrorOrErrorData(
               libtess.errorType.GLU_TESS_MISSING_END_CONTOUR);
           this.gluTessEndContour();
           break;
 
-        case libtess.tessState.T_IN_POLYGON:
+        case libtess.GluTesselator.tessState_.T_IN_POLYGON:
           this.callErrorOrErrorData(
               libtess.errorType.GLU_TESS_MISSING_END_POLYGON);
           // this.gluTessEndPolygon() is too much work!
