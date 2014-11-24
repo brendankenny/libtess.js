@@ -52,14 +52,20 @@ gulp.task('build-cat', function() {
     }
 
     // need to expand [startToken, endToken] to include beginning whitespace and
-    // ending `;`
+    // ending `;\n`
     var startToken = node.startToken;
-    if (startToken.prev.type === 'WhiteSpace' &&
-        startToken.prev.prev.type === 'LineBreak') {
-      startToken = startToken.prev.prev;
+    if (startToken.prev.type === 'WhiteSpace') {
+      startToken = startToken.prev;
     }
     var endToken = node.endToken;
-    if (endToken.next.value === ';') {
+    if (endToken.next.value === ';' &&
+        endToken.next.next.type === 'LineBreak') {
+      endToken = endToken.next.next;
+    }
+
+    // if removing the assert is going to leave two blank lines, remove one
+    if (startToken.prev.prev.type === 'LineBreak' &&
+        endToken.next.type === 'LineBreak') {
       endToken = endToken.next;
     }
 

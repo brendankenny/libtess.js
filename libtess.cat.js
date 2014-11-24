@@ -2228,7 +2228,6 @@ libtess.sweep.checkForLeftSplice_ = function(tess, regUp) {
   var eLo = regLo.eUp;
   var e;
 
-
   if (libtess.geom.vertLeq(eUp.dst(), eLo.dst())) {
     if (libtess.geom.edgeSign(eUp.dst(), eLo.dst(), eUp.org) < 0) {
       return false;
@@ -2280,7 +2279,6 @@ libtess.sweep.checkForIntersect_ = function(tess, regUp) {
   var dstLo = eLo.dst();
 
   var isect = new libtess.GluVertex();
-
 
   if (orgUp === orgLo) {
     // right endpoints are the same
@@ -4932,7 +4930,6 @@ libtess.PriorityQ.prototype.remove = function(curr) {
   }
   curr = -(curr + 1);
 
-
   this.keys_[curr] = null;
   while (this.size_ > 0 && this.keys_[this.order_[this.size_ - 1]] === null) {
     --this.size_;
@@ -5142,7 +5139,6 @@ libtess.PriorityQHeap.prototype.remove = function(hCurr) {
   var n = this.nodes_;
   var h = this.handles_;
 
-
   var curr = h[hCurr].node;
   n[curr].handle = n[this.size_].handle;
   h[n[curr].handle].node = curr;
@@ -5182,7 +5178,6 @@ libtess.PriorityQHeap.prototype.floatDown_ = function(curr) {
 
       ++child;
     }
-
 
     var hChild = n[child].handle;
     if (child > this.size_ || this.leq_(h[hCurr].key, h[hChild].key)) {
