@@ -58,15 +58,6 @@ libtess.assert = function(condition, opt_message) {
 };
 
 /**
- * [sweepDebugEvent description]
- * @param {libtess.GluTesselator} tess
- */
-libtess.sweepDebugEvent = function(tess) {
-  // TODO(bckenny): closure debug flag/debugger support
-  // sweep event updated
-};
-
-/**
  * The maximum vertex coordinate size, 1e150. Anything larger will trigger a
  * GLU_TESS_COORD_TOO_LARGE error callback and the vertex will be clamped to
  * this value for all tessellation calculations.

@@ -143,7 +143,6 @@ libtess.sweep.computeInterior = function(tess) {
   // Set tess.event for debugging purposes
   var minRegion = tess.dict.getMin().getKey();
   tess.event = minRegion.eUp.org;
-  libtess.sweepDebugEvent(tess);
   libtess.sweep.doneEdgeDict_(tess);
   libtess.sweep.donePriorityQ_(tess);
 
@@ -828,8 +827,6 @@ libtess.sweep.checkForIntersect_ = function(tess, regUp) {
   }
 
   // At this point the edges intersect, at least marginally
-  libtess.sweepDebugEvent(tess);
-
   libtess.geom.edgeIntersect(dstUp, orgUp, dstLo, orgLo, isect);
 
   // The following properties are guaranteed:
@@ -1283,7 +1280,6 @@ libtess.sweep.connectLeftVertex_ = function(tess, vEvent) {
  */
 libtess.sweep.sweepEvent_ = function(tess, vEvent) {
   tess.event = vEvent; // for access in edgeLeq_ // TODO(bckenny): wuh?
-  libtess.sweepDebugEvent(tess);
 
   /* Check if this vertex is the right endpoint of an edge that is
    * already in the dictionary.  In this case we don't need to waste
