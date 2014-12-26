@@ -7,6 +7,12 @@ Polygon tesselation library, ported from the tesselator in Silicon Graphics's
 the OpenGL Utility Library (GLU), written primarily by
 [Eric Veach](https://www.youtube.com/watch?v=e3ss_Ozb9Yg) while at SGI.
 
+## Installation
+
+```
+npm install libtess
+```
+
 ## Example
 See the [example page](https://brendankenny.github.io/libtess.js/examples/simple_triangulation/index.html)
 for a simple example of setting up a polygon with a hole made of two contours,
