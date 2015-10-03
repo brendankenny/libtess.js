@@ -200,6 +200,7 @@ gulp.task('coverage', ['build'], function(doneCallback) {
 
   gulp.src('libtess.debug.js')
     .pipe(istanbul())
+    .pipe(istanbul.hookRequire())
     .on('finish', function() {
       gulp.src('test/*.test.js')
         .pipe(mocha({
