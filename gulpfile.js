@@ -115,11 +115,7 @@ gulp.task('build-min', function() {
           'visibility',
         ],
         use_types_for_optimization: null,
-        use_only_custom_externs: null,
-        externs: [
-          './build/externs/es5.js',
-          './build/externs/es3.js'
-        ],
+        env: 'CUSTOM',
 
         // for node export
         output_wrapper: '%output% if (typeof module !== \'undefined\') { ' +
