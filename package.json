@@ -23,12 +23,7 @@
     "Tom Payne <twpayne@gmail.com>",
     "Brett Camper <bcamper@alum.mit.edu> (http://vector.io/)"
   ],
-  "licenses": [
-    {
-      "type": "SGI-B-2.0",
-      "url": "https://github.com/brendankenny/libtess.js/blob/gh-pages/LICENSE"
-    }
-  ],
+  "license" : "SGI-B-2.0",
   "bugs": "https://github.com/brendankenny/libtess.js/issues",
   "keywords": [
     "polygon",
