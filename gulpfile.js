@@ -30,7 +30,6 @@ var LINT_SRC = LIBTESS_SRC.concat([
   './libtess.cat.js',
   './libtess.debug.js',
   './{build,examples,test,third_party}/**/*.{js,html}',
-  '!./build/externs/*',
   '!./test/browser/*-browserified.js',
   '!./test/expectations/*',
   '!./third_party/node_modules/**',
