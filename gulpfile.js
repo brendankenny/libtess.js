@@ -15,11 +15,12 @@ var stylish = require('jshint-stylish');
 var jscs = require('gulp-jscs');
 var filter = require('gulp-filter');
 var istanbul = require('gulp-istanbul');
-var exec = require('child_process').exec;
 var rocambole = require('rocambole');
 var rocamboleToken = require('rocambole-token');
 var vinylMap = require('vinyl-map');
 var rename = require('gulp-rename');
+var coveralls = require('gulp-coveralls');
+var path = require('path');
 
 var COMPILER_PATH = 'node_modules/closurecompiler/compiler/compiler.jar';
 var LIBTESS_SRC = ['./src/libtess.js', './src/**/*.js'];
@@ -193,7 +194,6 @@ gulp.task('test', ['lint'], function() {
     }));
 });
 
-// TODO(bckenny): clean this up
 gulp.task('coverage', ['build'], function(doneCallback) {
   // use libtess.debug.js for coverage testing (see TODO in test/common.js)
   process.env.testType = 'coverage';
@@ -207,24 +207,18 @@ gulp.task('coverage', ['build'], function(doneCallback) {
           reporter: 'dot',
           ui: 'tdd'
         }))
-
         .pipe(istanbul.writeReports())
-        .on('end', function() {
-          // send coverage information to coveralls.io if running on travis
-          if (process.env.TRAVIS) {
-            exec('./node_modules/coveralls/bin/coveralls.js < ' +
-                './coverage/lcov.info',
-                function(error, stdout, stderr) {
-                  console.log('stdout: ' + stdout);
-                  console.log('stderr: ' + stderr);
-                  doneCallback(error);
-                });
-          } else {
-            console.log('exiting coverage without uploading to coveralls');
-            doneCallback();
-          }
-        });
+        .on('finish', doneCallback);
     });
+});
+
+gulp.task('coveralls', ['coverage'], function () {
+  if (!process.env.CI) {
+    console.log('exiting coverage without uploading to coveralls');
+    return;
+  }
+
+  return gulp.src(path.join(__dirname, 'coverage/lcov.info')).pipe(coveralls());
 });
 
 gulp.task('browserify-expectations-viewer', function() {

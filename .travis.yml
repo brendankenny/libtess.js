@@ -4,5 +4,5 @@ node_js:
 branches:
   only:
     - gh-pages
-after_success: gulp coverage
+after_success: gulp coveralls
 sudo: false
