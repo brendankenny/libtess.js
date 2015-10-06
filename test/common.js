@@ -4,17 +4,9 @@
 var chai = require('chai');
 var assert = chai.assert;
 
-// TODO(bckenny): not sure of a better way of doing this yet. Want to inject
-// libtess.debug.js for coverage, but libtess.min.js for all other runs.
-// gulp-mocha takes file names, though. Write to temp files first?
-exports.libtess = (function() {
-  if (process.env.testType === 'coverage') {
-    return require('../libtess.debug.js');
-
-  } else {
-    return require('../libtess.min.js');
-  }
-})();
+// Load compiled libtess unless a version has been manually injected.
+exports.libtess = global._injectedLibtess ?
+    global._injectedLibtess : require('../libtess.min.js');
 
 // TODO(bckenny): replace with some destructuring?
 /**

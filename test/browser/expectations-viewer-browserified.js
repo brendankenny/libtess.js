@@ -347,23 +347,16 @@ document.addEventListener('DOMContentLoaded', init, false);
 },{"./../third_party/test/geometry/osm_building.js":12,"./../third_party/test/geometry/osm_nyc_midtown.js":13,"./../third_party/test/geometry/osm_two_buildings.js":14,"./../third_party/test/geometry/poly2tri-dude.js":15,"./../third_party/test/geometry/roboto-registered.js":16,"./common.js":3,"./expectations/libtess.baseline.js":4,"./geometry/degenerate-hourglass.js":5,"./geometry/hourglass.js":6,"./geometry/letter-e.js":7,"./geometry/shared-borders.js":8,"./geometry/shared-edge-triangles.js":9,"./geometry/two-opposite-triangles.js":10,"./geometry/two-triangles.js":11,"./rfolder.js":2}],2:[function(require,module,exports){
 
 },{}],3:[function(require,module,exports){
+(function (global){
 /* jshint node: true */
 'use strict';
 
 var chai = require('chai');
 var assert = chai.assert;
 
-// TODO(bckenny): not sure of a better way of doing this yet. Want to inject
-// libtess.debug.js for coverage, but libtess.min.js for all other runs.
-// gulp-mocha takes file names, though. Write to temp files first?
-exports.libtess = (function() {
-  if ("browserify" === 'coverage') {
-    return require('../libtess.debug.js');
-
-  } else {
-    return require('../libtess.min.js');
-  }
-})();
+// Load compiled libtess unless a version has been manually injected.
+exports.libtess = global._injectedLibtess ?
+    global._injectedLibtess : require('../libtess.min.js');
 
 // TODO(bckenny): replace with some destructuring?
 /**
@@ -632,7 +625,8 @@ exports.createPlaneRotation = function(normal) {
   })(transform);
 };
 
-},{"../libtess.debug.js":undefined,"../libtess.min.js":undefined,"chai":undefined}],4:[function(require,module,exports){
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"../libtess.min.js":"../libtess.min.js","chai":"chai"}],4:[function(require,module,exports){
 /*
 
  Copyright 2000, Silicon Graphics, Inc. All Rights Reserved.

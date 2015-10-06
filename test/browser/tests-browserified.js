@@ -163,7 +163,7 @@ suite('Basic Tests', function() {
   });
 });
 
-},{"./common.js":5,"chai":undefined}],2:[function(require,module,exports){
+},{"./common.js":5,"chai":"chai"}],2:[function(require,module,exports){
 /* jshint node: true */
 /* global suite, test */
 'use strict';
@@ -592,7 +592,7 @@ suite('Explicit Error States', function() {
   });
 });
 
-},{"./common.js":5,"./geometry/hourglass.js":8,"chai":undefined}],3:[function(require,module,exports){
+},{"./common.js":5,"./geometry/hourglass.js":8,"chai":"chai"}],3:[function(require,module,exports){
 /* jshint node: true */
 /* global suite, test */
 'use strict';
@@ -688,26 +688,19 @@ function testGeometry(geometry) {
   });
 }
 
-},{"./../third_party/test/geometry/osm_building.js":14,"./../third_party/test/geometry/osm_nyc_midtown.js":15,"./../third_party/test/geometry/osm_two_buildings.js":16,"./../third_party/test/geometry/poly2tri-dude.js":17,"./../third_party/test/geometry/roboto-registered.js":18,"./common.js":5,"./expectations/libtess.baseline.js":6,"./geometry/degenerate-hourglass.js":7,"./geometry/hourglass.js":8,"./geometry/letter-e.js":9,"./geometry/shared-borders.js":10,"./geometry/shared-edge-triangles.js":11,"./geometry/two-opposite-triangles.js":12,"./geometry/two-triangles.js":13,"./rfolder.js":4,"chai":undefined}],4:[function(require,module,exports){
+},{"./../third_party/test/geometry/osm_building.js":14,"./../third_party/test/geometry/osm_nyc_midtown.js":15,"./../third_party/test/geometry/osm_two_buildings.js":16,"./../third_party/test/geometry/poly2tri-dude.js":17,"./../third_party/test/geometry/roboto-registered.js":18,"./common.js":5,"./expectations/libtess.baseline.js":6,"./geometry/degenerate-hourglass.js":7,"./geometry/hourglass.js":8,"./geometry/letter-e.js":9,"./geometry/shared-borders.js":10,"./geometry/shared-edge-triangles.js":11,"./geometry/two-opposite-triangles.js":12,"./geometry/two-triangles.js":13,"./rfolder.js":4,"chai":"chai"}],4:[function(require,module,exports){
 
 },{}],5:[function(require,module,exports){
+(function (global){
 /* jshint node: true */
 'use strict';
 
 var chai = require('chai');
 var assert = chai.assert;
 
-// TODO(bckenny): not sure of a better way of doing this yet. Want to inject
-// libtess.debug.js for coverage, but libtess.min.js for all other runs.
-// gulp-mocha takes file names, though. Write to temp files first?
-exports.libtess = (function() {
-  if ("browserify" === 'coverage') {
-    return require('../libtess.debug.js');
-
-  } else {
-    return require('../libtess.min.js');
-  }
-})();
+// Load compiled libtess unless a version has been manually injected.
+exports.libtess = global._injectedLibtess ?
+    global._injectedLibtess : require('../libtess.min.js');
 
 // TODO(bckenny): replace with some destructuring?
 /**
@@ -976,7 +969,8 @@ exports.createPlaneRotation = function(normal) {
   })(transform);
 };
 
-},{"../libtess.debug.js":undefined,"../libtess.min.js":undefined,"chai":undefined}],6:[function(require,module,exports){
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"../libtess.min.js":"../libtess.min.js","chai":"chai"}],6:[function(require,module,exports){
 /*
 
  Copyright 2000, Silicon Graphics, Inc. All Rights Reserved.

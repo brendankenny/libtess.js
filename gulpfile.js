@@ -7,7 +7,6 @@ var concat = require('gulp-concat');
 var closureCompiler = require('gulp-closure-compiler');
 var mocha = require('gulp-mocha');
 var browserify = require('browserify');
-var envify = require('envify/custom');
 var glob = require('glob');
 var vinylSource = require('vinyl-source-stream');
 var jshint = require('gulp-jshint');
@@ -136,25 +135,17 @@ gulp.task('dist-test-libs', function() {
     .pipe(gulp.dest('./third_party'));
 });
 
+// create a version of the tests that can run in a browser (test/index.html)
 gulp.task('browserify-tests', function() {
   // only includes baseline tess (uses libtess in page), so no prereqs
   return browserify(glob.sync('./test/*.test.js'))
-    // custom chai and libtess injected on page (for e.g. debug libtess)
-    // TODO(bckenny): is there a less-dumb way of doing this?
+    // chai and libtess injected on page, so just load stubs
     .require('./test/browser/fake-chai.js', {expose: 'chai'})
-    .require('./test/browser/fake-libtess.js',
-        {expose: '../libtess.debug.js'})
-    .require('./test/browser/fake-libtess.js',
-        {expose: '../libtess.min.js'})
+    .require('./test/browser/fake-libtess.js', {expose: '../libtess.min.js'})
 
     // expand list of tests in geometry/ at browserify time
     .ignore('./test/rfolder.js')
     .transform('rfolderify')
-
-    // eliminate env nonsense in common.js
-    .transform(envify({
-      testType: 'browserify'
-    }))
 
     .bundle()
 
@@ -194,10 +185,7 @@ gulp.task('test', ['lint'], function() {
     }));
 });
 
-gulp.task('coverage', ['build'], function(doneCallback) {
-  // use libtess.debug.js for coverage testing (see TODO in test/common.js)
-  process.env.testType = 'coverage';
-
+gulp.task('coverage', ['build-cat'], function(doneCallback) {
   gulp.src('libtess.debug.js')
     .pipe(istanbul())
     .pipe(istanbul.hookRequire())
@@ -205,7 +193,11 @@ gulp.task('coverage', ['build'], function(doneCallback) {
       gulp.src('test/*.test.js')
         .pipe(mocha({
           reporter: 'dot',
-          ui: 'tdd'
+          ui: 'tdd',
+          require: [
+            // track coverage over full debug version of libtess
+            './test/injection/debug.js'
+          ]
         }))
         .pipe(istanbul.writeReports())
         .on('finish', doneCallback);
@@ -224,19 +216,11 @@ gulp.task('coveralls', ['coverage'], function () {
 gulp.task('browserify-expectations-viewer', function() {
   return browserify('./test/expectations-viewer.js')
     .require('./test/browser/fake-chai.js', {expose: 'chai'})
-    .require('./test/browser/fake-libtess.js',
-        {expose: '../libtess.debug.js'})
-    .require('./test/browser/fake-libtess.js',
-        {expose: '../libtess.min.js'})
+    .require('./test/browser/fake-libtess.js', {expose: '../libtess.min.js'})
 
     // expand list of tests in geometry/ at browserify time
     .ignore('./test/rfolder.js')
     .transform('rfolderify')
-
-    // eliminate env nonsense in common.js
-    .transform(envify({
-      testType: 'browserify'
-    }))
 
     .bundle()
 
