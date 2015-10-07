@@ -200,7 +200,7 @@ gulp.task('coverage', ['build-cat'], function(doneCallback) {
           ]
         }))
         .pipe(istanbul.writeReports())
-        .on('finish', doneCallback);
+        .on('end', doneCallback);
     });
 });
 
