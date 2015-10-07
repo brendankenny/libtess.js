@@ -1,4 +1,4 @@
-/* jshint node: true */
+/* jshint node: true, esnext: true */
 'use strict';
 
 var gulp = require('gulp');
@@ -38,43 +38,49 @@ var LINT_SRC = LIBTESS_SRC.concat([
   '!./examples/osm/nyc_midtown_*.js'
 ]);
 
-gulp.task('build-cat', function() {
-  var removedAsserts = 0;
-  function stripAsserts(node) {
-    // looking only for `libtess.assert` calls
-    if (node.type !== 'CallExpression' ||
-        node.callee.type !== 'MemberExpression' ||
-        node.callee.property.name !== 'assert' ||
-        node.callee.object.type !== 'Identifier' ||
-        node.callee.object.name !== 'libtess') {
-      return;
-    }
-
-    // need to expand [startToken, endToken] to include beginning whitespace and
-    // ending `;\n`
-    var startToken = node.startToken;
-    if (startToken.prev.type === 'WhiteSpace') {
-      startToken = startToken.prev;
-    }
-    var endToken = node.endToken;
-    if (endToken.next.value === ';' &&
-        endToken.next.next.type === 'LineBreak') {
-      endToken = endToken.next.next;
-    }
-
-    // if removing the assert is going to leave two blank lines, remove one
-    if (startToken.prev.prev.type === 'LineBreak' &&
-        endToken.next.type === 'LineBreak') {
-      endToken = endToken.next;
-    }
-
-    // because our lint rules require things like always using curly braces, we
-    // can safely remove libtess.assert(...) calls without replacing them with
-    // `void 0` or the like.
-    rocamboleToken.eachInBetween(startToken, endToken, rocamboleToken.remove);
-    removedAsserts++;
+/**
+ * Determine if an AST node is a `libtess.assert` call, remove assert (and
+ * surrounding whitespace) if so.
+ */
+function stripAsserts(node) {
+  // looking only for assert calls
+  if (node.type !== 'CallExpression' ||
+      node.callee.type !== 'MemberExpression' ||
+      node.callee.property.name !== 'assert' ||
+      node.callee.object.type !== 'Identifier' ||
+      node.callee.object.name !== 'libtess') {
+    return;
   }
 
+  // need to expand [startToken, endToken] to include beginning whitespace and
+  // ending `;\n`
+  var startToken = node.startToken;
+  if (startToken.prev.type === 'WhiteSpace') {
+    startToken = startToken.prev;
+  }
+  var endToken = node.endToken;
+  if (endToken.next.value === ';' &&
+      endToken.next.next.type === 'LineBreak') {
+    endToken = endToken.next.next;
+  }
+
+  // if removing the assert is going to leave two blank lines, remove one
+  if (startToken.prev.prev.type === 'LineBreak' &&
+      endToken.next.type === 'LineBreak') {
+    endToken = endToken.next;
+  }
+
+  // because our lint rules require things like always using curly braces, we
+  // can safely remove libtess.assert(...) calls without replacing them with
+  // `void 0` or the like.
+  rocamboleToken.eachInBetween(startToken, endToken, rocamboleToken.remove);
+}
+
+/**
+ * Build a single-file version of libtess, one (libtess.debug.js) with asserts
+ * turned on, and one (libtess.cat.js) with them stripped out.
+ */
+gulp.task('build-cat', () => {
   return gulp.src(LIBTESS_SRC.concat('./build/node_export.js'))
     // remove license at top of each file except first (which begins '@license')
     .pipe(replace(/^\/\*[\s\*]+Copyright 2000[\s\S]*?\*\//m, ''))
@@ -82,19 +88,21 @@ gulp.task('build-cat', function() {
     .pipe(gulp.dest('.'))
 
     // remove asserts
-    .pipe(vinylMap(function(code, filename) {
+    .pipe(vinylMap((code, filename) => {
       var stripped = rocambole.moonwalk(code.toString(), stripAsserts);
-      console.log('asserts removed: ' + removedAsserts);
-
       return stripped.toString();
     }))
-    // turn off debug (for checkMesh, etc)
+
+    // disable `libtess.DEBUG` so debug branches are never taken
     .pipe(replace('libtess.DEBUG = true;', 'libtess.DEBUG = false;'))
     .pipe(rename('libtess.cat.js'))
     .pipe(gulp.dest('.'));
 });
 
-gulp.task('build-min', function() {
+/**
+ * Compile libtess using the Closure Compiler.
+ */
+gulp.task('build-min', () => {
   return gulp.src(LIBTESS_SRC.concat('./build/closure_exports.js'))
     .pipe(closureCompiler({
       compilerPath: COMPILER_PATH,
@@ -104,7 +112,7 @@ gulp.task('build-min', function() {
         warning_level: 'VERBOSE',
         language_in: 'ECMASCRIPT5_STRICT',
         define: [
-          // NOTE(bckenny): switch to true for assertions throughout code
+          // NOTE(bckenny): switch to true for assertions throughout code.
           'libtess.DEBUG=false'
         ],
         jscomp_warning: [
@@ -114,6 +122,9 @@ gulp.task('build-min', function() {
           'visibility',
         ],
         use_types_for_optimization: null,
+
+        // Since DOM isn't touched, don't use default externs, leaving only the
+        // core language keywords unobfuscated.
         env: 'CUSTOM',
 
         // for node export
@@ -124,9 +135,74 @@ gulp.task('build-min', function() {
     .pipe(gulp.dest('.'));
 });
 
-// copy latest mocha and chai over to third_party for distribution for live
-// testing on gh-pages
-gulp.task('dist-test-libs', function() {
+/**
+ * Lint code with JSHint and JSCS.
+ */
+gulp.task('lint', ['build-cat'], () => {
+  return gulp.src(LINT_SRC)
+    // jshint
+    .pipe(jshint.extract('auto'))
+    .pipe(jshint())
+    .pipe(jshint.reporter(stylish))
+    .pipe(jshint.reporter('fail'))
+
+    // jscs (code style)
+    // TODO(bckenny): get jscs to lint inline JS in html?
+    .pipe(filter('**/*.js'))
+    .pipe(jscs());
+});
+
+/**
+ * Run full test suite over compiled libtess.
+ */
+gulp.task('run-tests', ['build-min'], () => {
+  return gulp.src('test/*.test.js', {read: false})
+    .pipe(mocha({
+      reporter: 'spec',
+      ui: 'tdd'
+    }));
+});
+
+/**
+ * Track code coverage of test suite. libtess.debug.js is loaded as global
+ * variable `_injectedLibtess` so it is used for coverage (see test/common.js).
+ */
+gulp.task('coverage', ['build-cat'], (doneCallback) => {
+  gulp.src('libtess.debug.js')
+    .pipe(istanbul())
+    .pipe(istanbul.hookRequire())
+    .on('finish', () => {
+      gulp.src('test/*.test.js', {read: false})
+        .pipe(mocha({
+          reporter: 'dot',
+          ui: 'tdd',
+          require: [
+            // Inject libtess.debug.js so coverage is run over it.
+            './test/injection/debug.js'
+          ]
+        }))
+        .pipe(istanbul.writeReports())
+        .on('end', doneCallback);
+    });
+});
+
+/**
+ * If running in some CI environment, attempt to upload results to Coveralls.
+ */
+gulp.task('coveralls', ['coverage'], () => {
+  if (!process.env.CI) {
+    console.log('exiting coverage without uploading to coveralls');
+    return;
+  }
+
+  return gulp.src(path.join(__dirname, 'coverage/lcov.info')).pipe(coveralls());
+});
+
+/**
+ * Copy latest mocha and chai over to third_party for distribution for live
+ * testing on gh-pages.
+ */
+gulp.task('dist-test-libs', () => {
   return gulp.src([
     'node_modules/mocha/mocha.{css,js}',
     'node_modules/mocha/LICENSE',
@@ -135,8 +211,10 @@ gulp.task('dist-test-libs', function() {
     .pipe(gulp.dest('./third_party'));
 });
 
-// create a version of the tests that can run in a browser (test/index.html)
-gulp.task('browserify-tests', function() {
+/**
+ * Create a version of the tests that can run in a browser (test/index.html).
+ */
+gulp.task('browserify-tests', () => {
   // only includes baseline tess (uses libtess in page), so no prereqs
   return browserify(glob.sync('./test/*.test.js'))
     // chai and libtess injected on page, so just load stubs
@@ -154,66 +232,11 @@ gulp.task('browserify-tests', function() {
     .pipe(gulp.dest('./test/browser'));
 });
 
-// TODO(bckenny): more incremental
-gulp.task('build', [
-  'build-cat',
-  'build-min',
-  'browserify-tests',
-  'dist-test-libs',
-  'browserify-expectations-viewer'
-]);
-
-gulp.task('lint', ['build'], function() {
-  return gulp.src(LINT_SRC)
-    // jshint
-    .pipe(jshint.extract('auto'))
-    .pipe(jshint())
-    .pipe(jshint.reporter(stylish))
-    .pipe(jshint.reporter('fail'))
-
-    // jscs (code style)
-    // TODO(bckenny): get jscs to lint inline JS in html?
-    .pipe(filter('**/*.js'))
-    .pipe(jscs());
-});
-
-gulp.task('test', ['lint'], function() {
-  return gulp.src('test/*.test.js', {read: false})
-    .pipe(mocha({
-      reporter: 'spec',
-      ui: 'tdd'
-    }));
-});
-
-gulp.task('coverage', ['build-cat'], function(doneCallback) {
-  gulp.src('libtess.debug.js')
-    .pipe(istanbul())
-    .pipe(istanbul.hookRequire())
-    .on('finish', function() {
-      gulp.src('test/*.test.js')
-        .pipe(mocha({
-          reporter: 'dot',
-          ui: 'tdd',
-          require: [
-            // track coverage over full debug version of libtess
-            './test/injection/debug.js'
-          ]
-        }))
-        .pipe(istanbul.writeReports())
-        .on('end', doneCallback);
-    });
-});
-
-gulp.task('coveralls', ['coverage'], function () {
-  if (!process.env.CI) {
-    console.log('exiting coverage without uploading to coveralls');
-    return;
-  }
-
-  return gulp.src(path.join(__dirname, 'coverage/lcov.info')).pipe(coveralls());
-});
-
-gulp.task('browserify-expectations-viewer', function() {
+/**
+ * Browserify the geometry tests so they can be run in an expectations
+ * comparison page.
+ */
+gulp.task('browserify-expectations-viewer', () => {
   return browserify('./test/expectations-viewer.js')
     .require('./test/browser/fake-chai.js', {expose: 'chai'})
     .require('./test/browser/fake-libtess.js', {expose: '../libtess.min.js'})
@@ -228,5 +251,16 @@ gulp.task('browserify-expectations-viewer', function() {
     .pipe(vinylSource('expectations-viewer-browserified.js'))
     .pipe(gulp.dest('./test/browser'));
 });
+
+gulp.task('test', ['lint', 'run-tests']);
+
+// TODO(bckenny): more incremental
+gulp.task('build', [
+  'build-cat',
+  'build-min',
+  'browserify-tests',
+  'dist-test-libs',
+  'browserify-expectations-viewer'
+]);
 
 gulp.task('default', ['build']);
