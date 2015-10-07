@@ -24,6 +24,7 @@
  * @suppress {globalThis}
  */
 
+/* jscs:disable requireDotNotation */
 this['libtess'] = {
   'GluTesselator': libtess.GluTesselator,
 
@@ -98,3 +99,4 @@ libtess.GluTesselator.prototype['gluTessEndContour'] =
     libtess.GluTesselator.prototype.gluTessEndContour;
 libtess.GluTesselator.prototype['gluTessEndPolygon'] =
     libtess.GluTesselator.prototype.gluTessEndPolygon;
+/* jscs:enable requireDotNotation */

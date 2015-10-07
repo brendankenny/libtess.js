@@ -4083,7 +4083,7 @@ libtess.GluTesselator.prototype.callEndOrEndData = function() {
   }
 };
 
-
+/* jscs:disable maximumLineLength */
 /**
  * [callCombineOrCombineData description]
  * @param {Array.<number>} coords [description].
@@ -4091,9 +4091,7 @@ libtess.GluTesselator.prototype.callEndOrEndData = function() {
  * @param {Array.<number>} weight [description].
  * @return {Object} Interpolated vertex.
  */
-libtess.GluTesselator.prototype.callCombineOrCombineData =
-    function(coords, data, weight) {
-
+libtess.GluTesselator.prototype.callCombineOrCombineData = function(coords, data, weight) {
   var interpData;
   if (this.callCombineData_) {
     interpData = this.callCombineData_(coords, data, weight, this.polygonData_);
@@ -4108,7 +4106,7 @@ libtess.GluTesselator.prototype.callCombineOrCombineData =
   }
   return interpData;
 };
-
+/* jscs:enable maximumLineLength */
 
 // TODO(bckenny): combine the enums in libtess
 /**

@@ -1,5 +1,24 @@
 {
   "preset": "google",
   "disallowMultipleLineBreaks": null,
-  "requireCamelCaseOrUpperCaseIdentifiers": null
+  "requireCamelCaseOrUpperCaseIdentifiers": null,
+  "jsDoc": {
+      "checkAnnotations": {
+        "preset": "closurecompiler",
+        "extra": {
+          "const": true,
+          "fileoverview": "some",
+          "private": true,
+          "suppress": "some"
+        }
+      },
+      "checkParamNames": true,
+      "requireParamTypes": true,
+      "checkRedundantParams": true,
+      "checkReturnTypes": true,
+      "checkRedundantReturns": true,
+      "requireReturnTypes": true,
+      "checkTypes": true,
+      "checkRedundantAccess": true
+    }
 }

@@ -149,7 +149,9 @@ gulp.task('lint', ['build-cat'], () => {
     // jscs (code style)
     // TODO(bckenny): get jscs to lint inline JS in html?
     .pipe(filter('**/*.js'))
-    .pipe(jscs());
+    .pipe(jscs())
+    .pipe(jscs.reporter())
+    .pipe(jscs.reporter('fail'));
 });
 
 /**
