@@ -20,6 +20,7 @@ var vinylMap = require('vinyl-map');
 var rename = require('gulp-rename');
 var coveralls = require('gulp-coveralls');
 var path = require('path');
+var newer = require('gulp-newer');
 
 var COMPILER_PATH = 'node_modules/closurecompiler/compiler/compiler.jar';
 var LIBTESS_SRC = ['./src/libtess.js', './src/**/*.js'];
@@ -82,10 +83,13 @@ function stripAsserts(node) {
  */
 gulp.task('build-cat', () => {
   return gulp.src(LIBTESS_SRC.concat('./build/node_export.js'))
+    .pipe(newer('./libtess.debug.js'))
     // remove license at top of each file except first (which begins '@license')
     .pipe(replace(/^\/\*[\s\*]+Copyright 2000[\s\S]*?\*\//m, ''))
     .pipe(concat('libtess.debug.js'))
     .pipe(gulp.dest('.'))
+
+    .pipe(newer('./libtess.cat.js'))
 
     // remove asserts
     .pipe(vinylMap((code, filename) => {
@@ -104,6 +108,7 @@ gulp.task('build-cat', () => {
  */
 gulp.task('build-min', () => {
   return gulp.src(LIBTESS_SRC.concat('./build/closure_exports.js'))
+    .pipe(newer('./libtess.min.js'))
     .pipe(closureCompiler({
       compilerPath: COMPILER_PATH,
       fileName: 'libtess.min.js',
@@ -157,10 +162,10 @@ gulp.task('lint', ['build-cat'], () => {
 /**
  * Run full test suite over compiled libtess.
  */
-gulp.task('run-tests', ['build-min'], () => {
+gulp.task('test-suite', ['build-min'], () => {
   return gulp.src('test/*.test.js', {read: false})
     .pipe(mocha({
-      reporter: 'spec',
+      reporter: 'dot',
       ui: 'tdd'
     }));
 });
@@ -254,9 +259,8 @@ gulp.task('browserify-expectations-viewer', () => {
     .pipe(gulp.dest('./test/browser'));
 });
 
-gulp.task('test', ['lint', 'run-tests']);
+gulp.task('test', ['lint', 'test-suite']);
 
-// TODO(bckenny): more incremental
 gulp.task('build', [
   'build-cat',
   'build-min',
