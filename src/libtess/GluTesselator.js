@@ -1,6 +1,6 @@
 /**
  * Copyright 2000, Silicon Graphics, Inc. All Rights Reserved.
- * Copyright 2014, Google Inc. All Rights Reserved.
+ * Copyright 2015, Google Inc. All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -64,7 +64,6 @@ libtess.GluTesselator = function() {
    * @type {libtess.GluMesh}
    */
   this.mesh = null;
-  // NOTE(bckenny): initialized in this.emptyCache_
 
   /**
    * Error callback.
@@ -235,31 +234,6 @@ libtess.GluTesselator = function() {
    * @type {Object}
    */
   this.polygonData_ = null;
-
-  /*** state needed to cache single-contour polygons for renderCache() ***/
-  /**
-   * empty cache on next vertex() call
-   * @type {boolean}
-   */
-  this.emptyCache = false;
-  // TODO(bckenny): possibly rename to be clear it's a boolean
-
-  /**
-   * number of cached vertices
-   * @type {number}
-   */
-  this.cacheCount = 0;
-
-  /**
-   * the vertex data
-   * @type {Array.<libtess.CachedVertex>}
-   */
-  this.cache = new Array(libtess.TESS_MAX_CACHE);
-
-  // TODO(bckenny): fill now? or init on demand
-  for (var i = 0; i < libtess.TESS_MAX_CACHE; i++) {
-    this.cache[i] = new libtess.CachedVertex();
-  }
 };
 
 /**
@@ -476,11 +450,6 @@ libtess.GluTesselator.prototype.gluTessVertex = function(coords, data) {
 
   this.requireState_(libtess.GluTesselator.tessState_.T_IN_CONTOUR);
 
-  if (this.emptyCache) {
-    this.emptyCache_();
-    this.lastEdge_ = null;
-  }
-
   for (var i = 0; i < 3; ++i) {
     var x = coords[i];
     if (x < -libtess.GLU_TESS_MAX_COORD) {
@@ -498,16 +467,6 @@ libtess.GluTesselator.prototype.gluTessVertex = function(coords, data) {
     this.callErrorOrErrorData(libtess.errorType.GLU_TESS_COORD_TOO_LARGE);
   }
 
-  if (this.mesh === null) {
-    if (this.cacheCount < libtess.TESS_MAX_CACHE) {
-      this.cacheVertex_(clamped, data);
-      return;
-    }
-
-    // cache is full, create mesh and add cached verts to it
-    this.emptyCache_();
-  }
-
   this.addVertex_(clamped, data);
 };
 
@@ -520,9 +479,8 @@ libtess.GluTesselator.prototype.gluTessBeginPolygon = function(data) {
   this.requireState_(libtess.GluTesselator.tessState_.T_DORMANT);
 
   this.state = libtess.GluTesselator.tessState_.T_IN_POLYGON;
-  this.cacheCount = 0;
-  this.emptyCache = false;
-  this.mesh = null;
+
+  this.mesh = new libtess.GluMesh();
 
   this.polygonData_ = data;
 };
@@ -536,13 +494,6 @@ libtess.GluTesselator.prototype.gluTessBeginContour = function() {
 
   this.state = libtess.GluTesselator.tessState_.T_IN_CONTOUR;
   this.lastEdge_ = null;
-  if (this.cacheCount > 0) {
-    // Just set a flag so we don't get confused by empty contours
-    // -- these can be generated accidentally with the obsolete
-    // NextContour() interface.
-    // TODO(bckenny): we aren't implementing NextContour() interface.
-    this.emptyCache = true;
-  }
 };
 
 
@@ -561,11 +512,6 @@ libtess.GluTesselator.prototype.gluTessEndContour = function() {
 libtess.GluTesselator.prototype.gluTessEndPolygon = function() {
   this.requireState_(libtess.GluTesselator.tessState_.T_IN_POLYGON);
   this.state = libtess.GluTesselator.tessState_.T_DORMANT;
-
-  if (this.mesh === null) {
-    // TODO(bckenny): can we eliminate more cache functionality?
-    this.emptyCache_();
-  }
 
   // Determine the polygon normal and project vertices onto the plane
   // of the polygon.
@@ -634,6 +580,7 @@ libtess.GluTesselator.prototype.gluTessEndPolygon = function() {
  * @private
  */
 libtess.GluTesselator.prototype.makeDormant_ = function() {
+  // TODO(bckenny): this could be eliminated by just auto-finishing the poly.
   if (this.mesh) {
     libtess.mesh.deleteMesh(this.mesh);
   }
@@ -733,41 +680,6 @@ libtess.GluTesselator.prototype.addVertex_ = function(coords, data) {
   e.sym.winding = -1;
 
   this.lastEdge_ = e;
-};
-
-
-/**
- * [cacheVertex_ description]
- * @private
- * @param {Array.<number>} coords [description].
- * @param {Object} data [description].
- */
-libtess.GluTesselator.prototype.cacheVertex_ = function(coords, data) {
-  var v = this.cache[this.cacheCount];
-
-  v.data = data;
-  v.coords[0] = coords[0];
-  v.coords[1] = coords[1];
-  v.coords[2] = coords[2];
-  ++this.cacheCount;
-};
-
-
-/**
- * [emptyCache_ description]
- * @private
- */
-libtess.GluTesselator.prototype.emptyCache_ = function() {
-  // NOTE(bckenny): surprise!
-  this.mesh = new libtess.GluMesh();
-
-  for (var i = 0; i < this.cacheCount; i++) {
-    var v = this.cache[i];
-    this.addVertex_(v.coords, v.data);
-  }
-
-  this.cacheCount = 0;
-  this.emptyCache = false;
 };
 
 
