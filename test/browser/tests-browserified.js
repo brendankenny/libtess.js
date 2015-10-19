@@ -89,6 +89,17 @@ suite('Basic Tests', function() {
   });
 
   suite('Basic Geometry', function() {
+    test('no points should return an empty result', function() {
+      var tess = createTessellator(libtess);
+
+      var resultVerts = [];
+      tess.gluTessBeginPolygon(resultVerts);
+      tess.gluTessBeginContour();
+      tess.gluTessEndContour();
+      tess.gluTessEndPolygon();
+
+      assert.deepEqual(resultVerts, [], 'no points resulted in geometry');
+    });
     test('a single point should return an empty result', function() {
       var tess = createTessellator(libtess);
 
