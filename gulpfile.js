@@ -127,6 +127,7 @@ gulp.task('build-min', () => {
           'visibility',
         ],
         use_types_for_optimization: null,
+        // variable_renaming_report: 'varreport.txt',
 
         // Since DOM isn't touched, don't use default externs, leaving only the
         // core language keywords unobfuscated.

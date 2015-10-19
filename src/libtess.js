@@ -1,7 +1,7 @@
 /**
  * @license
  * Copyright 2000, Silicon Graphics, Inc. All Rights Reserved.
- * Copyright 2014, Google Inc. All Rights Reserved.
+ * Copyright 2015, Google Inc. All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -84,13 +84,6 @@ libtess.GLU_TESS_MAX_COORD = 1e150;
  * @const {boolean}
  */
 libtess.TRUE_PROJECT = false;
-
-/**
- * We cache vertex data for single-contour polygons so that we can try a
- * quick-and-dirty decomposition first.
- * @const {number}
- */
-libtess.TESS_MAX_CACHE = 100;
 
 /**
  * The default tolerance for merging features, 0, meaning vertices are only
