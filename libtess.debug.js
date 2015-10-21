@@ -3838,24 +3838,9 @@ libtess.GluTesselator.prototype.gluTessEndPolygon = function() {
 
 
 /**
- * Return the tessellator to its original dormant state.
+ * Change the tesselator state.
  * @private
- */
-libtess.GluTesselator.prototype.makeDormant_ = function() {
-  // TODO(bckenny): this could be eliminated by just auto-finishing the poly.
-  if (this.mesh) {
-    libtess.mesh.deleteMesh(this.mesh);
-  }
-  this.state = libtess.GluTesselator.tessState_.T_DORMANT;
-  this.lastEdge_ = null;
-  this.mesh = null;
-};
-
-
-/**
- * [requireState_ description]
- * @private
- * @param {libtess.GluTesselator.tessState_} state [description].
+ * @param {libtess.GluTesselator.tessState_} state
  */
 libtess.GluTesselator.prototype.requireState_ = function(state) {
   if (this.state !== state) {
@@ -3865,14 +3850,15 @@ libtess.GluTesselator.prototype.requireState_ = function(state) {
 
 
 /**
- * [gotoState_ description]
+ * Change the current tesselator state one level at a time to get to the
+ * desired state. Only triggered when the API is not called in the correct order
+ * so an error callback is made, however the tesselator will always attempt to
+ * recover afterwards (see README).
  * @private
- * @param  {libtess.GluTesselator.tessState_} newState [description].
+ * @param {libtess.GluTesselator.tessState_} newState
  */
 libtess.GluTesselator.prototype.gotoState_ = function(newState) {
   while (this.state !== newState) {
-    // We change the current state one level at a time, to get to the desired
-    // state.
     if (this.state < newState) {
       switch (this.state) {
         case libtess.GluTesselator.tessState_.T_DORMANT:
@@ -3899,8 +3885,11 @@ libtess.GluTesselator.prototype.gotoState_ = function(newState) {
         case libtess.GluTesselator.tessState_.T_IN_POLYGON:
           this.callErrorOrErrorData(
               libtess.errorType.GLU_TESS_MISSING_END_POLYGON);
-          // this.gluTessEndPolygon() is too much work!
-          this.makeDormant_();
+          // NOTE(bckenny): libtess originally reset the tesselator, even though
+          // the README claims it should spit out the tessellated results at
+          // this point.
+          // (see http://cgit.freedesktop.org/mesa/glu/tree/src/libtess/tess.c#n180)
+          this.gluTessEndPolygon();
           break;
       }
     }

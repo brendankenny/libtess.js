@@ -202,10 +202,11 @@ suite('Explicit Error States', function() {
     // the tessellated result. However, in tess.c, MakeDormant is called
     // instead, deleting the mesh and resetting the tessellator
     // (see http://cgit.freedesktop.org/mesa/glu/tree/src/libtess/tess.c#n180)
-    // test('tessellator should recover and produce a correct result', function() {
-    //   assert.deepEqual(resultVerts, HOURGLASS_RESULT_,
-    //       'tessellation incorrect after GLU_TESS_MISSING_END_POLYGON error');
-    // });
+    // libtess.js now recovers by producing the tessellation.
+    test('tessellator should recover and produce a correct result', function() {
+      assert.deepEqual(resultVerts, HOURGLASS_RESULT_,
+          'tessellation incorrect after GLU_TESS_MISSING_END_POLYGON error');
+    });
   });
 
   // from the readme:
