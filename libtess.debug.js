@@ -1402,7 +1402,7 @@ libtess.render = {};
  * @param {boolean} flagEdges
  */
 libtess.render.renderMesh = function(tess, mesh, flagEdges) {
-  var beginOrBeginDataCalled = false;
+  var beginCallbackCalled = false;
 
   // TODO(bckenny): edgeState needs to be boolean, but !== on first call
   // force edge state output for first vertex
@@ -1415,9 +1415,9 @@ libtess.render.renderMesh = function(tess, mesh, flagEdges) {
   for (var f = mesh.fHead.prev; f !== mesh.fHead; f = f.prev) {
     if (f.inside) {
       // We're going to emit a triangle, so call begin callback once
-      if (!beginOrBeginDataCalled) {
-        tess.callBeginOrBeginData(libtess.primitiveType.GL_TRIANGLES);
-        beginOrBeginDataCalled = true;
+      if (!beginCallbackCalled) {
+        tess.callBeginCallback(libtess.primitiveType.GL_TRIANGLES);
+        beginCallbackCalled = true;
       }
 
       // check that face has only three edges
@@ -1433,12 +1433,12 @@ libtess.render.renderMesh = function(tess, mesh, flagEdges) {
           if (edgeState !== newState) {
             edgeState = newState;
             // TODO(bckenny): edgeState should be boolean now
-            tess.callEdgeFlagOrEdgeFlagData(!!edgeState);
+            tess.callEdgeFlagCallback(!!edgeState);
           }
         }
 
         // emit vertex
-        tess.callVertexOrVertexData(e.org.data);
+        tess.callVertexCallback(e.org.data);
 
         e = e.lNext;
       } while (e !== f.anEdge);
@@ -1446,8 +1446,8 @@ libtess.render.renderMesh = function(tess, mesh, flagEdges) {
   }
 
   // only call end callback if begin was called
-  if (beginOrBeginDataCalled) {
-    tess.callEndOrEndData();
+  if (beginCallbackCalled) {
+    tess.callEndCallback();
   }
 };
 
@@ -1460,15 +1460,15 @@ libtess.render.renderMesh = function(tess, mesh, flagEdges) {
 libtess.render.renderBoundary = function(tess, mesh) {
   for (var f = mesh.fHead.next; f !== mesh.fHead; f = f.next) {
     if (f.inside) {
-      tess.callBeginOrBeginData(libtess.primitiveType.GL_LINE_LOOP);
+      tess.callBeginCallback(libtess.primitiveType.GL_LINE_LOOP);
 
       var e = f.anEdge;
       do {
-        tess.callVertexOrVertexData(e.org.data);
+        tess.callVertexCallback(e.org.data);
         e = e.lNext;
       } while (e !== f.anEdge);
 
-      tess.callEndOrEndData();
+      tess.callEndCallback();
     }
   }
 };
@@ -1968,13 +1968,13 @@ libtess.sweep.addRightEdges_ = function(tess, regUp, eFirst, eLast, eTopLeft,
 
 
 /**
- * [callCombine_ description]
+ * Set up data for and call GLU_TESS_COMBINE callback on GluTesselator.
  * @private
- * @param {libtess.GluTesselator} tess [description].
- * @param {libtess.GluVertex} isect [description].
- * @param {Array.<Object>} data [description].
- * @param {Array.<number>} weights [description].
- * @param {boolean} needed [description].
+ * @param {!libtess.GluTesselator} tess
+ * @param {!libtess.GluVertex} isect A raw vertex at the intersection.
+ * @param {!Array<Object>} data The vertices of the intersecting edges.
+ * @param {!Array<number>} weights The linear combination coefficients for this intersection.
+ * @param {boolean} needed Whether a returned vertex is necessary in this case.
  */
 libtess.sweep.callCombine_ = function(tess, isect, data, weights, needed) {
   // Copy coord data in case the callback changes it.
@@ -1985,7 +1985,7 @@ libtess.sweep.callCombine_ = function(tess, isect, data, weights, needed) {
   ];
 
   isect.data = null;
-  isect.data = tess.callCombineOrCombineData(coords, data, weights);
+  isect.data = tess.callCombineCallback(coords, data, weights);
   if (isect.data === null) {
     if (!needed) {
       // not needed, so just use data from first vertex
@@ -1995,8 +1995,7 @@ libtess.sweep.callCombine_ = function(tess, isect, data, weights, needed) {
       // The only way fatal error is when two edges are found to intersect,
       // but the user has not provided the callback necessary to handle
       // generated intersection points.
-      tess.callErrorOrErrorData(
-          libtess.errorType.GLU_TESS_NEED_COMBINE_CALLBACK);
+      tess.callErrorCallback(libtess.errorType.GLU_TESS_NEED_COMBINE_CALLBACK);
       tess.fatalError = true;
     }
   }
@@ -2007,7 +2006,7 @@ libtess.sweep.callCombine_ = function(tess, isect, data, weights, needed) {
  * Two vertices with idential coordinates are combined into one.
  * e1.org is kept, while e2.org is discarded.
  * @private
- * @param {libtess.GluTesselator} tess [description].
+ * @param {!libtess.GluTesselator} tess
  * @param {libtess.GluHalfEdge} e1 [description].
  * @param {libtess.GluHalfEdge} e2 [description].
  */
@@ -2060,7 +2059,7 @@ libtess.sweep.vertexWeights_ = function(isect, org, dst, weights, weightIndex) {
  * from the user so that we can refer to this new vertex in the
  * rendering callbacks.
  * @private
- * @param {libtess.GluTesselator} tess [description].
+ * @param {!libtess.GluTesselator} tess
  * @param {libtess.GluVertex} isect [description].
  * @param {libtess.GluVertex} orgUp [description].
  * @param {libtess.GluVertex} dstUp [description].
@@ -2571,7 +2570,7 @@ libtess.sweep.connectRightVertex_ = function(tess, regUp, eBottomLeft) {
  * Adding the new vertex involves splicing it into the already-processed
  * part of the mesh.
  * @private
- * @param {libtess.GluTesselator} tess [description].
+ * @param {!libtess.GluTesselator} tess
  * @param {libtess.ActiveRegion} regUp [description].
  * @param {libtess.GluVertex} vEvent [description].
  */
@@ -3330,10 +3329,9 @@ libtess.GluTesselator = function() {
   /**
    * Error callback.
    * @private
-   * @type {?function((libtess.errorType|libtess.gluEnum))}
+   * @type {?function((libtess.errorType|libtess.gluEnum), Object=)}
    */
-  this.callError_ = null;
-
+  this.errorCallback_ = null;
 
   /*** state needed for projecting onto the sweep plane ***/
 
@@ -3400,9 +3398,9 @@ libtess.GluTesselator = function() {
   /**
    * Combine callback.
    * @private
-   * @type {?function(Array.<number>, Array.<Object>, Array.<number>): Object}
+   * @type {?function(Array<number>, Array<Object>, Array<number>, Object=): Object}
    */
-  this.callCombine_ = null;
+  this.combineCallback_ = null;
 
   /*** state needed for rendering callbacks (see render.js) ***/
 
@@ -3415,80 +3413,37 @@ libtess.GluTesselator = function() {
   /**
    * Begin callback.
    * @private
-   * @type {?function(libtess.primitiveType)}
+   * @type {?function(libtess.primitiveType, Object=)}
    */
-  this.callBegin_ = null;
+  this.beginCallback_ = null;
 
   /**
    * Edge flag callback.
    * @private
-   * @type {?function(boolean)}
+   * @type {?function(boolean, Object=)}
    */
-  this.callEdgeFlag_ = null;
+  this.edgeFlagCallback_ = null;
 
   /**
    * Vertex callback.
    * @private
-   * @type {?function(Object)}
+   * @type {?function(Object, Object=)}
    */
-  this.callVertex_ = null;
+  this.vertexCallback_ = null;
 
   /**
    * End callback.
    * @private
-   * @type {?function()}
+   * @type {?function(Object=)}
    */
-  this.callEnd_ = null;
+  this.endCallback_ = null;
 
   /**
    * Mesh callback.
    * @private
    * @type {?function(libtess.GluMesh)}
    */
-  this.callMesh_ = null;
-
-  /*** rendering callbacks that also pass polygon data  ***/
-  /**
-   * BeginData callback.
-   * @private
-   * @type {?function(libtess.primitiveType, Object)}
-   */
-  this.callBeginData_ = null;
-
-  /**
-   * EdgeFlagData callback.
-   * @private
-   * @type {?function(boolean, Object)}
-   */
-  this.callEdgeFlagData_ = null;
-
-  /**
-   * VertexData callback.
-   * @private
-   * @type {?function(Object, Object)}
-   */
-  this.callVertexData_ = null;
-
-  /**
-   * EndData callback.
-   * @private
-   * @type {?function(Object)}
-   */
-  this.callEndData_ = null;
-
-  /**
-   * ErrorData callback.
-   * @private
-   * @type {?function((libtess.errorType|libtess.gluEnum), Object)}
-   */
-  this.callErrorData_ = null;
-
-  /**
-   * CombineData callback.
-   * @private
-   * @type {?function(Array.<number>, Array.<Object>, Array.<number>, Object): Object}
-   */
-  this.callCombineData_ = null;
+  this.meshCallback_ = null;
 
   /**
    * client data for current polygon
@@ -3562,10 +3517,10 @@ libtess.GluTesselator.prototype.gluTessProperty = function(which, value) {
       return;
 
     default:
-      this.callErrorOrErrorData(libtess.gluEnum.GLU_INVALID_ENUM);
+      this.callErrorCallback(libtess.gluEnum.GLU_INVALID_ENUM);
       return;
   }
-  this.callErrorOrErrorData(libtess.gluEnum.GLU_INVALID_VALUE);
+  this.callErrorCallback(libtess.gluEnum.GLU_INVALID_VALUE);
 };
 
 
@@ -3598,7 +3553,7 @@ libtess.GluTesselator.prototype.gluGetTessProperty = function(which) {
       return this.boundaryOnly;
 
     default:
-      this.callErrorOrErrorData(libtess.gluEnum.GLU_INVALID_ENUM);
+      this.callErrorCallback(libtess.gluEnum.GLU_INVALID_ENUM);
       break;
   }
   return false;
@@ -3626,8 +3581,8 @@ libtess.GluTesselator.prototype.gluTessNormal = function(x, y, z) {
 
 
 /**
- * Specify callbacks. See README. A null or undefined opt_fn removes current
- * callback.
+ * Specify callbacks. See README for callback descriptions. A null or undefined
+ * opt_fn removes current callback.
  *
  * @param {libtess.gluEnum} which The callback-type gluEnum value.
  * @param {?Function=} opt_fn
@@ -3635,64 +3590,45 @@ libtess.GluTesselator.prototype.gluTessNormal = function(x, y, z) {
 libtess.GluTesselator.prototype.gluTessCallback = function(which, opt_fn) {
   var fn = !opt_fn ? null : opt_fn;
   // TODO(bckenny): better opt_fn typing?
+  // TODO(bckenny): should add documentation that references in callback are volatile (or make a copy)
 
   switch (which) {
     case libtess.gluEnum.GLU_TESS_BEGIN:
-      this.callBegin_ = /** @type {function(libtess.primitiveType)} */ (fn);
-      return;
-
     case libtess.gluEnum.GLU_TESS_BEGIN_DATA:
-      this.callBeginData_ =
-          /** @type {function(libtess.primitiveType, Object)} */ (fn);
+      this.beginCallback_ = /** @type {?function(libtess.primitiveType, Object=)} */ (fn);
       return;
 
     case libtess.gluEnum.GLU_TESS_EDGE_FLAG:
-      this.callEdgeFlag_ = /** @type {function(boolean)} */ (fn);
-      return;
-
     case libtess.gluEnum.GLU_TESS_EDGE_FLAG_DATA:
-      this.callEdgeFlagData_ = /** @type {function(boolean, Object)} */ (fn);
+      this.edgeFlagCallback_ = /** @type {?function(boolean, Object=)} */ (fn);
       return;
 
     case libtess.gluEnum.GLU_TESS_VERTEX:
-      this.callVertex_ = /** @type {function(Object)} */ (fn);
-      return;
-
     case libtess.gluEnum.GLU_TESS_VERTEX_DATA:
-      this.callVertexData_ = /** @type {function(Object, Object)} */ (fn);
+      this.vertexCallback_ = /** @type {?function(Object, Object=)} */ (fn);
       return;
 
     case libtess.gluEnum.GLU_TESS_END:
-      this.callEnd_ = /** @type {function()} */ (fn);
-      return;
-
     case libtess.gluEnum.GLU_TESS_END_DATA:
-      this.callEndData_ = /** @type {function(Object)} */ (fn);
+      this.endCallback_ = /** @type {?function(Object=)} */ (fn);
       return;
 
     case libtess.gluEnum.GLU_TESS_ERROR:
-      this.callError_ = /** @type {function((libtess.errorType|libtess.gluEnum))} */ (fn);
-      return;
-
     case libtess.gluEnum.GLU_TESS_ERROR_DATA:
-      this.callErrorData_ =
-          /** @type {function((libtess.errorType|libtess.gluEnum), Object)} */ (fn);
+      this.errorCallback_ = /** @type {?function((libtess.errorType|libtess.gluEnum), Object=)} */ (fn);
       return;
 
     case libtess.gluEnum.GLU_TESS_COMBINE:
-      this.callCombine_ = /** @type {function(Array.<number>, Array.<Object>, Array.<number>): Object} */ (fn);
-      return;
-
     case libtess.gluEnum.GLU_TESS_COMBINE_DATA:
-      this.callCombineData_ = /** @type {function(Array.<number>, Array.<Object>, Array.<number>, Object): Object} */ (fn);
+      this.combineCallback_ = /** @type {?function(Array<number>, Array<Object>, Array<number>, Object=): Object} */ (fn);
       return;
 
     case libtess.gluEnum.GLU_TESS_MESH:
-      this.callMesh_ = /** @type {function(libtess.GluMesh)} */ (fn);
+      this.meshCallback_ = /** @type {?function(libtess.GluMesh)} */ (fn);
       return;
 
     default:
-      this.callErrorOrErrorData(libtess.gluEnum.GLU_INVALID_ENUM);
+      this.callErrorCallback(libtess.gluEnum.GLU_INVALID_ENUM);
       return;
   }
 };
@@ -3727,7 +3663,7 @@ libtess.GluTesselator.prototype.gluTessVertex = function(coords, data) {
   }
 
   if (tooLarge) {
-    this.callErrorOrErrorData(libtess.errorType.GLU_TESS_COORD_TOO_LARGE);
+    this.callErrorCallback(libtess.errorType.GLU_TESS_COORD_TOO_LARGE);
   }
 
   this.addVertex_(clamped, data);
@@ -3801,9 +3737,8 @@ libtess.GluTesselator.prototype.gluTessEndPolygon = function() {
 
     this.mesh.checkMesh();
 
-    if (this.callBegin_ || this.callEnd_ || this.callVertex_ ||
-        this.callEdgeFlag_ || this.callBeginData_ || this.callEndData_ ||
-        this.callVertexData_ || this.callEdgeFlagData_) {
+    if (this.beginCallback_ || this.endCallback_ || this.vertexCallback_ ||
+        this.edgeFlagCallback_) {
 
       if (this.boundaryOnly) {
         // output boundary contours
@@ -3811,12 +3746,12 @@ libtess.GluTesselator.prototype.gluTessEndPolygon = function() {
 
       } else {
         // output triangles (with edge callback if one is set)
-        var flagEdges = !!(this.callEdgeFlag_ || this.callEdgeFlagData_);
+        var flagEdges = !!this.edgeFlagCallback_;
         libtess.render.renderMesh(this, this.mesh, flagEdges);
       }
     }
 
-    if (this.callMesh_) {
+    if (this.meshCallback_) {
       // Throw away the exterior faces, so that all faces are interior.
       // This way the user doesn't have to check the "inside" flag,
       // and we don't need to even reveal its existence. It also leaves
@@ -3824,7 +3759,7 @@ libtess.GluTesselator.prototype.gluTessEndPolygon = function() {
       // faces in the first place.
       libtess.tessmono.discardExterior(this.mesh);
       // user wants the mesh itself
-      this.callMesh_(this.mesh);
+      this.meshCallback_(this.mesh);
 
       this.mesh = null;
       this.polygonData_ = null;
@@ -3863,13 +3798,13 @@ libtess.GluTesselator.prototype.gotoState_ = function(newState) {
     if (this.state < newState) {
       switch (this.state) {
         case libtess.GluTesselator.tessState_.T_DORMANT:
-          this.callErrorOrErrorData(
+          this.callErrorCallback(
               libtess.errorType.GLU_TESS_MISSING_BEGIN_POLYGON);
           this.gluTessBeginPolygon(null);
           break;
 
         case libtess.GluTesselator.tessState_.T_IN_POLYGON:
-          this.callErrorOrErrorData(
+          this.callErrorCallback(
               libtess.errorType.GLU_TESS_MISSING_BEGIN_CONTOUR);
           this.gluTessBeginContour();
           break;
@@ -3878,13 +3813,13 @@ libtess.GluTesselator.prototype.gotoState_ = function(newState) {
     } else {
       switch (this.state) {
         case libtess.GluTesselator.tessState_.T_IN_CONTOUR:
-          this.callErrorOrErrorData(
+          this.callErrorCallback(
               libtess.errorType.GLU_TESS_MISSING_END_CONTOUR);
           this.gluTessEndContour();
           break;
 
         case libtess.GluTesselator.tessState_.T_IN_POLYGON:
-          this.callErrorOrErrorData(
+          this.callErrorCallback(
               libtess.errorType.GLU_TESS_MISSING_END_POLYGON);
           // NOTE(bckenny): libtess originally reset the tesselator, even though
           // the README claims it should spit out the tessellated results at
@@ -3934,101 +3869,73 @@ libtess.GluTesselator.prototype.addVertex_ = function(coords, data) {
   this.lastEdge_ = e;
 };
 
-
-// TODO(bckenny): all following conditional callbacks could be simplified
-// TODO(bckenny): using null for now, but may rework
-// TODO(bckenny): should add documentation that references in callback are volatile (or make a copy)
-// see README callback descriptions
 /**
- * [callBeginOrBeginData description]
- * @param {libtess.primitiveType} type [description].
+ * Call callback to indicate the start of a primitive, to be followed by emitted
+ * vertices, if any. In libtess.js, `type` will always be `GL_TRIANGLES`.
+ * @param {libtess.primitiveType} type
  */
-libtess.GluTesselator.prototype.callBeginOrBeginData = function(type) {
-  if (this.callBeginData_) {
-    this.callBeginData_(type, this.polygonData_);
-
-  } else if (this.callBegin_) {
-    this.callBegin_(type);
+libtess.GluTesselator.prototype.callBeginCallback = function(type) {
+  if (this.beginCallback_) {
+    this.beginCallback_(type, this.polygonData_);
   }
 };
 
-
 /**
- * [callVertexOrVertexData description]
- * @param {Object} data [description].
+ * Call callback to emit the vertices of the tessellated polygon.
+ * @param {Object} data
  */
-libtess.GluTesselator.prototype.callVertexOrVertexData = function(data) {
-  if (this.callVertexData_) {
-    this.callVertexData_(data, this.polygonData_);
-
-  } else if (this.callVertex_) {
-    this.callVertex_(data);
+libtess.GluTesselator.prototype.callVertexCallback = function(data) {
+  if (this.vertexCallback_) {
+    this.vertexCallback_(data, this.polygonData_);
   }
 };
 
-
 /**
- * [callEdgeFlagOrEdgeFlagData description]
- * @param {boolean} flag [description].
+ * Call callback to indicate whether the vertices to follow begin edges which
+ * lie on a polygon boundary.
+ * @param {boolean} flag
  */
-libtess.GluTesselator.prototype.callEdgeFlagOrEdgeFlagData = function(flag) {
-  if (this.callEdgeFlagData_) {
-    this.callEdgeFlagData_(flag, this.polygonData_);
-
-  } else if (this.callEdgeFlag_) {
-    this.callEdgeFlag_(flag);
+libtess.GluTesselator.prototype.callEdgeFlagCallback = function(flag) {
+  if (this.edgeFlagCallback_) {
+    this.edgeFlagCallback_(flag, this.polygonData_);
   }
 };
 
-
 /**
- * [callEndOrEndData description]
+ * Call callback to indicate the end of tessellation.
  */
-libtess.GluTesselator.prototype.callEndOrEndData = function() {
-  if (this.callEndData_) {
-    this.callEndData_(this.polygonData_);
-
-  } else if (this.callEnd_) {
-    this.callEnd_();
+libtess.GluTesselator.prototype.callEndCallback = function() {
+  if (this.endCallback_) {
+    this.endCallback_(this.polygonData_);
   }
 };
 
 /* jscs:disable maximumLineLength */
 /**
- * [callCombineOrCombineData description]
- * @param {Array.<number>} coords [description].
- * @param {Array.<Object>} data [description].
- * @param {Array.<number>} weight [description].
- * @return {Object} Interpolated vertex.
+ * Call callback for combining vertices at edge intersection requiring the
+ * creation of a new vertex.
+ * @param {!Array<number>} coords Intersection coordinates.
+ * @param {!Array<Object>} data Array of vertex data, one per edge vertices.
+ * @param {!Array<number>} weight Coefficients used for the linear combination of vertex coordinates that gives coords.
+ * @return {?Object} Interpolated vertex.
  */
-libtess.GluTesselator.prototype.callCombineOrCombineData = function(coords, data, weight) {
-  var interpData;
-  if (this.callCombineData_) {
-    interpData = this.callCombineData_(coords, data, weight, this.polygonData_);
-
-  } else if (this.callCombine_) {
-    interpData = this.callCombine_(coords, data, weight);
+libtess.GluTesselator.prototype.callCombineCallback = function(coords, data, weight) {
+  if (this.combineCallback_) {
+    return this.combineCallback_(coords, data, weight, this.polygonData_) ||
+        null;
   }
 
-  // TODO(bckenny): can't be undefined
-  if (interpData === undefined) {
-    interpData = null;
-  }
-  return interpData;
+  return null;
 };
 /* jscs:enable maximumLineLength */
 
-// TODO(bckenny): combine the enums in libtess
 /**
- * [callErrorOrErrorData description]
- * @param {(libtess.errorType|libtess.gluEnum)} errno [description].
+ * Call error callback, if specified, with errno.
+ * @param {(libtess.errorType|libtess.gluEnum)} errno
  */
-libtess.GluTesselator.prototype.callErrorOrErrorData = function(errno) {
-  if (this.callErrorData_) {
-    this.callErrorData_(errno, this.polygonData_);
-
-  } else if (this.callError_) {
-    this.callError_(errno);
+libtess.GluTesselator.prototype.callErrorCallback = function(errno) {
+  if (this.errorCallback_) {
+    this.errorCallback_(errno, this.polygonData_);
   }
 };
 

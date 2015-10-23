@@ -520,13 +520,13 @@ libtess.sweep.addRightEdges_ = function(tess, regUp, eFirst, eLast, eTopLeft,
 
 
 /**
- * [callCombine_ description]
+ * Set up data for and call GLU_TESS_COMBINE callback on GluTesselator.
  * @private
- * @param {libtess.GluTesselator} tess [description].
- * @param {libtess.GluVertex} isect [description].
- * @param {Array.<Object>} data [description].
- * @param {Array.<number>} weights [description].
- * @param {boolean} needed [description].
+ * @param {!libtess.GluTesselator} tess
+ * @param {!libtess.GluVertex} isect A raw vertex at the intersection.
+ * @param {!Array<Object>} data The vertices of the intersecting edges.
+ * @param {!Array<number>} weights The linear combination coefficients for this intersection.
+ * @param {boolean} needed Whether a returned vertex is necessary in this case.
  */
 libtess.sweep.callCombine_ = function(tess, isect, data, weights, needed) {
   // Copy coord data in case the callback changes it.
@@ -537,7 +537,7 @@ libtess.sweep.callCombine_ = function(tess, isect, data, weights, needed) {
   ];
 
   isect.data = null;
-  isect.data = tess.callCombineOrCombineData(coords, data, weights);
+  isect.data = tess.callCombineCallback(coords, data, weights);
   if (isect.data === null) {
     if (!needed) {
       // not needed, so just use data from first vertex
@@ -547,8 +547,7 @@ libtess.sweep.callCombine_ = function(tess, isect, data, weights, needed) {
       // The only way fatal error is when two edges are found to intersect,
       // but the user has not provided the callback necessary to handle
       // generated intersection points.
-      tess.callErrorOrErrorData(
-          libtess.errorType.GLU_TESS_NEED_COMBINE_CALLBACK);
+      tess.callErrorCallback(libtess.errorType.GLU_TESS_NEED_COMBINE_CALLBACK);
       tess.fatalError = true;
     }
   }
@@ -559,7 +558,7 @@ libtess.sweep.callCombine_ = function(tess, isect, data, weights, needed) {
  * Two vertices with idential coordinates are combined into one.
  * e1.org is kept, while e2.org is discarded.
  * @private
- * @param {libtess.GluTesselator} tess [description].
+ * @param {!libtess.GluTesselator} tess
  * @param {libtess.GluHalfEdge} e1 [description].
  * @param {libtess.GluHalfEdge} e2 [description].
  */
@@ -612,7 +611,7 @@ libtess.sweep.vertexWeights_ = function(isect, org, dst, weights, weightIndex) {
  * from the user so that we can refer to this new vertex in the
  * rendering callbacks.
  * @private
- * @param {libtess.GluTesselator} tess [description].
+ * @param {!libtess.GluTesselator} tess
  * @param {libtess.GluVertex} isect [description].
  * @param {libtess.GluVertex} orgUp [description].
  * @param {libtess.GluVertex} dstUp [description].
@@ -1123,7 +1122,7 @@ libtess.sweep.connectRightVertex_ = function(tess, regUp, eBottomLeft) {
  * Adding the new vertex involves splicing it into the already-processed
  * part of the mesh.
  * @private
- * @param {libtess.GluTesselator} tess [description].
+ * @param {!libtess.GluTesselator} tess
  * @param {libtess.ActiveRegion} regUp [description].
  * @param {libtess.GluVertex} vEvent [description].
  */

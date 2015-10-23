@@ -40,7 +40,7 @@ libtess.render = {};
  * @param {boolean} flagEdges
  */
 libtess.render.renderMesh = function(tess, mesh, flagEdges) {
-  var beginOrBeginDataCalled = false;
+  var beginCallbackCalled = false;
 
   // TODO(bckenny): edgeState needs to be boolean, but !== on first call
   // force edge state output for first vertex
@@ -53,9 +53,9 @@ libtess.render.renderMesh = function(tess, mesh, flagEdges) {
   for (var f = mesh.fHead.prev; f !== mesh.fHead; f = f.prev) {
     if (f.inside) {
       // We're going to emit a triangle, so call begin callback once
-      if (!beginOrBeginDataCalled) {
-        tess.callBeginOrBeginData(libtess.primitiveType.GL_TRIANGLES);
-        beginOrBeginDataCalled = true;
+      if (!beginCallbackCalled) {
+        tess.callBeginCallback(libtess.primitiveType.GL_TRIANGLES);
+        beginCallbackCalled = true;
       }
 
       // check that face has only three edges
@@ -71,12 +71,12 @@ libtess.render.renderMesh = function(tess, mesh, flagEdges) {
           if (edgeState !== newState) {
             edgeState = newState;
             // TODO(bckenny): edgeState should be boolean now
-            tess.callEdgeFlagOrEdgeFlagData(!!edgeState);
+            tess.callEdgeFlagCallback(!!edgeState);
           }
         }
 
         // emit vertex
-        tess.callVertexOrVertexData(e.org.data);
+        tess.callVertexCallback(e.org.data);
 
         e = e.lNext;
       } while (e !== f.anEdge);
@@ -84,8 +84,8 @@ libtess.render.renderMesh = function(tess, mesh, flagEdges) {
   }
 
   // only call end callback if begin was called
-  if (beginOrBeginDataCalled) {
-    tess.callEndOrEndData();
+  if (beginCallbackCalled) {
+    tess.callEndCallback();
   }
 };
 
@@ -98,15 +98,15 @@ libtess.render.renderMesh = function(tess, mesh, flagEdges) {
 libtess.render.renderBoundary = function(tess, mesh) {
   for (var f = mesh.fHead.next; f !== mesh.fHead; f = f.next) {
     if (f.inside) {
-      tess.callBeginOrBeginData(libtess.primitiveType.GL_LINE_LOOP);
+      tess.callBeginCallback(libtess.primitiveType.GL_LINE_LOOP);
 
       var e = f.anEdge;
       do {
-        tess.callVertexOrVertexData(e.org.data);
+        tess.callVertexCallback(e.org.data);
         e = e.lNext;
       } while (e !== f.anEdge);
 
-      tess.callEndOrEndData();
+      tess.callEndCallback();
     }
   }
 };
