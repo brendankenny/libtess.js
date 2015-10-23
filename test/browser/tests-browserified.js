@@ -90,39 +90,19 @@ suite('Basic Tests', function() {
 
   suite('Polygon data and callbacks', function() {
     // Tessellation without data callbacks.
-    var noDataArguments = {
-      begin: -1,
-      vertex: -1,
-      edge: -1,
-      combine: -1,
-      end: -1
-    };
-
     var noDataVerts = [];
-    function beginCallback(type) {
-      noDataArguments.begin = arguments.length;
-    }
     function vertexCallback(vertData) {
-      noDataArguments.vertex = arguments.length;
       noDataVerts.push(vertData[0], vertData[1], vertData[2]);
     }
-    function edgeCallback(flag) {
-      noDataArguments.edge = arguments.length;
-    }
     function combineCallback(coords, vertData, weight) {
-      noDataArguments.combine = arguments.length;
       return [coords[0], coords[1], coords[2]];
     }
-    function endCallback() {
-      noDataArguments.end = arguments.length;
-    }
-
     var noTess = new libtess.GluTesselator();
-    noTess.gluTessCallback(libtess.gluEnum.GLU_TESS_BEGIN, beginCallback);
+    noTess.gluTessCallback(libtess.gluEnum.GLU_TESS_BEGIN, function() {});
     noTess.gluTessCallback(libtess.gluEnum.GLU_TESS_VERTEX, vertexCallback);
-    noTess.gluTessCallback(libtess.gluEnum.GLU_TESS_END, endCallback);
+    noTess.gluTessCallback(libtess.gluEnum.GLU_TESS_END, function() {});
     noTess.gluTessCallback(libtess.gluEnum.GLU_TESS_COMBINE, combineCallback);
-    noTess.gluTessCallback(libtess.gluEnum.GLU_TESS_EDGE_FLAG, edgeCallback);
+    noTess.gluTessCallback(libtess.gluEnum.GLU_TESS_EDGE_FLAG, function() {});
     noTess.gluTessProperty(libtess.gluEnum.GLU_TESS_BOUNDARY_ONLY, false);
     noTess.gluTessCallback(libtess.gluEnum.GLU_TESS_ERROR, function(err) {
       throw new Error(common.ERROR_TYPES_[err]);
@@ -142,42 +122,60 @@ suite('Basic Tests', function() {
         'hourglass was not tessellated correctly in polygon no-data test');
     });
 
-    // Tessellation with data callbacks.
-    var dataArguments = {
-      begin: -1,
-      vertex: -1,
-      edge: -1,
-      combine: -1,
-      end: -1
+    // Tessellation with data callbacks. Mark if each callback correctly returns
+    // polygon data.
+    var dataCorrect = {
+      begin: null,
+      vertex: null,
+      edge: null,
+      combine: null,
+      end: null
     };
 
     var dataVerts = [];
     function beginDataCallback(type, data) {
-      dataArguments.begin = arguments.length;
-      assert.strictEqual(data, dataVerts,
-          'GLU_TESS_BEGIN_DATA callback data incorrect');
+      var localDataCorrect = data === dataVerts;
+      if (dataCorrect.begin === null) {
+        dataCorrect.begin = localDataCorrect;
+      } else {
+        dataCorrect.begin = dataCorrect.begin && localDataCorrect;
+      }
     }
     function vertexDataCallback(vertData, data) {
-      dataArguments.vertex = arguments.length;
+      var localDataCorrect = data === dataVerts;
+      if (dataCorrect.vertex === null) {
+        dataCorrect.vertex = localDataCorrect;
+      } else {
+        dataCorrect.vertex = dataCorrect.vertex && localDataCorrect;
+      }
+
       data.push(vertData[0], vertData[1], vertData[2]);
-      assert.strictEqual(data, dataVerts,
-          'GLU_TESS_VERTEX_DATA callback data incorrect');
     }
     function edgeDataCallback(flag, data) {
-      dataArguments.edge = arguments.length;
-      assert.strictEqual(data, dataVerts,
-          'GLU_TESS_EDGE_FLAG_DATA callback data incorrect');
+      var localDataCorrect = data === dataVerts;
+      if (dataCorrect.edge === null) {
+        dataCorrect.edge = localDataCorrect;
+      } else {
+        dataCorrect.edge = dataCorrect.edge && localDataCorrect;
+      }
     }
     function combineDataCallback(coords, vertData, weight, data) {
-      dataArguments.combine = arguments.length;
-      assert.strictEqual(data, dataVerts,
-          'GLU_TESS_COMBINE_DATA callback data incorrect');
+      var localDataCorrect = data === dataVerts;
+      if (dataCorrect.combine === null) {
+        dataCorrect.combine = localDataCorrect;
+      } else {
+        dataCorrect.combine = dataCorrect.combine && localDataCorrect;
+      }
+
       return [coords[0], coords[1], coords[2]];
     }
     function endDataCallback(data) {
-      dataArguments.end = arguments.length;
-      assert.strictEqual(data, dataVerts,
-          'GLU_TESS_END_DATA callback data incorrect');
+      var localDataCorrect = data === dataVerts;
+      if (dataCorrect.end === null) {
+        dataCorrect.end = localDataCorrect;
+      } else {
+        dataCorrect.end = dataCorrect.end && localDataCorrect;
+      }
     }
 
     var tess = new libtess.GluTesselator();
@@ -212,45 +210,25 @@ suite('Basic Tests', function() {
     });
 
     // Check argument counts.
-    test('begin callback should return with and without data', function() {
-      assert.strictEqual(noDataArguments.begin, 1,
-        'GLU_TESS_BEGIN callback called with ' + noDataArguments.begin +
-        ' arguments');
-      assert.strictEqual(dataArguments.begin, 2,
-        'GLU_TESS_BEGIN_DATA callback called with ' + dataArguments.begin +
-        ' arguments');
+    test('begin callback should correctly return polygon data', function() {
+      assert.isTrue(dataCorrect.begin,
+          'GLU_TESS_BEGIN_DATA callback called with wrong polygon data');
     });
-    test('vertex callback should return with and without data', function() {
-      assert.strictEqual(noDataArguments.vertex, 1,
-        'GLU_TESS_VERTEX callback called with ' + noDataArguments.vertex +
-        ' arguments');
-      assert.strictEqual(dataArguments.vertex, 2,
-        'GLU_TESS_VERTEX_DATA callback called with ' + dataArguments.vertex +
-        ' arguments');
+    test('vertex callback should correctly return polygon data', function() {
+      assert.isTrue(dataCorrect.vertex,
+          'GLU_TESS_VERTEX_DATA callback called with wrong polygon data');
     });
-    test('edge flag callback should return with and without data', function() {
-      assert.strictEqual(noDataArguments.edge, 1,
-        'GLU_TESS_EDGE_FLAG callback called with ' + noDataArguments.edge +
-        ' arguments');
-      assert.strictEqual(dataArguments.edge, 2,
-        'GLU_TESS_EDGE_FLAG_DATA callback called with ' + dataArguments.edge +
-        ' arguments');
+    test('edge flag callback should correctly return polygon data', function() {
+      assert.isTrue(dataCorrect.edge,
+          'GLU_TESS_EDGE_FLAG_DATA callback called with wrong polygon data');
     });
-    test('combine callback should return with and without data', function() {
-      assert.strictEqual(noDataArguments.combine, 3,
-        'GLU_TESS_COMBINE callback called with ' + noDataArguments.combine +
-        ' arguments');
-      assert.strictEqual(dataArguments.combine, 4,
-        'GLU_TESS_COMBINE_DATA callback called with ' + dataArguments.combine +
-        ' arguments');
+    test('combine callback should correctly return polygon data', function() {
+      assert.isTrue(dataCorrect.combine,
+          'GLU_TESS_COMBINE_DATA callback called with wrong polygon data');
     });
-    test('end callback should return with and without data', function() {
-      assert.strictEqual(noDataArguments.end, 0,
-        'GLU_TESS_END callback called with ' + noDataArguments.end +
-        ' arguments');
-      assert.strictEqual(dataArguments.end, 1,
-        'GLU_TESS_END_DATA callback called with ' + dataArguments.end +
-        ' arguments');
+    test('end callback should correctly return polygon data', function() {
+      assert.isTrue(dataCorrect.end,
+          'GLU_TESS_END_DATA callback called with wrong polygon data');
     });
   });
 
