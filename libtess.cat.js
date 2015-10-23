@@ -3841,7 +3841,7 @@ libtess.GluTesselator.prototype.callBeginCallback = function(type) {
 };
 
 /**
- * Call callback to emit the vertices of the tessellated polygon.
+ * Call callback to emit a vertex of the tessellated polygon.
  * @param {Object} data
  */
 libtess.GluTesselator.prototype.callVertexCallback = function(data) {
