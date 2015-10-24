@@ -1,6 +1,6 @@
 /**
  * Copyright 2000, Silicon Graphics, Inc. All Rights Reserved.
- * Copyright 2012, Google Inc. All Rights Reserved.
+ * Copyright 2015, Google Inc. All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -34,15 +34,12 @@
  * circular list, and a pointer to a half-edge with this vertex as
  * the origin (null if this is the dummy header). There is also a
  * field "data" for client data.
- *
- * @param {libtess.GluVertex=} opt_nextVertex [description].
- * @param {libtess.GluVertex=} opt_prevVertex [description].
+ * @param {libtess.GluVertex=} opt_nextVertex Optional reference to next vertex in the vertex list.
+ * @param {libtess.GluVertex=} opt_prevVertex Optional reference to previous vertex in the vertex list.
  * @constructor
  * @struct
  */
 libtess.GluVertex = function(opt_nextVertex, opt_prevVertex) {
-  // TODO(bckenny): reverse order of params?
-
   /**
    * Next vertex (never null).
    * @type {!libtess.GluVertex}
@@ -88,10 +85,9 @@ libtess.GluVertex = function(opt_nextVertex, opt_prevVertex) {
   this.t = 0;
 
   /**
-   * To allow deletion from priority queue.
-   * @type {?libtess.PQHandle}
+   * Handle to allow deletion from priority queue, or 0 if not yet inserted into
+   * queue.
+   * @type {libtess.PQHandle}
    */
-  this.pqHandle = null;
-  // NOTE(bckenny): pqHandle inited in sweep
-  // TODO(bckenny): can we have a numeric default value? null may do bad things
+  this.pqHandle = 0;
 };

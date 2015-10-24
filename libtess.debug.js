@@ -2142,8 +2142,7 @@ libtess.sweep.checkForRightSplice_ = function(tess, regUp) {
 
     } else if (eUp.org !== eLo.org) {
       // merge the two vertices, discarding eUp.org
-      // TODO(bckenny): fix pqHandle null situation
-      tess.pq.remove(/** @type {libtess.PQHandle} */(eUp.org.pqHandle));
+      tess.pq.remove(eUp.org.pqHandle);
       libtess.sweep.spliceMergeVertices_(tess, eLo.oPrev(), eUp);
     }
 
@@ -4278,15 +4277,12 @@ libtess.GluMesh.prototype.checkMesh = function() {
  * circular list, and a pointer to a half-edge with this vertex as
  * the origin (null if this is the dummy header). There is also a
  * field "data" for client data.
- *
- * @param {libtess.GluVertex=} opt_nextVertex [description].
- * @param {libtess.GluVertex=} opt_prevVertex [description].
+ * @param {libtess.GluVertex=} opt_nextVertex Optional reference to next vertex in the vertex list.
+ * @param {libtess.GluVertex=} opt_prevVertex Optional reference to previous vertex in the vertex list.
  * @constructor
  * @struct
  */
 libtess.GluVertex = function(opt_nextVertex, opt_prevVertex) {
-  // TODO(bckenny): reverse order of params?
-
   /**
    * Next vertex (never null).
    * @type {!libtess.GluVertex}
@@ -4332,12 +4328,11 @@ libtess.GluVertex = function(opt_nextVertex, opt_prevVertex) {
   this.t = 0;
 
   /**
-   * To allow deletion from priority queue.
-   * @type {?libtess.PQHandle}
+   * Handle to allow deletion from priority queue, or 0 if not yet inserted into
+   * queue.
+   * @type {libtess.PQHandle}
    */
-  this.pqHandle = null;
-  // NOTE(bckenny): pqHandle inited in sweep
-  // TODO(bckenny): can we have a numeric default value? null may do bad things
+  this.pqHandle = 0;
 };
 
 
@@ -4579,11 +4574,11 @@ libtess.PriorityQ.prototype.init = function() {
   // #endif
 };
 
-
 /**
- * [insert description]
- * @param {libtess.PQKey} keyNew [description].
- * @return {libtess.PQHandle} [description].
+ * Insert a PQKey into the priority queue. Returns a PQHandle to refer to it,
+ * which will never be 0.
+ * @param {libtess.PQKey} keyNew
+ * @return {libtess.PQHandle}
  */
 libtess.PriorityQ.prototype.insert = function(keyNew) {
   // NOTE(bckenny): originally returned LONG_MAX as alloc failure signal. no
@@ -4605,7 +4600,6 @@ libtess.PriorityQ.prototype.insert = function(keyNew) {
   // Negative handles index the sorted array.
   return -(curr + 1);
 };
-
 
 /**
  * Allocate a PQKey array of size size. If oldArray is not null, its

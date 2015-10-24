@@ -1,6 +1,6 @@
 /**
  * Copyright 2000, Silicon Graphics, Inc. All Rights Reserved.
- * Copyright 2012, Google Inc. All Rights Reserved.
+ * Copyright 2015, Google Inc. All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -161,11 +161,11 @@ libtess.PriorityQ.prototype.init = function() {
   // #endif
 };
 
-
 /**
- * [insert description]
- * @param {libtess.PQKey} keyNew [description].
- * @return {libtess.PQHandle} [description].
+ * Insert a PQKey into the priority queue. Returns a PQHandle to refer to it,
+ * which will never be 0.
+ * @param {libtess.PQKey} keyNew
+ * @return {libtess.PQHandle}
  */
 libtess.PriorityQ.prototype.insert = function(keyNew) {
   // NOTE(bckenny): originally returned LONG_MAX as alloc failure signal. no
@@ -187,7 +187,6 @@ libtess.PriorityQ.prototype.insert = function(keyNew) {
   // Negative handles index the sorted array.
   return -(curr + 1);
 };
-
 
 /**
  * Allocate a PQKey array of size size. If oldArray is not null, its
