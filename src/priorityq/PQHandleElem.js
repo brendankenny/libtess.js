@@ -60,7 +60,7 @@ libtess.PQHandleElem = function() {
  *
  * @param {?Array.<libtess.PQHandleElem>} oldArray [description].
  * @param {number} size [description].
- * @return {Array.<libtess.PQHandleElem>} [description].
+ * @return {!Array<libtess.PQHandleElem>} [description].
  */
 libtess.PQHandleElem.realloc = function(oldArray, size) {
   var newArray = new Array(size);

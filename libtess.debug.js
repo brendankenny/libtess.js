@@ -4370,7 +4370,7 @@ libtess.PQHandleElem = function() {
  *
  * @param {?Array.<libtess.PQHandleElem>} oldArray [description].
  * @param {number} size [description].
- * @return {Array.<libtess.PQHandleElem>} [description].
+ * @return {!Array<libtess.PQHandleElem>} [description].
  */
 libtess.PQHandleElem.realloc = function(oldArray, size) {
   var newArray = new Array(size);
@@ -4385,54 +4385,6 @@ libtess.PQHandleElem.realloc = function(oldArray, size) {
 
   for (; index < size; index++) {
     newArray[index] = new libtess.PQHandleElem();
-  }
-
-  return newArray;
-};
-
-
-
-/* global libtess */
-
-// TODO(bckenny): maybe just have these created inline as literals
-// (or unboxed directly - PQHandle is just an array index number)
-
-/**
- * [PQNode description]
- * @constructor
- * @struct
- */
-libtess.PQNode = function() {
-  /**
-   * [handle description]
-   * @type {libtess.PQHandle}
-   */
-  this.handle = 0;
-};
-
-
-/**
- * Allocate a PQNode array of size size. If oldArray is not null, its contents
- * are copied to the beginning of the new array. The rest of the array is
- * filled with new PQNodes.
- *
- * @param {?Array.<libtess.PQNode>} oldArray [description].
- * @param {number} size [description].
- * @return {Array.<libtess.PQNode>} [description].
- */
-libtess.PQNode.realloc = function(oldArray, size) {
-  var newArray = new Array(size);
-
-  // TODO(bckenny): better to reallocate array? or grow array?
-  var index = 0;
-  if (oldArray !== null) {
-    for (; index < oldArray.length; index++) {
-      newArray[index] = oldArray[index];
-    }
-  }
-
-  for (; index < size; index++) {
-    newArray[index] = new libtess.PQNode();
   }
 
   return newArray;
@@ -4520,8 +4472,6 @@ libtess.PriorityQ.INIT_SIZE_ = 32;
  * [deleteQ description]
  */
 libtess.PriorityQ.prototype.deleteQ = function() {
-  // TODO(bckenny): unnecessary, I think.
-  this.heap_.deleteHeap();
   this.heap_ = null;
   this.order_ = null;
   this.keys_ = null;
@@ -4749,7 +4699,8 @@ libtess.PriorityQ.prototype.remove = function(curr) {
 // TODO(bckenny): keys appear to always be GluVertex in this case?
 
 /**
- * [PriorityQHeap description]
+ * A priority queue of vertices, ordered by libtess.geom.vertLeq, implemented
+ * with a binary heap. Used only within libtess.PriorityQ.
  * @constructor
  * @struct
  * @param {function(libtess.PQKey, libtess.PQKey): boolean} leq [description].
@@ -4759,22 +4710,20 @@ libtess.PriorityQHeap = function(leq) {
    * The heap itself. Active nodes are stored in the range 1..size. Each node
    * stores only an index into handles.
    * @private
-   * @type {Array.<libtess.PQNode>}
+   * @type {!Array<number>}
    */
-  this.nodes_ = libtess.PQNode.realloc(null,
+  this.nodes_ = libtess.PriorityQHeap.reallocNodes_([0],
       libtess.PriorityQHeap.INIT_SIZE_ + 1);
 
   /**
    * Each handle stores a key, plus a pointer back to the node which currently
-   * represents that key (ie. nodes[handles[i].node].handle == i).
+   * represents that key (ie. nodes_[handles[i].node] == i).
    * @private
-   * @type {Array.<libtess.PQHandleElem>}
+   * @type {!Array.<libtess.PQHandleElem>}
    */
   this.handles_ = libtess.PQHandleElem.realloc(null,
       libtess.PriorityQHeap.INIT_SIZE_ + 1);
 
-  // TODO(bckenny): size and max should probably be libtess.PQHandle for correct
-  // typing (see PriorityQ.js)
   /**
    * The size of the queue.
    * @private
@@ -4818,9 +4767,8 @@ libtess.PriorityQHeap = function(leq) {
   this.leq_ = leq;
 
   // so that minimum returns null
-  this.nodes_[1].handle = 1;
+  this.nodes_[1] = 1;
 };
-
 
 /**
  * [INIT_SIZE_ description]
@@ -4830,17 +4778,30 @@ libtess.PriorityQHeap = function(leq) {
  */
 libtess.PriorityQHeap.INIT_SIZE_ = 32;
 
-
 /**
- * [deleteHeap description]
+ * Allocate a node index array of size size. If oldArray is not null, its
+ * contents are copied to the beginning of the new array. The rest of the array
+ * is filled with new node indices.
+ * @private
+ * @param {!Array<number>} oldArray
+ * @param {number} size
+ * @return {!Array<number>}
  */
-libtess.PriorityQHeap.prototype.deleteHeap = function() {
-  // TODO(bckenny): unnecessary, I think.
-  this.handles_ = null;
-  this.nodes_ = null;
-  // NOTE(bckenny): nulled at callsite in PriorityQ.deleteQ
-};
+libtess.PriorityQHeap.reallocNodes_ = function(oldArray, size) {
+  var newArray = new Array(size);
 
+  // TODO(bckenny): V8 likes this significantly more than simply growing the
+  // array element-by-element, so, for now, emulating realloc.
+  for (var index = 0; index < oldArray.length; index++) {
+    newArray[index] = oldArray[index];
+  }
+
+  for (; index < size; index++) {
+    newArray[index] = 0;
+  }
+
+  return newArray;
+};
 
 /**
  * Initializing ordering of the heap. Must be called before any method other
@@ -4855,7 +4816,6 @@ libtess.PriorityQHeap.prototype.init = function() {
   this.initialized_ = true;
 };
 
-
 /**
  * Insert a new key into the heap.
  * @param {libtess.PQKey} keyNew The key to insert.
@@ -4867,7 +4827,8 @@ libtess.PriorityQHeap.prototype.insert = function(keyNew) {
   // if the heap overflows, double its size.
   if ((curr * 2) > this.max_) {
     this.max_ *= 2;
-    this.nodes_ = libtess.PQNode.realloc(this.nodes_, this.max_ + 1);
+    this.nodes_ = libtess.PriorityQHeap.reallocNodes_(this.nodes_,
+        this.max_ + 1);
     this.handles_ = libtess.PQHandleElem.realloc(this.handles_, this.max_ + 1);
   }
 
@@ -4879,7 +4840,7 @@ libtess.PriorityQHeap.prototype.insert = function(keyNew) {
     this.freeList_ = this.handles_[free].node;
   }
 
-  this.nodes_[curr].handle = free;
+  this.nodes_[curr] = free;
   this.handles_[free].node = curr;
   this.handles_[free].key = keyNew;
 
@@ -4890,7 +4851,6 @@ libtess.PriorityQHeap.prototype.insert = function(keyNew) {
   return free;
 };
 
-
 /**
  * @return {boolean} Whether the heap is empty.
  */
@@ -4898,16 +4858,14 @@ libtess.PriorityQHeap.prototype.isEmpty = function() {
   return this.size_ === 0;
 };
 
-
 /**
  * Returns the minimum key in the heap. If the heap is empty, null will be
  * returned.
  * @return {libtess.PQKey} [description].
  */
 libtess.PriorityQHeap.prototype.minimum = function() {
-  return this.handles_[this.nodes_[1].handle].key;
+  return this.handles_[this.nodes_[1]].key;
 };
-
 
 /**
  * Removes the minimum key from the heap and returns it. If the heap is empty,
@@ -4917,12 +4875,12 @@ libtess.PriorityQHeap.prototype.minimum = function() {
 libtess.PriorityQHeap.prototype.extractMin = function() {
   var n = this.nodes_;
   var h = this.handles_;
-  var hMin = n[1].handle;
+  var hMin = n[1];
   var min = h[hMin].key;
 
   if (this.size_ > 0) {
-    n[1].handle = n[this.size_].handle;
-    h[n[1].handle].node = 1;
+    n[1] = n[this.size_];
+    h[n[1]].node = 1;
 
     h[hMin].key = null;
     h[hMin].node = this.freeList_;
@@ -4936,7 +4894,6 @@ libtess.PriorityQHeap.prototype.extractMin = function() {
   return min;
 };
 
-
 /**
  * Remove key associated with handle hCurr (returned from insert) from heap.
  * @param {libtess.PQHandle} hCurr [description].
@@ -4948,12 +4905,12 @@ libtess.PriorityQHeap.prototype.remove = function(hCurr) {
   libtess.assert(hCurr >= 1 && hCurr <= this.max_ && h[hCurr].key !== null);
 
   var curr = h[hCurr].node;
-  n[curr].handle = n[this.size_].handle;
-  h[n[curr].handle].node = curr;
+  n[curr] = n[this.size_];
+  h[n[curr]].node = curr;
 
   if (curr <= --this.size_) {
     if (curr <= 1 ||
-        this.leq_(h[n[curr >> 1].handle].key, h[n[curr].handle].key)) {
+        this.leq_(h[n[curr >> 1]].key, h[n[curr]].key)) {
 
       this.floatDown_(curr);
     } else {
@@ -4966,7 +4923,6 @@ libtess.PriorityQHeap.prototype.remove = function(hCurr) {
   this.freeList_ = hCurr;
 };
 
-
 /**
  * [floatDown_ description]
  * @private
@@ -4976,31 +4932,30 @@ libtess.PriorityQHeap.prototype.floatDown_ = function(curr) {
   var n = this.nodes_;
   var h = this.handles_;
 
-  var hCurr = n[curr].handle;
+  var hCurr = n[curr];
   for (;;) {
     // The children of node i are nodes 2i and 2i+1.
     // set child to the index of the child with the minimum key
     var child = curr << 1;
     if (child < this.size_ &&
-        this.leq_(h[n[child + 1].handle].key, h[n[child].handle].key)) {
+        this.leq_(h[n[child + 1]].key, h[n[child]].key)) {
 
       ++child;
     }
 
     libtess.assert(child <= this.max_);
 
-    var hChild = n[child].handle;
+    var hChild = n[child];
     if (child > this.size_ || this.leq_(h[hCurr].key, h[hChild].key)) {
-      n[curr].handle = hCurr;
+      n[curr] = hCurr;
       h[hCurr].node = curr;
       break;
     }
-    n[curr].handle = hChild;
+    n[curr] = hChild;
     h[hChild].node = curr;
     curr = child;
   }
 };
-
 
 /**
  * [floatUp_ description]
@@ -5011,17 +4966,17 @@ libtess.PriorityQHeap.prototype.floatUp_ = function(curr) {
   var n = this.nodes_;
   var h = this.handles_;
 
-  var hCurr = n[curr].handle;
+  var hCurr = n[curr];
   for (;;) {
     var parent = curr >> 1;
-    var hParent = n[parent].handle;
+    var hParent = n[parent];
     if (parent === 0 || this.leq_(h[hParent].key, h[hCurr].key)) {
-      n[curr].handle = hCurr;
+      n[curr] = hCurr;
       h[hCurr].node = curr;
       break;
     }
 
-    n[curr].handle = hParent;
+    n[curr] = hParent;
     h[hParent].node = curr;
     curr = parent;
   }

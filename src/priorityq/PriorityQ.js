@@ -107,8 +107,6 @@ libtess.PriorityQ.INIT_SIZE_ = 32;
  * [deleteQ description]
  */
 libtess.PriorityQ.prototype.deleteQ = function() {
-  // TODO(bckenny): unnecessary, I think.
-  this.heap_.deleteHeap();
   this.heap_ = null;
   this.order_ = null;
   this.keys_ = null;
