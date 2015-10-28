@@ -1,6 +1,6 @@
 /**
  * Copyright 2000, Silicon Graphics, Inc. All Rights Reserved.
- * Copyright 2014, Google Inc. All Rights Reserved.
+ * Copyright 2015, Google Inc. All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -78,9 +78,9 @@ libtess.normal.projectPolygon = function(tess) {
     computedNormal = true;
   }
 
-  var sUnit = tess.sUnit;
-  var tUnit = tess.tUnit;
   var i = libtess.normal.longAxis_(norm);
+  var vHead = tess.mesh.vHead;
+  var v;
 
   // NOTE(bckenny): This branch is never taken. See comment on
   // libtess.TRUE_PROJECT.
@@ -89,6 +89,9 @@ libtess.normal.projectPolygon = function(tess) {
     // Choose the initial sUnit vector to be approximately perpendicular
     // to the normal.
     libtess.normal.normalize_(norm);
+
+    var sUnit = [0, 0, 0];
+    var tUnit = [0, 0, 0];
 
     sUnit[i] = 0;
     sUnit[(i + 1) % 3] = libtess.normal.S_UNIT_X_;
@@ -107,24 +110,23 @@ libtess.normal.projectPolygon = function(tess) {
     tUnit[2] = norm[0] * sUnit[1] - norm[1] * sUnit[0];
     libtess.normal.normalize_(tUnit);
 
+    // Project the vertices onto the sweep plane
+    for (v = vHead.next; v !== vHead; v = v.next) {
+      v.s = libtess.normal.dot_(v.coords, sUnit);
+      v.t = libtess.normal.dot_(v.coords, tUnit);
+    }
+
   } else {
     // Project perpendicular to a coordinate axis -- better numerically
-    sUnit[i] = 0;
-    sUnit[(i + 1) % 3] = libtess.normal.S_UNIT_X_;
-    sUnit[(i + 2) % 3] = libtess.normal.S_UNIT_Y_;
+    var sAxis = (i + 1) % 3;
+    var tAxis = (i + 2) % 3;
+    var tNegate = norm[i] > 0 ? 1 : -1;
 
-    tUnit[i] = 0;
-    tUnit[(i + 1) % 3] = (norm[i] > 0) ?
-        -libtess.normal.S_UNIT_Y_ : libtess.normal.S_UNIT_Y_;
-    tUnit[(i + 2) % 3] = (norm[i] > 0) ?
-        libtess.normal.S_UNIT_X_ : -libtess.normal.S_UNIT_X_;
-  }
-
-  // Project the vertices onto the sweep plane
-  var vHead = tess.mesh.vHead;
-  for (var v = vHead.next; v !== vHead; v = v.next) {
-    v.s = libtess.normal.dot_(v.coords, sUnit);
-    v.t = libtess.normal.dot_(v.coords, tUnit);
+    // Project the vertices onto the sweep plane
+    for (v = vHead.next; v !== vHead; v = v.next) {
+      v.s = v.coords[sAxis];
+      v.t = tNegate * v.coords[tAxis];
+    }
   }
 
   if (computedNormal) {
@@ -135,8 +137,8 @@ libtess.normal.projectPolygon = function(tess) {
 /**
  * Computes the dot product of vectors u and v.
  * @private
- * @param {!Array.<number>} u
- * @param {!Array.<number>} v
+ * @param {!Array<number>} u
+ * @param {!Array<number>} v
  * @return {number}
  */
 libtess.normal.dot_ = function(u, v) {
@@ -149,7 +151,7 @@ libtess.normal.dot_ = function(u, v) {
 /**
  * Normalize vector v.
  * @private
- * @param {!Array.<number>} v
+ * @param {!Array<number>} v
  */
 libtess.normal.normalize_ = function(v) {
   var len = v[0] * v[0] + v[1] * v[1] + v[2] * v[2];
@@ -164,7 +166,7 @@ libtess.normal.normalize_ = function(v) {
 /**
  * Returns the index of the longest component of vector v.
  * @private
- * @param {!Array.<number>} v
+ * @param {!Array<number>} v
  * @return {number}
  */
 libtess.normal.longAxis_ = function(v) {
@@ -185,7 +187,7 @@ libtess.normal.longAxis_ = function(v) {
  * Result returned in norm.
  * @private
  * @param {!libtess.GluTesselator} tess
- * @param {!Array.<number>} norm
+ * @param {!Array<number>} norm
  */
 libtess.normal.computeNormal_ = function(tess, norm) {
   var maxVal = [
@@ -282,8 +284,5 @@ libtess.normal.checkOrientation_ = function(tess) {
     for (var v = vHead.next; v !== vHead; v = v.next) {
       v.t = -v.t;
     }
-    tess.tUnit[0] = -tess.tUnit[0];
-    tess.tUnit[1] = -tess.tUnit[1];
-    tess.tUnit[2] = -tess.tUnit[2];
   }
 };
