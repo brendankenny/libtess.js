@@ -1233,6 +1233,9 @@ libtess.normal.projectPolygon = function(tess) {
   }
 };
 
+// NOTE(bckenny): libtess.normal.dot_ is no longer called in code without
+// libtess.TRUE_PROJECT defined.
+/* istanbul ignore next */
 /**
  * Computes the dot product of vectors u and v.
  * @private
