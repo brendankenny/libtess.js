@@ -4374,7 +4374,7 @@ libtess.PriorityQ = function(leq) {
    * [heap_ description]
    * @private {libtess.PriorityQHeap}
    */
-  this.heap_ = new libtess.PriorityQHeap(this.leq_);
+  this.heap_ = new libtess.PriorityQHeap();
 };
 
 /**
@@ -4613,9 +4613,8 @@ libtess.PriorityQ.prototype.remove = function(curr) {
  * with a binary heap. Used only within libtess.PriorityQ.
  * @constructor
  * @struct
- * @param {function(libtess.GluVertex, libtess.GluVertex): boolean} leq
  */
-libtess.PriorityQHeap = function(leq) {
+libtess.PriorityQHeap = function() {
   /**
    * The heap itself. Active nodes are stored in the range 1..size, with the
    * minimum at 1. Each node stores only an index into verts_ and handles_.
@@ -4666,15 +4665,6 @@ libtess.PriorityQHeap = function(leq) {
    * @private {boolean}
    */
   this.initialized_ = false;
-
-  // TODO(bckenny): leq was inlined by define in original, but appears to
-  // be vertLeq, as passed. Using injected version, but is it better just to
-  // manually inline?
-  /**
-   * Heap comparison function.
-   * @private {function(libtess.GluVertex, libtess.GluVertex): boolean}
-   */
-  this.leq_ = leq;
 
   // Point the first index at the first (currently null) vertex.
   this.heap_[1] = 1;
@@ -4830,12 +4820,16 @@ libtess.PriorityQHeap.prototype.remove = function(removeHandle) {
 
   // Restore heap.
   if (heapIndex <= --this.size_) {
-    if (heapIndex <= 1 ||
-        this.leq_(verts[heap[heapIndex >> 1]], verts[heap[heapIndex]])) {
-
+    if (heapIndex <= 1) {
       this.floatDown_(heapIndex);
     } else {
-      this.floatUp_(heapIndex);
+      var vert = verts[heap[heapIndex]];
+      var parentVert = verts[heap[heapIndex >> 1]];
+      if (libtess.geom.vertLeq(parentVert, vert)) {
+        this.floatDown_(heapIndex);
+      } else {
+        this.floatUp_(heapIndex);
+      }
     }
   }
 
@@ -4863,7 +4857,8 @@ libtess.PriorityQHeap.prototype.floatDown_ = function(index) {
     var childIndex = currIndex << 1;
     if (childIndex < this.size_) {
       // Set child to the index of the child with the minimum vertex.
-      if (this.leq_(verts[heap[childIndex + 1]], verts[heap[childIndex]])) {
+      if (libtess.geom.vertLeq(verts[heap[childIndex + 1]],
+          verts[heap[childIndex]])) {
         childIndex = childIndex + 1;
       }
     }
@@ -4872,7 +4867,7 @@ libtess.PriorityQHeap.prototype.floatDown_ = function(index) {
 
     var childHandle = heap[childIndex];
     if (childIndex > this.size_ ||
-        this.leq_(verts[currHandle], verts[childHandle])) {
+        libtess.geom.vertLeq(verts[currHandle], verts[childHandle])) {
       // Heap restored.
       heap[currIndex] = currHandle;
       handles[currHandle] = currIndex;
@@ -4905,7 +4900,7 @@ libtess.PriorityQHeap.prototype.floatUp_ = function(index) {
     var parentHandle = heap[parentIndex];
 
     if (parentIndex === 0 ||
-        this.leq_(verts[parentHandle], verts[currHandle])) {
+        libtess.geom.vertLeq(verts[parentHandle], verts[currHandle])) {
       // Heap restored.
       heap[currIndex] = currHandle;
       handles[currHandle] = currIndex;

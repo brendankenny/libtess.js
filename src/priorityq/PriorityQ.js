@@ -82,7 +82,7 @@ libtess.PriorityQ = function(leq) {
    * [heap_ description]
    * @private {libtess.PriorityQHeap}
    */
-  this.heap_ = new libtess.PriorityQHeap(this.leq_);
+  this.heap_ = new libtess.PriorityQHeap();
 };
 
 /**
