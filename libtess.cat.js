@@ -186,10 +186,6 @@ libtess.gluEnum = {
 /** @typedef {number} */
 libtess.PQHandle;
 
-// TODO(bckenny): better typing on key?
-/** @typedef {Object} */
-libtess.PQKey;
-
 
 /* global libtess */
 
@@ -2858,9 +2854,7 @@ libtess.sweep.removeDegenerateEdges_ = function(tess) {
  * @param {libtess.GluTesselator} tess [description].
  */
 libtess.sweep.initPriorityQ_ = function(tess) {
-  // TODO(bckenny): libtess.geom.vertLeq needs cast?
-  var pq = new libtess.PriorityQ(
-      /** @type {function(Object, Object): boolean} */(libtess.geom.vertLeq));
+  var pq = new libtess.PriorityQ(libtess.geom.vertLeq);
   tess.pq = pq;
 
   var vHead = tess.mesh.vHead;
@@ -4268,42 +4262,37 @@ libtess.GluVertex = function(opt_nextVertex, opt_prevVertex) {
  * [PriorityQ description]
  * @constructor
  * @struct
- * @param {function(Object, Object): boolean} leq [description].
+ * @param {function(libtess.GluVertex, libtess.GluVertex): boolean} leq
  */
 libtess.PriorityQ = function(leq) {
   /**
    * [keys description]
-   * @private
-   * @type {Array.<libtess.PQKey>}
+   * @private {Array<libtess.GluVertex>}
    */
   this.keys_ = libtess.PriorityQ.prototype.PQKeyRealloc_(null,
       libtess.PriorityQ.INIT_SIZE_);
 
   /**
    * Array of indexes into this.keys_
-   * @private
-   * @type {Array.<number>}
+   * @private {Array<number>}
    */
   this.order_ = null;
 
   /**
    * [size description]
-   * @private
-   * @type {number}
+   * @private {number}
    */
   this.size_ = 0;
 
   /**
    * [max_ description]
-   * @private
-   * @type {number}
+   * @private {number}
    */
   this.max_ = libtess.PriorityQ.INIT_SIZE_;
 
   /**
    * [initialized description]
-   * @private
-   * @type {boolean}
+   * @private {boolean}
    */
   this.initialized_ = false;
 
@@ -4311,20 +4300,16 @@ libtess.PriorityQ = function(leq) {
   // be vertLeq, as passed. keep an eye on this as to why its not used.
   /**
    * [leq description]
-   * @private
-   * @type {function(libtess.PQKey, libtess.PQKey): boolean}
+   * @private {function(libtess.GluVertex, libtess.GluVertex): boolean}
    */
-  this.leq_ =
-      /** @type {function(libtess.PQKey, libtess.PQKey): boolean} */(leq);
+  this.leq_ = leq;
 
   /**
    * [heap_ description]
-   * @private
-   * @type {libtess.PriorityQHeap}
+   * @private {libtess.PriorityQHeap}
    */
   this.heap_ = new libtess.PriorityQHeap(this.leq_);
 };
-
 
 /**
  * [INIT_SIZE_ description]
@@ -4333,7 +4318,6 @@ libtess.PriorityQ = function(leq) {
  * @type {number}
  */
 libtess.PriorityQ.INIT_SIZE_ = 32;
-
 
 /**
  * [deleteQ description]
@@ -4344,7 +4328,6 @@ libtess.PriorityQ.prototype.deleteQ = function() {
   this.keys_ = null;
   // NOTE(bckenny): nulled at callsite (sweep.donePriorityQ_)
 };
-
 
 /**
  * [init description]
@@ -4390,16 +4373,16 @@ libtess.PriorityQ.prototype.init = function() {
 };
 
 /**
- * Insert a PQKey into the priority queue. Returns a PQHandle to refer to it,
+ * Insert a vertex into the priority queue. Returns a PQHandle to refer to it,
  * which will never be 0.
- * @param {libtess.PQKey} keyNew
+ * @param {libtess.GluVertex} vert
  * @return {libtess.PQHandle}
  */
-libtess.PriorityQ.prototype.insert = function(keyNew) {
+libtess.PriorityQ.prototype.insert = function(vert) {
   // NOTE(bckenny): originally returned LONG_MAX as alloc failure signal. no
   // longer does.
   if (this.initialized_) {
-    return this.heap_.insert(keyNew);
+    return this.heap_.insert(vert);
   }
 
   var curr = this.size_;
@@ -4410,21 +4393,20 @@ libtess.PriorityQ.prototype.insert = function(keyNew) {
         libtess.PriorityQ.prototype.PQKeyRealloc_(this.keys_, this.max_);
   }
 
-  this.keys_[curr] = keyNew;
+  this.keys_[curr] = vert;
 
   // Negative handles index the sorted array.
   return -(curr + 1);
 };
 
 /**
- * Allocate a PQKey array of size size. If oldArray is not null, its
- * contents are copied to the beginning of the new array. The rest of the array
- * is filled with nulls.
- *
+ * Allocate an array of size size. If oldArray is not null, its contents are
+ * copied to the beginning of the new array. The rest of the array is filled
+ * with nulls.
  * @private
- * @param {?Array.<libtess.PQKey>} oldArray [description].
- * @param {number} size [description].
- * @return {Array.<(?libtess.PQKey)>} [description].
+ * @param {?Array<libtess.GluVertex>} oldArray
+ * @param {number} size
+ * @return {!Array<(libtess.GluVertex)>}
  */
 libtess.PriorityQ.prototype.PQKeyRealloc_ = function(oldArray, size) {
   // TODO(bckenny): double check return type. can we have ? there?
@@ -4479,10 +4461,9 @@ libtess.PriorityQ.prototype.keyGreaterThan_ = function(x, y) {
   return !this.leq_(keyX, keyY);
 };
 
-
 /**
  * [extractMin description]
- * @return {libtess.PQKey} [description].
+ * @return {libtess.GluVertex} [description].
  */
 libtess.PriorityQ.prototype.extractMin = function() {
   if (this.size_ === 0) {
@@ -4504,10 +4485,9 @@ libtess.PriorityQ.prototype.extractMin = function() {
   return sortMin;
 };
 
-
 /**
  * [minimum description]
- * @return {libtess.PQKey} [description].
+ * @return {libtess.GluVertex} [description].
  */
 libtess.PriorityQ.prototype.minimum = function() {
   if (this.size_ === 0) {
@@ -4537,7 +4517,6 @@ libtess.PriorityQ.prototype.isEmpty_ = function() {
   return (this.size_ === 0) && this.heap_.isEmpty();
 };
 
-
 /**
  * [remove description]
  * @param {libtess.PQHandle} curr [description].
@@ -4559,14 +4538,12 @@ libtess.PriorityQ.prototype.remove = function(curr) {
 
 /* global libtess */
 
-// TODO(bckenny): keys appear to always be GluVertex in this case?
-
 /**
  * A priority queue of vertices, ordered by libtess.geom.vertLeq, implemented
  * with a binary heap. Used only within libtess.PriorityQ.
  * @constructor
  * @struct
- * @param {function(libtess.PQKey, libtess.PQKey): boolean} leq [description].
+ * @param {function(libtess.GluVertex, libtess.GluVertex): boolean} leq
  */
 libtess.PriorityQHeap = function(leq) {
   /**
@@ -4579,7 +4556,7 @@ libtess.PriorityQHeap = function(leq) {
 
   /**
    * An unordered list of vertices in the heap, with null in empty slots.
-   * @private {!Array<libtess.PQKey>}
+   * @private {!Array<libtess.GluVertex>}
    */
   this.verts_ = [null, null];
 
@@ -4625,7 +4602,7 @@ libtess.PriorityQHeap = function(leq) {
   // manually inline?
   /**
    * Heap comparison function.
-   * @private {function(libtess.PQKey, libtess.PQKey): boolean}
+   * @private {function(libtess.GluVertex, libtess.GluVertex): boolean}
    */
   this.leq_ = leq;
 
@@ -4681,10 +4658,10 @@ libtess.PriorityQHeap.prototype.init = function() {
 
 /**
  * Insert a new vertex into the heap.
- * @param {libtess.PQKey} keyNew The vertex to insert.
+ * @param {libtess.GluVertex} vert The vertex to insert.
  * @return {libtess.PQHandle} A handle that can be used to remove the vertex.
  */
-libtess.PriorityQHeap.prototype.insert = function(keyNew) {
+libtess.PriorityQHeap.prototype.insert = function(vert) {
   var endIndex = ++this.size_;
 
   // If the heap overflows, double its size.
@@ -4705,7 +4682,7 @@ libtess.PriorityQHeap.prototype.insert = function(keyNew) {
     this.freeList_ = this.handles_[this.freeList_];
   }
 
-  this.verts_[newVertSlot] = keyNew;
+  this.verts_[newVertSlot] = vert;
   this.handles_[newVertSlot] = endIndex;
   this.heap_[endIndex] = newVertSlot;
 
@@ -4725,7 +4702,7 @@ libtess.PriorityQHeap.prototype.isEmpty = function() {
 /**
  * Returns the minimum vertex in the heap. If the heap is empty, null will be
  * returned.
- * @return {libtess.PQKey}
+ * @return {libtess.GluVertex}
  */
 libtess.PriorityQHeap.prototype.minimum = function() {
   return this.verts_[this.heap_[1]];
@@ -4734,7 +4711,7 @@ libtess.PriorityQHeap.prototype.minimum = function() {
 /**
  * Removes the minimum vertex from the heap and returns it. If the heap is
  * empty, null will be returned.
- * @return {libtess.PQKey}
+ * @return {libtess.GluVertex}
  */
 libtess.PriorityQHeap.prototype.extractMin = function() {
   var heap = this.heap_;

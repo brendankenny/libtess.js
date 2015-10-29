@@ -29,14 +29,12 @@
 
 /* global libtess */
 
-// TODO(bckenny): keys appear to always be GluVertex in this case?
-
 /**
  * A priority queue of vertices, ordered by libtess.geom.vertLeq, implemented
  * with a binary heap. Used only within libtess.PriorityQ.
  * @constructor
  * @struct
- * @param {function(libtess.PQKey, libtess.PQKey): boolean} leq [description].
+ * @param {function(libtess.GluVertex, libtess.GluVertex): boolean} leq
  */
 libtess.PriorityQHeap = function(leq) {
   /**
@@ -49,7 +47,7 @@ libtess.PriorityQHeap = function(leq) {
 
   /**
    * An unordered list of vertices in the heap, with null in empty slots.
-   * @private {!Array<libtess.PQKey>}
+   * @private {!Array<libtess.GluVertex>}
    */
   this.verts_ = [null, null];
 
@@ -95,7 +93,7 @@ libtess.PriorityQHeap = function(leq) {
   // manually inline?
   /**
    * Heap comparison function.
-   * @private {function(libtess.PQKey, libtess.PQKey): boolean}
+   * @private {function(libtess.GluVertex, libtess.GluVertex): boolean}
    */
   this.leq_ = leq;
 
@@ -151,10 +149,10 @@ libtess.PriorityQHeap.prototype.init = function() {
 
 /**
  * Insert a new vertex into the heap.
- * @param {libtess.PQKey} keyNew The vertex to insert.
+ * @param {libtess.GluVertex} vert The vertex to insert.
  * @return {libtess.PQHandle} A handle that can be used to remove the vertex.
  */
-libtess.PriorityQHeap.prototype.insert = function(keyNew) {
+libtess.PriorityQHeap.prototype.insert = function(vert) {
   var endIndex = ++this.size_;
 
   // If the heap overflows, double its size.
@@ -175,7 +173,7 @@ libtess.PriorityQHeap.prototype.insert = function(keyNew) {
     this.freeList_ = this.handles_[this.freeList_];
   }
 
-  this.verts_[newVertSlot] = keyNew;
+  this.verts_[newVertSlot] = vert;
   this.handles_[newVertSlot] = endIndex;
   this.heap_[endIndex] = newVertSlot;
 
@@ -195,7 +193,7 @@ libtess.PriorityQHeap.prototype.isEmpty = function() {
 /**
  * Returns the minimum vertex in the heap. If the heap is empty, null will be
  * returned.
- * @return {libtess.PQKey}
+ * @return {libtess.GluVertex}
  */
 libtess.PriorityQHeap.prototype.minimum = function() {
   return this.verts_[this.heap_[1]];
@@ -204,7 +202,7 @@ libtess.PriorityQHeap.prototype.minimum = function() {
 /**
  * Removes the minimum vertex from the heap and returns it. If the heap is
  * empty, null will be returned.
- * @return {libtess.PQKey}
+ * @return {libtess.GluVertex}
  */
 libtess.PriorityQHeap.prototype.extractMin = function() {
   var heap = this.heap_;

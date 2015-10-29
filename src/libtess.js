@@ -185,7 +185,3 @@ libtess.gluEnum = {
 
 /** @typedef {number} */
 libtess.PQHandle;
-
-// TODO(bckenny): better typing on key?
-/** @typedef {Object} */
-libtess.PQKey;
