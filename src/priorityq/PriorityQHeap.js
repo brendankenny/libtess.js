@@ -60,8 +60,7 @@ libtess.PriorityQHeap = function(leq) {
    * Empty slots below size_ are a free list chain starting at freeList_.
    * @private {!Array<number>}
    */
-  this.handles_ = libtess.PriorityQHeap.reallocNumeric_([0],
-      libtess.PriorityQHeap.INIT_SIZE_ + 1);
+  this.handles_ = [0, 0];
 
   /**
    * The size of the queue.
@@ -162,8 +161,6 @@ libtess.PriorityQHeap.prototype.insert = function(keyNew) {
   if ((endIndex * 2) > this.max_) {
     this.max_ *= 2;
 
-    this.heap_ = libtess.PriorityQHeap.reallocNumeric_(this.heap_,
-        this.max_ + 1);
     this.handles_ = libtess.PriorityQHeap.reallocNumeric_(this.handles_,
         this.max_ + 1);
   }
