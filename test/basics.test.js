@@ -15,16 +15,16 @@ var createTessellator = common.createInstrumentedTessellator;
 
 suite('Basic Tests', function() {
   suite('Getting and Setting Properties', function() {
-    // NOTE(bckenny): libtess doesn't actually do anything with this value
+    // NOTE(bckenny): libtess doesn't do anything with GLU_TESS_TOLERANCE, so
+    // merely testing existence to ensure backwards compatibility.
     test('GLU_TESS_TOLERANCE settable and gettable', function() {
       var tess = createTessellator(libtess);
-      var tolerance = 0.5;
-      tess.gluTessProperty(libtess.gluEnum.GLU_TESS_TOLERANCE, tolerance);
-      var gotTolerance =
-          tess.gluGetTessProperty(libtess.gluEnum.GLU_TESS_TOLERANCE);
-
-      assert.strictEqual(gotTolerance, tolerance,
-          'GLU_TESS_TOLERANCE did not round trip correctly');
+      assert.doesNotThrow(tess.gluTessProperty.bind(tess,
+          libtess.gluEnum.GLU_TESS_TOLERANCE, 1),
+          'setting GLU_TESS_TOLERANCE threw an error');
+      assert.doesNotThrow(tess.gluGetTessProperty.bind(tess,
+          libtess.gluEnum.GLU_TESS_TOLERANCE),
+          'getting GLU_TESS_TOLERANCE threw an error');
     });
     test('GLU_TESS_WINDING_RULE settable and gettable', function() {
       var tess = createTessellator(libtess);

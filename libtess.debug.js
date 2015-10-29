@@ -3337,13 +3337,6 @@ libtess.GluTesselator = function() {
 
   /*** state needed for the line sweep ***/
 
-  // TODO(bckenny): unused.
-  /**
-   * tolerance for merging features
-   * @type {number}
-   */
-  this.relTolerance = libtess.GLU_TESS_DEFAULT_TOLERANCE;
-
   /**
    * rule for determining polygon interior
    * @type {libtess.windingRule}
@@ -3461,12 +3454,7 @@ libtess.GluTesselator.prototype.gluTessProperty = function(which, value) {
 
   switch (which) {
     case libtess.gluEnum.GLU_TESS_TOLERANCE:
-      if (value < 0 || value > 1) {
-        break;
-      }
-      // TODO(bckenny): libtess doesn't support any tolerance but 0. This should
-      // reject any non-zero tolerance accordingly.
-      this.relTolerance = /** @type {number} */(value);
+      // NOTE(bckenny): libtess has never supported any tolerance but 0.
       return;
 
     case libtess.gluEnum.GLU_TESS_WINDING_RULE:
@@ -3506,9 +3494,7 @@ libtess.GluTesselator.prototype.gluGetTessProperty = function(which) {
 
   switch (which) {
     case libtess.gluEnum.GLU_TESS_TOLERANCE:
-      // tolerance should be in range [0..1]
-      libtess.assert(0 <= this.relTolerance && this.relTolerance <= 1);
-      return this.relTolerance;
+      return 0;
 
     case libtess.gluEnum.GLU_TESS_WINDING_RULE:
       var rule = this.windingRule;

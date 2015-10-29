@@ -371,15 +371,6 @@ suite('Explicit Error States', function() {
   });
 
   suite('GLU_INVALID_VALUE', function() {
-    test('should throw on out-of-range tolerance', function() {
-      var tess = createTessellator(libtess);
-      assert.throw(tess.gluTessProperty.bind(tess,
-          libtess.gluEnum.GLU_TESS_TOLERANCE, 1.1), 'GLU_INVALID_VALUE',
-          'did not throw GLU_INVALID_VALUE');
-      assert.throw(tess.gluTessProperty.bind(tess,
-          libtess.gluEnum.GLU_TESS_TOLERANCE, -0.1), 'GLU_INVALID_VALUE',
-          'did not throw GLU_INVALID_VALUE');
-    });
     test('should throw on invalid winding room', function() {
       var tess = createTessellator(libtess);
       assert.throw(tess.gluTessProperty.bind(tess,

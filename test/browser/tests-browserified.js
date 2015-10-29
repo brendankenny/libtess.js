@@ -24,16 +24,16 @@ var createTessellator = common.createInstrumentedTessellator;
 
 suite('Basic Tests', function() {
   suite('Getting and Setting Properties', function() {
-    // NOTE(bckenny): libtess doesn't actually do anything with this value
+    // NOTE(bckenny): libtess doesn't do anything with GLU_TESS_TOLERANCE, so
+    // merely testing existence to ensure backwards compatibility.
     test('GLU_TESS_TOLERANCE settable and gettable', function() {
       var tess = createTessellator(libtess);
-      var tolerance = 0.5;
-      tess.gluTessProperty(libtess.gluEnum.GLU_TESS_TOLERANCE, tolerance);
-      var gotTolerance =
-          tess.gluGetTessProperty(libtess.gluEnum.GLU_TESS_TOLERANCE);
-
-      assert.strictEqual(gotTolerance, tolerance,
-          'GLU_TESS_TOLERANCE did not round trip correctly');
+      assert.doesNotThrow(tess.gluTessProperty.bind(tess,
+          libtess.gluEnum.GLU_TESS_TOLERANCE, 1),
+          'setting GLU_TESS_TOLERANCE threw an error');
+      assert.doesNotThrow(tess.gluGetTessProperty.bind(tess,
+          libtess.gluEnum.GLU_TESS_TOLERANCE),
+          'getting GLU_TESS_TOLERANCE threw an error');
     });
     test('GLU_TESS_WINDING_RULE settable and gettable', function() {
       var tess = createTessellator(libtess);
@@ -974,15 +974,6 @@ suite('Explicit Error States', function() {
   });
 
   suite('GLU_INVALID_VALUE', function() {
-    test('should throw on out-of-range tolerance', function() {
-      var tess = createTessellator(libtess);
-      assert.throw(tess.gluTessProperty.bind(tess,
-          libtess.gluEnum.GLU_TESS_TOLERANCE, 1.1), 'GLU_INVALID_VALUE',
-          'did not throw GLU_INVALID_VALUE');
-      assert.throw(tess.gluTessProperty.bind(tess,
-          libtess.gluEnum.GLU_TESS_TOLERANCE, -0.1), 'GLU_INVALID_VALUE',
-          'did not throw GLU_INVALID_VALUE');
-    });
     test('should throw on invalid winding room', function() {
       var tess = createTessellator(libtess);
       assert.throw(tess.gluTessProperty.bind(tess,
