@@ -4327,61 +4327,6 @@ libtess.GluVertex = function(opt_nextVertex, opt_prevVertex) {
 
 /* global libtess */
 
-// TODO(bckenny): more specific typing on key
-
-/**
- * [PQHandleElem description]
- * @constructor
- * @struct
- */
-libtess.PQHandleElem = function() {
-  // TODO(bckenny): if key could instead be an indexed into another store, makes heap storage a lot easier
-
-  /**
-   * [key description]
-   * @type {libtess.PQKey}
-   */
-  this.key = null;
-
-  /**
-   * [node description]
-   * @type {libtess.PQHandle}
-   */
-  this.node = 0;
-};
-
-
-/**
- * Allocate a PQHandleElem array of size size. If oldArray is not null, its
- * contents are copied to the beginning of the new array. The rest of the array
- * is filled with new PQHandleElems.
- *
- * @param {?Array.<libtess.PQHandleElem>} oldArray [description].
- * @param {number} size [description].
- * @return {!Array<libtess.PQHandleElem>} [description].
- */
-libtess.PQHandleElem.realloc = function(oldArray, size) {
-  var newArray = new Array(size);
-
-  // TODO(bckenny): better to reallocate array? or grow array?
-  var index = 0;
-  if (oldArray !== null) {
-    for (; index < oldArray.length; index++) {
-      newArray[index] = oldArray[index];
-    }
-  }
-
-  for (; index < size; index++) {
-    newArray[index] = new libtess.PQHandleElem();
-  }
-
-  return newArray;
-};
-
-
-
-/* global libtess */
-
 // TODO(bckenny): preallocating arrays may actually be hurting us in sort
 // performance (esp if theres some undefs in there)
 
@@ -4695,43 +4640,47 @@ libtess.PriorityQ.prototype.remove = function(curr) {
  */
 libtess.PriorityQHeap = function(leq) {
   /**
-   * The heap itself. Active nodes are stored in the range 1..size. Each node
-   * stores only an index into handles.
-   * @private
-   * @type {!Array<number>}
+   * The heap itself. Active nodes are stored in the range 1..size, with the
+   * minimum at 1. Each node stores only an index into verts_ and handles_.
+   * @private {!Array<number>}
    */
-  this.nodes_ = libtess.PriorityQHeap.reallocNodes_([0],
+  this.heap_ = libtess.PriorityQHeap.reallocNumeric_([0],
       libtess.PriorityQHeap.INIT_SIZE_ + 1);
 
   /**
-   * Each handle stores a key, plus a pointer back to the node which currently
-   * represents that key (ie. nodes_[handles[i].node] == i).
-   * @private
-   * @type {!Array.<libtess.PQHandleElem>}
+   * An unordered list of vertices in the heap, with null in empty slots.
+   * @private {!Array<libtess.PQKey>}
    */
-  this.handles_ = libtess.PQHandleElem.realloc(null,
+  this.verts_ = libtess.PriorityQHeap.reallocKeys_([],
+      libtess.PriorityQHeap.INIT_SIZE_ + 1);
+
+  /**
+   * An unordered list of indices mapping vertex handles into the heap. An entry
+   * at index i will map the vertex at i in verts_ to its place in the heap
+   * (i.e. heap_[handles_[i]] === i).
+   * Empty slots below size_ are a free list chain starting at freeList_.
+   * @private {!Array<number>}
+   */
+  this.handles_ = libtess.PriorityQHeap.reallocNumeric_([0],
       libtess.PriorityQHeap.INIT_SIZE_ + 1);
 
   /**
    * The size of the queue.
-   * @private
-   * @type {number}
+   * @private {number}
    */
   this.size_ = 0;
 
   /**
    * The queue's current allocated space.
-   * @private
-   * @type {number}
+   * @private {number}
    */
   this.max_ = libtess.PriorityQHeap.INIT_SIZE_;
 
   /**
-   * The index of the next free hole in the handles array. Handle in that slot
-   * has next item in freeList in its node propert. If there are no holes,
-   * freeList === 0 and one at the end of handles must be use.
-   * @private
-   * @type {libtess.PQHandle}
+   * The index of the next free hole in the verts_ array. That slot in handles_
+   * has the next index in the free list. If there are no holes, freeList_ === 0
+   * and a new vertex must be appended to the list.
+   * @private {libtess.PQHandle}
    */
   this.freeList_ = 0;
 
@@ -4739,8 +4688,7 @@ libtess.PriorityQHeap = function(leq) {
    * Indicates that the heap has been initialized via init. If false, inserts
    * are fast insertions at the end of a list. If true, all inserts will now be
    * correctly ordered in the queue before returning.
-   * @private
-   * @type {boolean}
+   * @private {boolean}
    */
   this.initialized_ = false;
 
@@ -4748,44 +4696,65 @@ libtess.PriorityQHeap = function(leq) {
   // be vertLeq, as passed. Using injected version, but is it better just to
   // manually inline?
   /**
-   * [leq description]
-   * @private
-   * @type {function(libtess.PQKey, libtess.PQKey): boolean}
+   * Heap comparison function.
+   * @private {function(libtess.PQKey, libtess.PQKey): boolean}
    */
   this.leq_ = leq;
 
-  // so that minimum returns null
-  this.nodes_[1] = 1;
+  // Point the first index at the first (currently null) vertex.
+  this.heap_[1] = 1;
 };
 
 /**
- * [INIT_SIZE_ description]
- * @private
+ * The initial allocated space for the queue.
  * @const
- * @type {number}
+ * @private {number}
  */
 libtess.PriorityQHeap.INIT_SIZE_ = 32;
 
 /**
- * Allocate a node index array of size size. If oldArray is not null, its
- * contents are copied to the beginning of the new array. The rest of the array
- * is filled with new node indices.
+ * Allocate a numeric index array of size size. oldArray's contents are copied
+ * to the beginning of the new array. The rest of the array is filled with
+ * zeroes.
  * @private
  * @param {!Array<number>} oldArray
  * @param {number} size
  * @return {!Array<number>}
  */
-libtess.PriorityQHeap.reallocNodes_ = function(oldArray, size) {
+libtess.PriorityQHeap.reallocNumeric_ = function(oldArray, size) {
   var newArray = new Array(size);
 
-  // TODO(bckenny): V8 likes this significantly more than simply growing the
-  // array element-by-element, so, for now, emulating realloc.
+  // NOTE(bckenny): V8 likes this significantly more than simply growing the
+  // array element-by-element or expanding the existing array all at once, so,
+  // for now, emulating realloc.
   for (var index = 0; index < oldArray.length; index++) {
     newArray[index] = oldArray[index];
   }
 
   for (; index < size; index++) {
     newArray[index] = 0;
+  }
+
+  return newArray;
+};
+
+/**
+ * Allocate a PQKey array of size size. oldArray's contents are copied to the
+ * beginning of the new array. The rest of the array is filled with null values.
+ * @private
+ * @param {!Array<libtess.PQKey>} oldArray
+ * @param {number} size
+ * @return {!Array<libtess.PQKey>}
+ */
+libtess.PriorityQHeap.reallocKeys_ = function(oldArray, size) {
+  var newArray = new Array(size);
+
+  for (var index = 0; index < oldArray.length; index++) {
+    newArray[index] = oldArray[index];
+  }
+
+  for (; index < size; index++) {
+    newArray[index] = null;
   }
 
   return newArray;
@@ -4805,38 +4774,43 @@ libtess.PriorityQHeap.prototype.init = function() {
 };
 
 /**
- * Insert a new key into the heap.
- * @param {libtess.PQKey} keyNew The key to insert.
- * @return {libtess.PQHandle} A handle that can be used to remove the key.
+ * Insert a new vertex into the heap.
+ * @param {libtess.PQKey} keyNew The vertex to insert.
+ * @return {libtess.PQHandle} A handle that can be used to remove the vertex.
  */
 libtess.PriorityQHeap.prototype.insert = function(keyNew) {
-  var curr = ++this.size_;
+  var endIndex = ++this.size_;
 
-  // if the heap overflows, double its size.
-  if ((curr * 2) > this.max_) {
+  // If the heap overflows, double its size.
+  if ((endIndex * 2) > this.max_) {
     this.max_ *= 2;
-    this.nodes_ = libtess.PriorityQHeap.reallocNodes_(this.nodes_,
+
+    this.heap_ = libtess.PriorityQHeap.reallocNumeric_(this.heap_,
         this.max_ + 1);
-    this.handles_ = libtess.PQHandleElem.realloc(this.handles_, this.max_ + 1);
+    this.verts_ = libtess.PriorityQHeap.reallocKeys_(this.verts_,
+        this.max_ + 1);
+    this.handles_ = libtess.PriorityQHeap.reallocNumeric_(this.handles_,
+        this.max_ + 1);
   }
 
-  var free;
+  var newVertSlot;
   if (this.freeList_ === 0) {
-    free = curr;
+    // No free slots, append vertex.
+    newVertSlot = endIndex;
   } else {
-    free = this.freeList_;
-    this.freeList_ = this.handles_[free].node;
+    // Put vertex in free slot, update freeList_ to next free slot.
+    newVertSlot = this.freeList_;
+    this.freeList_ = this.handles_[this.freeList_];
   }
 
-  this.nodes_[curr] = free;
-  this.handles_[free].node = curr;
-  this.handles_[free].key = keyNew;
+  this.verts_[newVertSlot] = keyNew;
+  this.handles_[newVertSlot] = endIndex;
+  this.heap_[endIndex] = newVertSlot;
 
   if (this.initialized_) {
-    this.floatUp_(curr);
+    this.floatUp_(endIndex);
   }
-
-  return free;
+  return newVertSlot;
 };
 
 /**
@@ -4847,126 +4821,152 @@ libtess.PriorityQHeap.prototype.isEmpty = function() {
 };
 
 /**
- * Returns the minimum key in the heap. If the heap is empty, null will be
+ * Returns the minimum vertex in the heap. If the heap is empty, null will be
  * returned.
- * @return {libtess.PQKey} [description].
+ * @return {libtess.PQKey}
  */
 libtess.PriorityQHeap.prototype.minimum = function() {
-  return this.handles_[this.nodes_[1]].key;
+  return this.verts_[this.heap_[1]];
 };
 
 /**
- * Removes the minimum key from the heap and returns it. If the heap is empty,
- * null will be returned.
- * @return {libtess.PQKey} [description].
+ * Removes the minimum vertex from the heap and returns it. If the heap is
+ * empty, null will be returned.
+ * @return {libtess.PQKey}
  */
 libtess.PriorityQHeap.prototype.extractMin = function() {
-  var n = this.nodes_;
-  var h = this.handles_;
-  var hMin = n[1];
-  var min = h[hMin].key;
+  var heap = this.heap_;
+  var verts = this.verts_;
+  var handles = this.handles_;
+
+  var minHandle = heap[1];
+  var minVertex = verts[minHandle];
 
   if (this.size_ > 0) {
-    n[1] = n[this.size_];
-    h[n[1]].node = 1;
+    // Replace min with last vertex.
+    heap[1] = heap[this.size_];
+    handles[heap[1]] = 1;
 
-    h[hMin].key = null;
-    h[hMin].node = this.freeList_;
-    this.freeList_ = hMin;
+    // Clear min vertex and put slot at front of freeList_.
+    verts[minHandle] = null;
+    handles[minHandle] = this.freeList_;
+    this.freeList_ = minHandle;
 
+    // Restore heap.
     if (--this.size_ > 0) {
       this.floatDown_(1);
     }
   }
 
-  return min;
+  return minVertex;
 };
 
 /**
- * Remove key associated with handle hCurr (returned from insert) from heap.
- * @param {libtess.PQHandle} hCurr [description].
+ * Remove vertex with handle removeHandle from heap.
+ * @param {libtess.PQHandle} removeHandle
  */
-libtess.PriorityQHeap.prototype.remove = function(hCurr) {
-  var n = this.nodes_;
-  var h = this.handles_;
+libtess.PriorityQHeap.prototype.remove = function(removeHandle) {
+  var heap = this.heap_;
+  var verts = this.verts_;
+  var handles = this.handles_;
 
-  libtess.assert(hCurr >= 1 && hCurr <= this.max_ && h[hCurr].key !== null);
+  libtess.assert(removeHandle >= 1 && removeHandle <= this.max_ &&
+      verts[removeHandle] !== null);
 
-  var curr = h[hCurr].node;
-  n[curr] = n[this.size_];
-  h[n[curr]].node = curr;
+  var heapIndex = handles[removeHandle];
 
-  if (curr <= --this.size_) {
-    if (curr <= 1 ||
-        this.leq_(h[n[curr >> 1]].key, h[n[curr]].key)) {
+  // Replace with last vertex.
+  heap[heapIndex] = heap[this.size_];
+  handles[heap[heapIndex]] = heapIndex;
 
-      this.floatDown_(curr);
+  // Restore heap.
+  if (heapIndex <= --this.size_) {
+    if (heapIndex <= 1 ||
+        this.leq_(verts[heap[heapIndex >> 1]], verts[heap[heapIndex]])) {
+
+      this.floatDown_(heapIndex);
     } else {
-      this.floatUp_(curr);
+      this.floatUp_(heapIndex);
     }
   }
 
-  h[hCurr].key = null;
-  h[hCurr].node = this.freeList_;
-  this.freeList_ = hCurr;
+  // Clear vertex and put slot at front of freeList_.
+  verts[removeHandle] = null;
+  handles[removeHandle] = this.freeList_;
+  this.freeList_ = removeHandle;
 };
 
 /**
- * [floatDown_ description]
+ * Restore heap by moving the vertex at index in the heap downwards to a valid
+ * slot.
  * @private
- * @param {libtess.PQHandle} curr [description].
+ * @param {libtess.PQHandle} index
  */
-libtess.PriorityQHeap.prototype.floatDown_ = function(curr) {
-  var n = this.nodes_;
-  var h = this.handles_;
+libtess.PriorityQHeap.prototype.floatDown_ = function(index) {
+  var heap = this.heap_;
+  var verts = this.verts_;
+  var handles = this.handles_;
 
-  var hCurr = n[curr];
+  var currIndex = index;
+  var currHandle = heap[currIndex];
   for (;;) {
     // The children of node i are nodes 2i and 2i+1.
-    // set child to the index of the child with the minimum key
-    var child = curr << 1;
-    if (child < this.size_ &&
-        this.leq_(h[n[child + 1]].key, h[n[child]].key)) {
-
-      ++child;
+    var childIndex = currIndex << 1;
+    if (childIndex < this.size_) {
+      // Set child to the index of the child with the minimum vertex.
+      if (this.leq_(verts[heap[childIndex + 1]], verts[heap[childIndex]])) {
+        childIndex = childIndex + 1;
+      }
     }
 
-    libtess.assert(child <= this.max_);
+    libtess.assert(childIndex <= this.max_);
 
-    var hChild = n[child];
-    if (child > this.size_ || this.leq_(h[hCurr].key, h[hChild].key)) {
-      n[curr] = hCurr;
-      h[hCurr].node = curr;
-      break;
+    var childHandle = heap[childIndex];
+    if (childIndex > this.size_ ||
+        this.leq_(verts[currHandle], verts[childHandle])) {
+      // Heap restored.
+      heap[currIndex] = currHandle;
+      handles[currHandle] = currIndex;
+      return;
     }
-    n[curr] = hChild;
-    h[hChild].node = curr;
-    curr = child;
+
+    // Swap current node and child; repeat from childIndex.
+    heap[currIndex] = childHandle;
+    handles[childHandle] = currIndex;
+    currIndex = childIndex;
   }
 };
 
 /**
- * [floatUp_ description]
+ * Restore heap by moving the vertex at index in the heap upwards to a valid
+ * slot.
  * @private
- * @param {libtess.PQHandle} curr [description].
+ * @param {libtess.PQHandle} index
  */
-libtess.PriorityQHeap.prototype.floatUp_ = function(curr) {
-  var n = this.nodes_;
-  var h = this.handles_;
+libtess.PriorityQHeap.prototype.floatUp_ = function(index) {
+  var heap = this.heap_;
+  var verts = this.verts_;
+  var handles = this.handles_;
 
-  var hCurr = n[curr];
+  var currIndex = index;
+  var currHandle = heap[currIndex];
   for (;;) {
-    var parent = curr >> 1;
-    var hParent = n[parent];
-    if (parent === 0 || this.leq_(h[hParent].key, h[hCurr].key)) {
-      n[curr] = hCurr;
-      h[hCurr].node = curr;
-      break;
+    // The parent of node i is node floor(i/2).
+    var parentIndex = currIndex >> 1;
+    var parentHandle = heap[parentIndex];
+
+    if (parentIndex === 0 ||
+        this.leq_(verts[parentHandle], verts[currHandle])) {
+      // Heap restored.
+      heap[currIndex] = currHandle;
+      handles[currHandle] = currIndex;
+      return;
     }
 
-    n[curr] = hParent;
-    h[hParent].node = curr;
-    curr = parent;
+    // Swap current node and parent; repeat from parentIndex.
+    heap[currIndex] = parentHandle;
+    handles[parentHandle] = currIndex;
+    currIndex = parentIndex;
   }
 };
 
