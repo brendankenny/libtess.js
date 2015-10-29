@@ -1157,18 +1157,22 @@ libtess.normal.S_UNIT_Y_ = 0.0;
 
 /**
  * Determines a polygon normal and projects vertices onto the plane of the
- * polygon.
+ * polygon. A pre-computed normal for the data may be provided, or set to the
+ * zero vector if one should be computed from it.
  * @param {!libtess.GluTesselator} tess
+ * @param {number} normalX
+ * @param {number} normalY
+ * @param {number} normalZ
  */
-libtess.normal.projectPolygon = function(tess) {
+libtess.normal.projectPolygon = function(tess, normalX, normalY, normalZ) {
   var computedNormal = false;
 
   var norm = [
-    tess.normal[0],
-    tess.normal[1],
-    tess.normal[2]
+    normalX,
+    normalY,
+    normalZ
   ];
-  if (norm[0] === 0 && norm[1] === 0 && norm[2] === 0) {
+  if (normalX === 0 && normalY === 0 && normalZ === 0) {
     libtess.normal.computeNormal_(tess, norm);
     computedNormal = true;
   }
@@ -3297,21 +3301,17 @@ libtess.GluTesselator = function() {
   // Only initialize fields which can be changed by the api. Other fields
   // are initialized where they are used.
 
-  // TODO(bckenny): many of these can be made private
-  // TODO(bckenny): can we combine call* and call*Data functions?
-
   /*** state needed for collecting the input data ***/
 
   /**
-   * what begin/end calls have we seen?
-   * @type {libtess.GluTesselator.tessState_}
+   * Tesselator state, tracking what begin/end calls have been seen.
+   * @private {libtess.GluTesselator.tessState_}
    */
-  this.state = libtess.GluTesselator.tessState_.T_DORMANT;
+  this.state_ = libtess.GluTesselator.tessState_.T_DORMANT;
 
   /**
    * lastEdge_.org is the most recent vertex
-   * @private
-   * @type {libtess.GluHalfEdge}
+   * @private {libtess.GluHalfEdge}
    */
   this.lastEdge_ = null;
 
@@ -3323,8 +3323,7 @@ libtess.GluTesselator = function() {
 
   /**
    * Error callback.
-   * @private
-   * @type {?function((libtess.errorType|libtess.gluEnum), Object=)}
+   * @private {?function((libtess.errorType|libtess.gluEnum), Object=)}
    */
   this.errorCallback_ = null;
 
@@ -3332,12 +3331,13 @@ libtess.GluTesselator = function() {
 
   /**
    * user-specified normal (if provided)
-   * @type {!Array<number>}
+   * @private {!Array<number>}
    */
-  this.normal = [0, 0, 0];
+  this.normal_ = [0, 0, 0];
 
   /*** state needed for the line sweep ***/
 
+  // TODO(bckenny): unused.
   /**
    * tolerance for merging features
    * @type {number}
@@ -3378,8 +3378,7 @@ libtess.GluTesselator = function() {
 
   /**
    * Combine callback.
-   * @private
-   * @type {?function(Array<number>, Array<Object>, Array<number>, Object=): Object}
+   * @private {?function(Array<number>, Array<Object>, Array<number>, Object=): Object}
    */
   this.combineCallback_ = null;
 
@@ -3387,49 +3386,43 @@ libtess.GluTesselator = function() {
 
   /**
    * Extract contours, not triangles
-   * @type {boolean}
+   * @private {boolean}
    */
-  this.boundaryOnly = false;
+  this.boundaryOnly_ = false;
 
   /**
    * Begin callback.
-   * @private
-   * @type {?function(libtess.primitiveType, Object=)}
+   * @private {?function(libtess.primitiveType, Object=)}
    */
   this.beginCallback_ = null;
 
   /**
    * Edge flag callback.
-   * @private
-   * @type {?function(boolean, Object=)}
+   * @private {?function(boolean, Object=)}
    */
   this.edgeFlagCallback_ = null;
 
   /**
    * Vertex callback.
-   * @private
-   * @type {?function(Object, Object=)}
+   * @private {?function(Object, Object=)}
    */
   this.vertexCallback_ = null;
 
   /**
    * End callback.
-   * @private
-   * @type {?function(Object=)}
+   * @private {?function(Object=)}
    */
   this.endCallback_ = null;
 
   /**
    * Mesh callback.
-   * @private
-   * @type {?function(libtess.GluMesh)}
+   * @private {?function(libtess.GluMesh)}
    */
   this.meshCallback_ = null;
 
   /**
    * client data for current polygon
-   * @private
-   * @type {Object}
+   * @private {Object}
    */
   this.polygonData_ = null;
 };
@@ -3456,7 +3449,6 @@ libtess.GluTesselator.prototype.gluDeleteTess = function() {
   this.requireState_(libtess.GluTesselator.tessState_.T_DORMANT);
   // memFree(tess); TODO(bckenny)
 };
-
 
 /**
  * Set properties for control over tesselation. See README.
@@ -3493,8 +3485,7 @@ libtess.GluTesselator.prototype.gluTessProperty = function(which, value) {
       break;
 
     case libtess.gluEnum.GLU_TESS_BOUNDARY_ONLY:
-      // TODO(bckenny): added boolean param type. make sure ok.
-      this.boundaryOnly = !!value;
+      this.boundaryOnly_ = !!value;
       return;
 
     default:
@@ -3503,7 +3494,6 @@ libtess.GluTesselator.prototype.gluTessProperty = function(which, value) {
   }
   this.callErrorCallback(libtess.gluEnum.GLU_INVALID_VALUE);
 };
-
 
 /**
  * Returns tessellator property
@@ -3530,8 +3520,9 @@ libtess.GluTesselator.prototype.gluGetTessProperty = function(which) {
       return rule;
 
     case libtess.gluEnum.GLU_TESS_BOUNDARY_ONLY:
-      libtess.assert(this.boundaryOnly === true || this.boundaryOnly === false);
-      return this.boundaryOnly;
+      libtess.assert(this.boundaryOnly_ === true ||
+          this.boundaryOnly_ === false);
+      return this.boundaryOnly_;
 
     default:
       this.callErrorCallback(libtess.gluEnum.GLU_INVALID_ENUM);
@@ -3540,31 +3531,26 @@ libtess.GluTesselator.prototype.gluGetTessProperty = function(which) {
   return false;
 };
 
-
 /**
- * Lets the user supply the polygon normal, if known.  All input data
- * is projected into a plane perpendicular to the normal before
- * tesselation. All output triangles are oriented CCW with
- * respect to the normal (CW orientation can be obtained by
- * reversing the sign of the supplied normal). For example, if
- * you know that all polygons lie in the x-y plane, call
- * "tess.gluTessNormal(0.0, 0.0, 1.0)" before rendering any polygons.
- *
- * @param {number} x [description].
- * @param {number} y [description].
- * @param {number} z [description].
+ * Lets the user supply the polygon normal, if known. All input data is
+ * projected into a plane perpendicular to the normal before tesselation. All
+ * output triangles are oriented CCW with respect to the normal (CW orientation
+ * can be obtained by reversing the sign of the supplied normal). For example,
+ * if you know that all polygons lie in the x-y plane, call
+ * `tess.gluTessNormal(0.0, 0.0, 1.0)` before rendering any polygons.
+ * @param {number} x
+ * @param {number} y
+ * @param {number} z
  */
 libtess.GluTesselator.prototype.gluTessNormal = function(x, y, z) {
-  this.normal[0] = x;
-  this.normal[1] = y;
-  this.normal[2] = z;
+  this.normal_[0] = x;
+  this.normal_[1] = y;
+  this.normal_[2] = z;
 };
-
 
 /**
  * Specify callbacks. See README for callback descriptions. A null or undefined
  * opt_fn removes current callback.
- *
  * @param {libtess.gluEnum} which The callback-type gluEnum value.
  * @param {?Function=} opt_fn
  */
@@ -3614,13 +3600,11 @@ libtess.GluTesselator.prototype.gluTessCallback = function(which, opt_fn) {
   }
 };
 
-
 /**
  * Specify a vertex and associated data. Must be within calls to
  * beginContour/endContour. See README.
- *
- * @param {Array.<number>} coords [description].
- * @param {Object} data [description].
+ * @param {!Array<number>} coords
+ * @param {Object} data
  */
 libtess.GluTesselator.prototype.gluTessVertex = function(coords, data) {
   var tooLarge = false;
@@ -3650,7 +3634,6 @@ libtess.GluTesselator.prototype.gluTessVertex = function(coords, data) {
   this.addVertex_(clamped, data);
 };
 
-
 /**
  * [gluTessBeginPolygon description]
  * @param {Object} data Client data for current polygon.
@@ -3658,13 +3641,12 @@ libtess.GluTesselator.prototype.gluTessVertex = function(coords, data) {
 libtess.GluTesselator.prototype.gluTessBeginPolygon = function(data) {
   this.requireState_(libtess.GluTesselator.tessState_.T_DORMANT);
 
-  this.state = libtess.GluTesselator.tessState_.T_IN_POLYGON;
+  this.state_ = libtess.GluTesselator.tessState_.T_IN_POLYGON;
 
   this.mesh = new libtess.GluMesh();
 
   this.polygonData_ = data;
 };
-
 
 /**
  * [gluTessBeginContour description]
@@ -3672,30 +3654,29 @@ libtess.GluTesselator.prototype.gluTessBeginPolygon = function(data) {
 libtess.GluTesselator.prototype.gluTessBeginContour = function() {
   this.requireState_(libtess.GluTesselator.tessState_.T_IN_POLYGON);
 
-  this.state = libtess.GluTesselator.tessState_.T_IN_CONTOUR;
+  this.state_ = libtess.GluTesselator.tessState_.T_IN_CONTOUR;
   this.lastEdge_ = null;
 };
-
 
 /**
  * [gluTessEndContour description]
  */
 libtess.GluTesselator.prototype.gluTessEndContour = function() {
   this.requireState_(libtess.GluTesselator.tessState_.T_IN_CONTOUR);
-  this.state = libtess.GluTesselator.tessState_.T_IN_POLYGON;
+  this.state_ = libtess.GluTesselator.tessState_.T_IN_POLYGON;
 };
-
 
 /**
  * [gluTessEndPolygon description]
  */
 libtess.GluTesselator.prototype.gluTessEndPolygon = function() {
   this.requireState_(libtess.GluTesselator.tessState_.T_IN_POLYGON);
-  this.state = libtess.GluTesselator.tessState_.T_DORMANT;
+  this.state_ = libtess.GluTesselator.tessState_.T_DORMANT;
 
   // Determine the polygon normal and project vertices onto the plane
   // of the polygon.
-  libtess.normal.projectPolygon(this);
+  libtess.normal.projectPolygon(this, this.normal_[0], this.normal_[1],
+      this.normal_[2]);
 
   // computeInterior(tess) computes the planar arrangement specified
   // by the given contours, and further subdivides this arrangement
@@ -3710,7 +3691,7 @@ libtess.GluTesselator.prototype.gluTessEndPolygon = function() {
     // Otherwise we tessellate all the regions marked "inside".
     // NOTE(bckenny): we know this.mesh has been initialized, so help closure out.
     var mesh = /** @type {!libtess.GluMesh} */(this.mesh);
-    if (this.boundaryOnly) {
+    if (this.boundaryOnly_) {
       libtess.tessmono.setWindingNumber(mesh, 1, true);
     } else {
       libtess.tessmono.tessellateInterior(mesh);
@@ -3721,7 +3702,7 @@ libtess.GluTesselator.prototype.gluTessEndPolygon = function() {
     if (this.beginCallback_ || this.endCallback_ || this.vertexCallback_ ||
         this.edgeFlagCallback_) {
 
-      if (this.boundaryOnly) {
+      if (this.boundaryOnly_) {
         // output boundary contours
         libtess.render.renderBoundary(this, this.mesh);
 
@@ -3753,18 +3734,16 @@ libtess.GluTesselator.prototype.gluTessEndPolygon = function() {
   this.mesh = null;
 };
 
-
 /**
  * Change the tesselator state.
  * @private
  * @param {libtess.GluTesselator.tessState_} state
  */
 libtess.GluTesselator.prototype.requireState_ = function(state) {
-  if (this.state !== state) {
+  if (this.state_ !== state) {
     this.gotoState_(state);
   }
 };
-
 
 /**
  * Change the current tesselator state one level at a time to get to the
@@ -3775,9 +3754,9 @@ libtess.GluTesselator.prototype.requireState_ = function(state) {
  * @param {libtess.GluTesselator.tessState_} newState
  */
 libtess.GluTesselator.prototype.gotoState_ = function(newState) {
-  while (this.state !== newState) {
-    if (this.state < newState) {
-      switch (this.state) {
+  while (this.state_ !== newState) {
+    if (this.state_ < newState) {
+      switch (this.state_) {
         case libtess.GluTesselator.tessState_.T_DORMANT:
           this.callErrorCallback(
               libtess.errorType.GLU_TESS_MISSING_BEGIN_POLYGON);
@@ -3792,7 +3771,7 @@ libtess.GluTesselator.prototype.gotoState_ = function(newState) {
       }
 
     } else {
-      switch (this.state) {
+      switch (this.state_) {
         case libtess.GluTesselator.tessState_.T_IN_CONTOUR:
           this.callErrorCallback(
               libtess.errorType.GLU_TESS_MISSING_END_CONTOUR);
@@ -3813,11 +3792,10 @@ libtess.GluTesselator.prototype.gotoState_ = function(newState) {
   }
 };
 
-
 /**
  * [addVertex_ description]
  * @private
- * @param {Array.<number>} coords [description].
+ * @param {!Array<number>} coords [description].
  * @param {Object} data [description].
  */
 libtess.GluTesselator.prototype.addVertex_ = function(coords, data) {

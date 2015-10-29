@@ -62,18 +62,22 @@ libtess.normal.S_UNIT_Y_ = 0.0;
 
 /**
  * Determines a polygon normal and projects vertices onto the plane of the
- * polygon.
+ * polygon. A pre-computed normal for the data may be provided, or set to the
+ * zero vector if one should be computed from it.
  * @param {!libtess.GluTesselator} tess
+ * @param {number} normalX
+ * @param {number} normalY
+ * @param {number} normalZ
  */
-libtess.normal.projectPolygon = function(tess) {
+libtess.normal.projectPolygon = function(tess, normalX, normalY, normalZ) {
   var computedNormal = false;
 
   var norm = [
-    tess.normal[0],
-    tess.normal[1],
-    tess.normal[2]
+    normalX,
+    normalY,
+    normalZ
   ];
-  if (norm[0] === 0 && norm[1] === 0 && norm[2] === 0) {
+  if (normalX === 0 && normalY === 0 && normalZ === 0) {
     libtess.normal.computeNormal_(tess, norm);
     computedNormal = true;
   }
