@@ -4581,8 +4581,7 @@ libtess.PriorityQHeap = function(leq) {
    * An unordered list of vertices in the heap, with null in empty slots.
    * @private {!Array<libtess.PQKey>}
    */
-  this.verts_ = libtess.PriorityQHeap.reallocKeys_([],
-      libtess.PriorityQHeap.INIT_SIZE_ + 1);
+  this.verts_ = [null, null];
 
   /**
    * An unordered list of indices mapping vertex handles into the heap. An entry
@@ -4669,28 +4668,6 @@ libtess.PriorityQHeap.reallocNumeric_ = function(oldArray, size) {
 };
 
 /**
- * Allocate a PQKey array of size size. oldArray's contents are copied to the
- * beginning of the new array. The rest of the array is filled with null values.
- * @private
- * @param {!Array<libtess.PQKey>} oldArray
- * @param {number} size
- * @return {!Array<libtess.PQKey>}
- */
-libtess.PriorityQHeap.reallocKeys_ = function(oldArray, size) {
-  var newArray = new Array(size);
-
-  for (var index = 0; index < oldArray.length; index++) {
-    newArray[index] = oldArray[index];
-  }
-
-  for (; index < size; index++) {
-    newArray[index] = null;
-  }
-
-  return newArray;
-};
-
-/**
  * Initializing ordering of the heap. Must be called before any method other
  * than insert is called to ensure correctness when removing or querying.
  */
@@ -4716,8 +4693,6 @@ libtess.PriorityQHeap.prototype.insert = function(keyNew) {
     this.max_ *= 2;
 
     this.heap_ = libtess.PriorityQHeap.reallocNumeric_(this.heap_,
-        this.max_ + 1);
-    this.verts_ = libtess.PriorityQHeap.reallocKeys_(this.verts_,
         this.max_ + 1);
     this.handles_ = libtess.PriorityQHeap.reallocNumeric_(this.handles_,
         this.max_ + 1);
