@@ -4285,9 +4285,6 @@ libtess.GluVertex = function(opt_nextVertex, opt_prevVertex) {
 
 /* global libtess */
 
-// TODO(bckenny): preallocating arrays may actually be hurting us in sort
-// performance (esp if theres some undefs in there)
-
 /**
  * [PriorityQ description]
  * @constructor
@@ -4296,14 +4293,13 @@ libtess.GluVertex = function(opt_nextVertex, opt_prevVertex) {
  */
 libtess.PriorityQ = function(leq) {
   /**
-   * [keys description]
+   * [verts description]
    * @private {Array<libtess.GluVertex>}
    */
-  this.keys_ = libtess.PriorityQ.prototype.PQKeyRealloc_(null,
-      libtess.PriorityQ.INIT_SIZE_);
+  this.verts_ = [];
 
   /**
-   * Array of indexes into this.keys_
+   * Array of indexes into this.verts_
    * @private {Array<number>}
    */
   this.order_ = null;
@@ -4313,12 +4309,6 @@ libtess.PriorityQ = function(leq) {
    * @private {number}
    */
   this.size_ = 0;
-
-  /**
-   * [max_ description]
-   * @private {number}
-   */
-  this.max_ = libtess.PriorityQ.INIT_SIZE_;
 
   /**
    * [initialized description]
@@ -4342,20 +4332,12 @@ libtess.PriorityQ = function(leq) {
 };
 
 /**
- * [INIT_SIZE_ description]
- * @private
- * @const
- * @type {number}
- */
-libtess.PriorityQ.INIT_SIZE_ = 32;
-
-/**
  * [deleteQ description]
  */
 libtess.PriorityQ.prototype.deleteQ = function() {
   this.heap_ = null;
   this.order_ = null;
-  this.keys_ = null;
+  this.verts_ = null;
   // NOTE(bckenny): nulled at callsite (sweep.donePriorityQ_)
 };
 
@@ -4367,27 +4349,26 @@ libtess.PriorityQ.prototype.init = function() {
   // dictated by this.size_, but array.sort doesn't know that
   this.order_ = [];
 
-  // Create an array of indirect pointers to the keys, so that
+  // Create an array of indirect pointers to the verts, so that
   // the handles we have returned are still valid.
   // TODO(bckenny): valid for when? it appears we can just store indexes into
-  // keys_, but what did this mean?
+  // verts_, but what did this mean?
   for (var i = 0; i < this.size_; i++) {
     this.order_[i] = i;
   }
 
-  // sort the indirect pointers in descending order of the keys themselves
-  // TODO(bckenny): make sure it's ok that keys[a] === keys[b] returns 1
+  // sort the indirect pointers in descending order of the verts themselves
+  // TODO(bckenny): make sure it's ok that verts[a] === verts[b] returns 1
   // TODO(bckenny): unstable sort means we may get slightly different polys in
   // different browsers, but only when passing in equal points
   // TODO(bckenny): make less awkward closure?
-  var comparator = (function(keys, leq) {
+  var comparator = (function(verts, leq) {
     return function(a, b) {
-      return leq(keys[a], keys[b]) ? 1 : -1;
+      return leq(verts[a], verts[b]) ? 1 : -1;
     };
-  })(this.keys_, this.leq_);
+  })(this.verts_, this.leq_);
   this.order_.sort(comparator);
 
-  this.max_ = this.size_;
   this.initialized_ = true;
   this.heap_.init();
 
@@ -4397,8 +4378,8 @@ libtess.PriorityQ.prototype.init = function() {
     var p = 0;
     var r = p + this.size_ - 1;
     for (i = p; i < r; ++i) {
-      libtess.assert(this.leq_(this.keys_[this.order_[i + 1]],
-          this.keys_[this.order_[i]]));
+      libtess.assert(this.leq_(this.verts_[this.order_[i + 1]],
+          this.verts_[this.order_[i]]));
     }
   }
   // #endif
@@ -4417,46 +4398,12 @@ libtess.PriorityQ.prototype.insert = function(vert) {
     return this.heap_.insert(vert);
   }
 
-  var curr = this.size_;
-  if (++this.size_ >= this.max_) {
-    // If the heap overflows, double its size.
-    this.max_ *= 2;
-    this.keys_ =
-        libtess.PriorityQ.prototype.PQKeyRealloc_(this.keys_, this.max_);
-  }
+  var curr = this.size_++;
 
-  this.keys_[curr] = vert;
+  this.verts_[curr] = vert;
 
   // Negative handles index the sorted array.
   return -(curr + 1);
-};
-
-/**
- * Allocate an array of size size. If oldArray is not null, its contents are
- * copied to the beginning of the new array. The rest of the array is filled
- * with nulls.
- * @private
- * @param {?Array<libtess.GluVertex>} oldArray
- * @param {number} size
- * @return {!Array<(libtess.GluVertex)>}
- */
-libtess.PriorityQ.prototype.PQKeyRealloc_ = function(oldArray, size) {
-  // TODO(bckenny): double check return type. can we have ? there?
-  var newArray = new Array(size);
-
-  // TODO(bckenny): better to reallocate array? or grow array?
-  var index = 0;
-  if (oldArray !== null) {
-    for (; index < oldArray.length; index++) {
-      newArray[index] = oldArray[index];
-    }
-  }
-
-  for (; index < size; index++) {
-    newArray[index] = null;
-  }
-
-  return newArray;
 };
 
 // NOTE(bckenny): libtess.PriorityQ.keyLessThan_ is called nowhere in libtess
@@ -4471,8 +4418,8 @@ libtess.PriorityQ.prototype.PQKeyRealloc_ = function(oldArray, size) {
  */
 libtess.PriorityQ.prototype.keyLessThan_ = function(x, y) {
   // NOTE(bckenny): was macro LT
-  var keyX = this.keys_[x];
-  var keyY = this.keys_[y];
+  var keyX = this.verts_[x];
+  var keyY = this.verts_[y];
   return !this.leq_(keyY, keyX);
 };
 
@@ -4488,8 +4435,8 @@ libtess.PriorityQ.prototype.keyLessThan_ = function(x, y) {
  */
 libtess.PriorityQ.prototype.keyGreaterThan_ = function(x, y) {
   // NOTE(bckenny): was macro GT
-  var keyX = this.keys_[x];
-  var keyY = this.keys_[y];
+  var keyX = this.verts_[x];
+  var keyY = this.verts_[y];
   return !this.leq_(keyX, keyY);
 };
 
@@ -4502,7 +4449,7 @@ libtess.PriorityQ.prototype.extractMin = function() {
     return this.heap_.extractMin();
   }
 
-  var sortMin = this.keys_[this.order_[this.size_ - 1]];
+  var sortMin = this.verts_[this.order_[this.size_ - 1]];
   if (!this.heap_.isEmpty()) {
     var heapMin = this.heap_.minimum();
     if (this.leq_(heapMin, sortMin)) {
@@ -4512,7 +4459,7 @@ libtess.PriorityQ.prototype.extractMin = function() {
 
   do {
     --this.size_;
-  } while (this.size_ > 0 && this.keys_[this.order_[this.size_ - 1]] === null);
+  } while (this.size_ > 0 && this.verts_[this.order_[this.size_ - 1]] === null);
 
   return sortMin;
 };
@@ -4526,7 +4473,7 @@ libtess.PriorityQ.prototype.minimum = function() {
     return this.heap_.minimum();
   }
 
-  var sortMin = this.keys_[this.order_[this.size_ - 1]];
+  var sortMin = this.verts_[this.order_[this.size_ - 1]];
   if (!this.heap_.isEmpty()) {
     var heapMin = this.heap_.minimum();
     if (this.leq_(heapMin, sortMin)) {
@@ -4560,10 +4507,10 @@ libtess.PriorityQ.prototype.remove = function(curr) {
   }
   curr = -(curr + 1);
 
-  libtess.assert(curr < this.max_ && this.keys_[curr] !== null);
+  libtess.assert(curr < this.verts_.length && this.verts_[curr] !== null);
 
-  this.keys_[curr] = null;
-  while (this.size_ > 0 && this.keys_[this.order_[this.size_ - 1]] === null) {
+  this.verts_[curr] = null;
+  while (this.size_ > 0 && this.verts_[this.order_[this.size_ - 1]] === null) {
     --this.size_;
   }
 };
