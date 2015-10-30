@@ -31,7 +31,8 @@
 
 /**
  * A priority queue of vertices, ordered by libtess.geom.vertLeq, implemented
- * with a binary heap. Used only within libtess.PriorityQ.
+ * with a binary heap. Used only within libtess.PriorityQ for prioritizing
+ * vertices created by intersections (see libtess.sweep.checkForIntersect_).
  * @constructor
  * @struct
  */
@@ -131,6 +132,8 @@ libtess.PriorityQHeap.reallocNumeric_ = function(oldArray, size) {
 libtess.PriorityQHeap.prototype.init = function() {
   // This method of building a heap is O(n), rather than O(n lg n).
   for (var i = this.size_; i >= 1; --i) {
+    // TODO(bckenny): since init is called before anything is inserted (see
+    // PriorityQ.init), this will always be empty. Better to lazily init?
     this.floatDown_(i);
   }
 

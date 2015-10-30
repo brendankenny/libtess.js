@@ -30,32 +30,40 @@
 /* global libtess */
 
 /**
- * [PriorityQ description]
+ * A priority queue of vertices, ordered by libtess.geom.vertLeq, implemented
+ * with a sorted array. Used for initial insertion of vertices (see
+ * libtess.sweep.initPriorityQ_), sorted once, then it uses an internal
+ * libtess.PriorityQHeap for any subsequently created vertices from
+ * intersections.
  * @constructor
  * @struct
  * @param {function(libtess.GluVertex, libtess.GluVertex): boolean} leq
  */
 libtess.PriorityQ = function(leq) {
   /**
-   * [verts description]
+   * An unordered list of vertices that have been inserted in the queue, with
+   * null in empty slots.
    * @private {Array<libtess.GluVertex>}
    */
   this.verts_ = [];
 
   /**
-   * Array of indexes into this.verts_
+   * Array of indices into this.verts_, sorted by vertLeq over the addressed
+   * vertices.
    * @private {Array<number>}
    */
   this.order_ = null;
 
   /**
-   * [size description]
+   * The size of this queue, not counting any vertices stored in heap_.
    * @private {number}
    */
   this.size_ = 0;
 
   /**
-   * [initialized description]
+   * Indicates that the queue has been initialized via init. If false, inserts
+   * are fast insertions at the end of the verts_ array. If true, the verts_
+   * array is sorted and subsequent inserts are done in the heap.
    * @private {boolean}
    */
   this.initialized_ = false;
@@ -63,22 +71,24 @@ libtess.PriorityQ = function(leq) {
   // TODO(bckenny): leq was inlined by define in original, but appears to just
   // be vertLeq, as passed. keep an eye on this as to why its not used.
   /**
-   * [leq description]
+   * Sorting comparator function. Always libtess.geom.vertLeq.
    * @private {function(libtess.GluVertex, libtess.GluVertex): boolean}
    */
   this.leq_ = leq;
 
   /**
-   * [heap_ description]
+   * A priority queue heap, used for faster insertions of vertices after verts_
+   * has been sorted.
    * @private {libtess.PriorityQHeap}
    */
   this.heap_ = new libtess.PriorityQHeap();
 };
 
 /**
- * [deleteQ description]
+ * Release major storage memory used by priority queue.
  */
 libtess.PriorityQ.prototype.deleteQ = function() {
+  // TODO(bckenny): could instead clear most of these.
   this.heap_ = null;
   this.order_ = null;
   this.verts_ = null;
@@ -86,7 +96,8 @@ libtess.PriorityQ.prototype.deleteQ = function() {
 };
 
 /**
- * [init description]
+ * Sort vertices by libtess.geom.vertLeq. Must be called before any method other
+ * than insert is called to ensure correctness when removing or querying.
  */
 libtess.PriorityQ.prototype.init = function() {
   // TODO(bckenny): reuse. in theory, we don't have to empty this, as access is
@@ -116,8 +127,7 @@ libtess.PriorityQ.prototype.init = function() {
   this.initialized_ = true;
   this.heap_.init();
 
-  // TODO(bckenny):
-  // #ifndef NDEBUG
+  // NOTE(bckenny): debug assert of ordering of the verts_ array.
   if (libtess.DEBUG) {
     var p = 0;
     var r = p + this.size_ - 1;
@@ -126,7 +136,6 @@ libtess.PriorityQ.prototype.init = function() {
           this.verts_[this.order_[i]]));
     }
   }
-  // #endif
 };
 
 /**
@@ -150,43 +159,10 @@ libtess.PriorityQ.prototype.insert = function(vert) {
   return -(curr + 1);
 };
 
-// NOTE(bckenny): libtess.PriorityQ.keyLessThan_ is called nowhere in libtess
-// and isn't part of the public API.
-/* istanbul ignore next */
 /**
- * Whether x is less than y according to this.leq_.
- * @private
- * @param {number} x
- * @param {number} y
- * @return {boolean}
- */
-libtess.PriorityQ.prototype.keyLessThan_ = function(x, y) {
-  // NOTE(bckenny): was macro LT
-  var keyX = this.verts_[x];
-  var keyY = this.verts_[y];
-  return !this.leq_(keyY, keyX);
-};
-
-// NOTE(bckenny): libtess.PriorityQ.keyGreaterThan_ is called nowhere in libtess
-// and isn't part of the public API.
-/* istanbul ignore next */
-/**
- * Whether x is greater than y according to this.leq_.
- * @private
- * @param {number} x
- * @param {number} y
- * @return {boolean}
- */
-libtess.PriorityQ.prototype.keyGreaterThan_ = function(x, y) {
-  // NOTE(bckenny): was macro GT
-  var keyX = this.verts_[x];
-  var keyY = this.verts_[y];
-  return !this.leq_(keyX, keyY);
-};
-
-/**
- * [extractMin description]
- * @return {libtess.GluVertex} [description].
+ * Removes the minimum vertex from the queue and returns it. If the queue is
+ * empty, null will be returned.
+ * @return {libtess.GluVertex}
  */
 libtess.PriorityQ.prototype.extractMin = function() {
   if (this.size_ === 0) {
@@ -209,8 +185,9 @@ libtess.PriorityQ.prototype.extractMin = function() {
 };
 
 /**
- * [minimum description]
- * @return {libtess.GluVertex} [description].
+ * Returns the minimum vertex in the queue. If the queue is empty, null will be
+ * returned.
+ * @return {libtess.GluVertex}
  */
 libtess.PriorityQ.prototype.minimum = function() {
   if (this.size_ === 0) {
@@ -228,32 +205,21 @@ libtess.PriorityQ.prototype.minimum = function() {
   return sortMin;
 };
 
-// NOTE(bckenny): libtess.PriorityQ.isEmpty_ isn't called within libtess and
-// isn't part of the public API. For now, leaving in but ignoring for coverage.
-/* istanbul ignore next */
 /**
- * Returns whether the priority queue is empty.
- * @private
- * @return {boolean}
+ * Remove vertex with handle removeHandle from queue.
+ * @param {libtess.PQHandle} removeHandle
  */
-libtess.PriorityQ.prototype.isEmpty_ = function() {
-  return (this.size_ === 0) && this.heap_.isEmpty();
-};
-
-/**
- * [remove description]
- * @param {libtess.PQHandle} curr [description].
- */
-libtess.PriorityQ.prototype.remove = function(curr) {
-  if (curr >= 0) {
-    this.heap_.remove(curr);
+libtess.PriorityQ.prototype.remove = function(removeHandle) {
+  if (removeHandle >= 0) {
+    this.heap_.remove(removeHandle);
     return;
   }
-  curr = -(curr + 1);
+  removeHandle = -(removeHandle + 1);
 
-  libtess.assert(curr < this.verts_.length && this.verts_[curr] !== null);
+  libtess.assert(removeHandle < this.verts_.length &&
+      this.verts_[removeHandle] !== null);
 
-  this.verts_[curr] = null;
+  this.verts_[removeHandle] = null;
   while (this.size_ > 0 && this.verts_[this.order_[this.size_ - 1]] === null) {
     --this.size_;
   }

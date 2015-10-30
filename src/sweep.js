@@ -110,11 +110,10 @@ libtess.sweep.computeInterior = function(tess) {
   libtess.sweep.initPriorityQ_(tess);
   libtess.sweep.initEdgeDict_(tess);
 
-  // TODO(bckenny): don't need the cast if pq's key is better typed
   var v;
-  while ((v = /** @type {libtess.GluVertex} */(tess.pq.extractMin())) !== null) {
+  while ((v = tess.pq.extractMin()) !== null) {
     for (;;) {
-      var vNext = /** @type {libtess.GluVertex} */(tess.pq.minimum());
+      var vNext = tess.pq.minimum();
       if (vNext === null || !libtess.geom.vertEq(vNext, v)) {
         break;
       }
@@ -133,7 +132,7 @@ libtess.sweep.computeInterior = function(tess) {
        * gap between them.  This kind of error is especially obvious
        * when using boundary extraction (GLU_TESS_BOUNDARY_ONLY).
        */
-      vNext = /** @type {libtess.GluVertex} */(tess.pq.extractMin());
+      vNext = tess.pq.extractMin();
       libtess.sweep.spliceMergeVertices_(tess, v.anEdge, vNext.anEdge);
     }
     libtess.sweep.sweepEvent_(tess, v);
