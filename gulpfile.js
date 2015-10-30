@@ -85,7 +85,7 @@ gulp.task('build-cat', () => {
   return gulp.src(LIBTESS_SRC.concat('./build/node_export.js'))
     .pipe(newer('./libtess.debug.js'))
     // remove license at top of each file except first (which begins '@license')
-    .pipe(replace(/^\/\*[\s\*]+Copyright 2000[\s\S]*?\*\//m, ''))
+    .pipe(replace(/^\/\*[\s\*]+Copyright 2000[\s\S]*?\*\/\n/m, ''))
     .pipe(concat('libtess.debug.js'))
     .pipe(gulp.dest('.'))
 

@@ -26,7 +26,6 @@
  * Copyright in any portions created by third parties is as indicated
  * elsewhere herein. All Rights Reserved.
  */
-
 /* global libtess */
 
 // TODO(bckenny): could maybe merge GluMesh and mesh.js since these are

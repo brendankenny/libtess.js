@@ -186,7 +186,6 @@ libtess.gluEnum = {
 /** @typedef {number} */
 libtess.PQHandle;
 
-
 /* global libtess */
 
 /** @const */
@@ -516,8 +515,6 @@ libtess.geom.edgeIntersect = function(o1, d1, o2, d2, v) {
     v.t = libtess.geom.interpolate_(z1, o2.t, z2, d2.t);
   }
 };
-
-
 
 /* global libtess */
 
@@ -1116,7 +1113,6 @@ libtess.mesh.killFace_ = function(fDel, newLFace) {
   // TODO(bckenny): need to null at callsites?
 };
 
-
 /* global libtess */
 
 /** @const */
@@ -1384,7 +1380,6 @@ libtess.normal.checkOrientation_ = function(tess) {
   }
 };
 
-
 /* global libtess */
 
 /** @const */
@@ -1467,7 +1462,6 @@ libtess.render.renderBoundary = function(tess, mesh) {
     }
   }
 };
-
 
 /* global libtess */
 
@@ -2913,7 +2907,6 @@ libtess.sweep.removeDegenerateFaces_ = function(mesh) {
   }
 };
 
-
 /* global libtess */
 
 /** @const */
@@ -3062,7 +3055,6 @@ libtess.tessmono.setWindingNumber = function(mesh, value, keepOnlyBoundary) {
   }
 };
 
-
 /* global libtess */
 
 /**
@@ -3192,7 +3184,6 @@ libtess.Dict.prototype.getMax = function() {
   return this.head_.prev;
 };
 
-
 /* global libtess */
 
 /**
@@ -3250,8 +3241,6 @@ libtess.DictNode.prototype.getSuccessor = function() {
 libtess.DictNode.prototype.getPredecessor = function() {
   return this.prev;
 };
-
-
 
 /* global libtess */
 
@@ -3843,8 +3832,6 @@ libtess.GluTesselator.prototype.callErrorCallback = function(errno) {
   }
 };
 
-
-
 /* global libtess */
 
 /**
@@ -3891,8 +3878,6 @@ libtess.GluFace = function(opt_nextFace, opt_prevFace) {
    */
   this.inside = false;
 };
-
-
 
 /* global libtess */
 
@@ -4064,8 +4049,6 @@ libtess.GluHalfEdge.prototype.rNext = function() {
   return this.oPrev().sym;
 };
 
-
-
 /* global libtess */
 
 /**
@@ -4147,8 +4130,6 @@ libtess.GluMesh.prototype.checkMesh = function() {
   }
 };
 
-
-
 /* global libtess */
 
 /**
@@ -4213,8 +4194,6 @@ libtess.GluVertex = function(opt_nextVertex, opt_prevVertex) {
    */
   this.pqHandle = 0;
 };
-
-
 
 /* global libtess */
 
@@ -4399,8 +4378,6 @@ libtess.PriorityQ.prototype.remove = function(removeHandle) {
     --this.size_;
   }
 };
-
-
 
 /* global libtess */
 
@@ -4707,7 +4684,6 @@ libtess.PriorityQHeap.prototype.floatUp_ = function(index) {
     currIndex = parentIndex;
   }
 };
-
 
 /* global libtess */
 
