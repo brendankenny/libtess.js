@@ -37,9 +37,8 @@
  * intersections.
  * @constructor
  * @struct
- * @param {function(libtess.GluVertex, libtess.GluVertex): boolean} leq
  */
-libtess.PriorityQ = function(leq) {
+libtess.PriorityQ = function() {
   /**
    * An unordered list of vertices that have been inserted in the queue, with
    * null in empty slots.
@@ -67,14 +66,6 @@ libtess.PriorityQ = function(leq) {
    * @private {boolean}
    */
   this.initialized_ = false;
-
-  // TODO(bckenny): leq was inlined by define in original, but appears to just
-  // be vertLeq, as passed. keep an eye on this as to why its not used.
-  /**
-   * Sorting comparator function. Always libtess.geom.vertLeq.
-   * @private {function(libtess.GluVertex, libtess.GluVertex): boolean}
-   */
-  this.leq_ = leq;
 
   /**
    * A priority queue heap, used for faster insertions of vertices after verts_
@@ -117,11 +108,11 @@ libtess.PriorityQ.prototype.init = function() {
   // TODO(bckenny): unstable sort means we may get slightly different polys in
   // different browsers, but only when passing in equal points
   // TODO(bckenny): make less awkward closure?
-  var comparator = (function(verts, leq) {
+  var comparator = (function(verts) {
     return function(a, b) {
-      return leq(verts[a], verts[b]) ? 1 : -1;
+      return libtess.geom.vertLeq(verts[a], verts[b]) ? 1 : -1;
     };
-  })(this.verts_, this.leq_);
+  })(this.verts_);
   this.order_.sort(comparator);
 
   this.initialized_ = true;
@@ -132,7 +123,7 @@ libtess.PriorityQ.prototype.init = function() {
     var p = 0;
     var r = p + this.size_ - 1;
     for (i = p; i < r; ++i) {
-      libtess.assert(this.leq_(this.verts_[this.order_[i + 1]],
+      libtess.assert(libtess.geom.vertLeq(this.verts_[this.order_[i + 1]],
           this.verts_[this.order_[i]]));
     }
   }
@@ -172,7 +163,7 @@ libtess.PriorityQ.prototype.extractMin = function() {
   var sortMin = this.verts_[this.order_[this.size_ - 1]];
   if (!this.heap_.isEmpty()) {
     var heapMin = this.heap_.minimum();
-    if (this.leq_(heapMin, sortMin)) {
+    if (libtess.geom.vertLeq(heapMin, sortMin)) {
       return this.heap_.extractMin();
     }
   }
@@ -197,7 +188,7 @@ libtess.PriorityQ.prototype.minimum = function() {
   var sortMin = this.verts_[this.order_[this.size_ - 1]];
   if (!this.heap_.isEmpty()) {
     var heapMin = this.heap_.minimum();
-    if (this.leq_(heapMin, sortMin)) {
+    if (libtess.geom.vertLeq(heapMin, sortMin)) {
       return heapMin;
     }
   }

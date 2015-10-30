@@ -1437,7 +1437,7 @@ libtess.sweep.removeDegenerateEdges_ = function(tess) {
  * @param {libtess.GluTesselator} tess [description].
  */
 libtess.sweep.initPriorityQ_ = function(tess) {
-  var pq = new libtess.PriorityQ(libtess.geom.vertLeq);
+  var pq = new libtess.PriorityQ();
   tess.pq = pq;
 
   var vHead = tess.mesh.vHead;
