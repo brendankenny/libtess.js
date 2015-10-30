@@ -1118,7 +1118,7 @@ var basetess = require('./expectations/libtess.baseline.js');
 
 // geometry tests are both here and in third_party
 var rfolder = require('./rfolder.js');
-var geometryFiles = {"degenerate-hourglass": require("./geometry/degenerate-hourglass.js"),"hourglass": require("./geometry/hourglass.js"),"letter-e": require("./geometry/letter-e.js"),"shared-borders": require("./geometry/shared-borders.js"),"shared-edge-triangles": require("./geometry/shared-edge-triangles.js"),"two-opposite-triangles": require("./geometry/two-opposite-triangles.js"),"two-triangles": require("./geometry/two-triangles.js")};
+var geometryFiles = {"degenerate-hourglass": require("./geometry/degenerate-hourglass.js"),"hourglass": require("./geometry/hourglass.js"),"intersection-heavy": require("./geometry/intersection-heavy.js"),"letter-e": require("./geometry/letter-e.js"),"shared-borders": require("./geometry/shared-borders.js"),"shared-edge-triangles": require("./geometry/shared-edge-triangles.js"),"two-opposite-triangles": require("./geometry/two-opposite-triangles.js"),"two-triangles": require("./geometry/two-triangles.js")};
 var geometries = Object.keys(geometryFiles).map(function(filename) {
   return geometryFiles[filename];
 });
@@ -1186,7 +1186,7 @@ function testGeometry(geometry) {
   });
 }
 
-},{"./../third_party/test/geometry/osm_building.js":14,"./../third_party/test/geometry/osm_nyc_midtown.js":15,"./../third_party/test/geometry/osm_two_buildings.js":16,"./../third_party/test/geometry/poly2tri-dude.js":17,"./../third_party/test/geometry/roboto-registered.js":18,"./common.js":3,"./expectations/libtess.baseline.js":5,"./geometry/degenerate-hourglass.js":7,"./geometry/hourglass.js":8,"./geometry/letter-e.js":9,"./geometry/shared-borders.js":10,"./geometry/shared-edge-triangles.js":11,"./geometry/two-opposite-triangles.js":12,"./geometry/two-triangles.js":13,"./rfolder.js":1,"chai":"chai"}],7:[function(require,module,exports){
+},{"./../third_party/test/geometry/osm_building.js":15,"./../third_party/test/geometry/osm_nyc_midtown.js":16,"./../third_party/test/geometry/osm_two_buildings.js":17,"./../third_party/test/geometry/poly2tri-dude.js":18,"./../third_party/test/geometry/roboto-registered.js":19,"./common.js":3,"./expectations/libtess.baseline.js":5,"./geometry/degenerate-hourglass.js":7,"./geometry/hourglass.js":8,"./geometry/intersection-heavy.js":9,"./geometry/letter-e.js":10,"./geometry/shared-borders.js":11,"./geometry/shared-edge-triangles.js":12,"./geometry/two-opposite-triangles.js":13,"./geometry/two-triangles.js":14,"./rfolder.js":1,"chai":"chai"}],7:[function(require,module,exports){
 /* jshint node: true */
 
 module.exports = {
@@ -1228,6 +1228,58 @@ module.exports = {
 /* jshint node: true */
 
 module.exports = {
+  // Intersection heavy geometry for better coverage of intersection handling.
+  name: 'Moar Intersections',
+  value: [
+    [
+      1.000, 0.000, 0,
+      -1.000, 0.000, 0,
+      0.988, 0.156, 0,
+      -0.988, -0.156, 0,
+      0.951, 0.309, 0,
+      -0.951, -0.309, 0,
+      0.891, 0.454, 0,
+      -0.891, -0.454, 0,
+      0.809, 0.588, 0,
+      -0.809, -0.588, 0,
+      0.707, 0.707, 0,
+      -0.707, -0.707, 0,
+      0.588, 0.809, 0,
+      -0.588, -0.809, 0,
+      0.454, 0.891, 0,
+      -0.454, -0.891, 0,
+      0.309, 0.951, 0,
+      -0.309, -0.951, 0,
+      0.156, 0.988, 0,
+      -0.156, -0.988, 0,
+      0.000, 1.000, 0,
+      -0.000, -1.000, 0,
+      -0.156, 0.988, 0,
+      0.156, -0.988, 0,
+      -0.309, 0.951, 0,
+      0.309, -0.951, 0,
+      -0.454, 0.891, 0,
+      0.454, -0.891, 0,
+      -0.588, 0.809, 0,
+      0.588, -0.809, 0,
+      -0.707, 0.707, 0,
+      0.707, -0.707, 0,
+      -0.809, 0.588, 0,
+      0.809, -0.588, 0,
+      -0.891, 0.454, 0,
+      0.891, -0.454, 0,
+      -0.951, 0.309, 0,
+      0.951, -0.309, 0,
+      -0.988, 0.156, 0,
+      0.988, -0.156, 0,
+    ]
+  ]
+};
+
+},{}],10:[function(require,module,exports){
+/* jshint node: true */
+
+module.exports = {
   // a simple letter E
   // from discussion at http://www.gamedev.net/topic/584914-polygon-tessellationtriangulation-implementations/
   name: 'the letter E',
@@ -1249,7 +1301,7 @@ module.exports = {
   ]
 };
 
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 /* jshint node: true */
 
 module.exports = {
@@ -1290,7 +1342,7 @@ module.exports = {
   ]
 };
 
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 /* jshint node: true */
 
 module.exports = {
@@ -1312,7 +1364,7 @@ module.exports = {
   ]
 };
 
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 /* jshint node: true */
 
 module.exports = {
@@ -1333,7 +1385,7 @@ module.exports = {
   ]
 };
 
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 /* jshint node: true */
 
 module.exports = {
@@ -1354,7 +1406,7 @@ module.exports = {
   ]
 };
 
-},{}],14:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 /**
  * Copyright 2014, OpenStreetMap contributors.
  * Copyright 2014, Mapzen.
@@ -1404,7 +1456,7 @@ module.exports = {
   ]
 };
 
-},{}],15:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 /**
  * Copyright 2014, OpenStreetMap contributors.
  * Copyright 2014, Mapzen.
@@ -2055,7 +2107,7 @@ module.exports = {
   ]
 };
 
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 /**
  * Copyright 2014, OpenStreetMap contributors.
  * Copyright 2014, Mapzen.
@@ -2122,7 +2174,7 @@ module.exports = {
   ]
 };
 
-},{}],17:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 /**
  * Poly2Tri Copyright (c) 2009-2010, Poly2Tri Contributors
  * http://code.google.com/p/poly2tri/
@@ -2275,7 +2327,7 @@ module.exports = {
   ]
 };
 
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 /**
  * Copyright (C) 2008 The Android Open Source Project
  * https://developer.android.com/design/style/typography.html

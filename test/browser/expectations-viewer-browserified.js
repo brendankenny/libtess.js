@@ -299,7 +299,7 @@ var basetess = require('./expectations/libtess.baseline.js');
 
 // geometry tests are both in test/geometry/ and in third_party/test/geometry/
 var rfolder = require('./rfolder.js');
-var geometryFiles = {"degenerate-hourglass": require("./geometry/degenerate-hourglass.js"),"hourglass": require("./geometry/hourglass.js"),"letter-e": require("./geometry/letter-e.js"),"shared-borders": require("./geometry/shared-borders.js"),"shared-edge-triangles": require("./geometry/shared-edge-triangles.js"),"two-opposite-triangles": require("./geometry/two-opposite-triangles.js"),"two-triangles": require("./geometry/two-triangles.js")};
+var geometryFiles = {"degenerate-hourglass": require("./geometry/degenerate-hourglass.js"),"hourglass": require("./geometry/hourglass.js"),"intersection-heavy": require("./geometry/intersection-heavy.js"),"letter-e": require("./geometry/letter-e.js"),"shared-borders": require("./geometry/shared-borders.js"),"shared-edge-triangles": require("./geometry/shared-edge-triangles.js"),"two-opposite-triangles": require("./geometry/two-opposite-triangles.js"),"two-triangles": require("./geometry/two-triangles.js")};
 var geometries = Object.keys(geometryFiles).map(function(filename) {
   return geometryFiles[filename];
 });
@@ -626,7 +626,7 @@ function optionsToOptions(options, selectElement) {
 
 document.addEventListener('DOMContentLoaded', init, false);
 
-},{"./../third_party/test/geometry/osm_building.js":12,"./../third_party/test/geometry/osm_nyc_midtown.js":13,"./../third_party/test/geometry/osm_two_buildings.js":14,"./../third_party/test/geometry/poly2tri-dude.js":15,"./../third_party/test/geometry/roboto-registered.js":16,"./common.js":2,"./expectations/libtess.baseline.js":4,"./geometry/degenerate-hourglass.js":5,"./geometry/hourglass.js":6,"./geometry/letter-e.js":7,"./geometry/shared-borders.js":8,"./geometry/shared-edge-triangles.js":9,"./geometry/two-opposite-triangles.js":10,"./geometry/two-triangles.js":11,"./rfolder.js":1}],4:[function(require,module,exports){
+},{"./../third_party/test/geometry/osm_building.js":13,"./../third_party/test/geometry/osm_nyc_midtown.js":14,"./../third_party/test/geometry/osm_two_buildings.js":15,"./../third_party/test/geometry/poly2tri-dude.js":16,"./../third_party/test/geometry/roboto-registered.js":17,"./common.js":2,"./expectations/libtess.baseline.js":4,"./geometry/degenerate-hourglass.js":5,"./geometry/hourglass.js":6,"./geometry/intersection-heavy.js":7,"./geometry/letter-e.js":8,"./geometry/shared-borders.js":9,"./geometry/shared-edge-triangles.js":10,"./geometry/two-opposite-triangles.js":11,"./geometry/two-triangles.js":12,"./rfolder.js":1}],4:[function(require,module,exports){
 /*
 
  Copyright 2000, Silicon Graphics, Inc. All Rights Reserved.
@@ -737,6 +737,58 @@ module.exports = {
 /* jshint node: true */
 
 module.exports = {
+  // Intersection heavy geometry for better coverage of intersection handling.
+  name: 'Moar Intersections',
+  value: [
+    [
+      1.000, 0.000, 0,
+      -1.000, 0.000, 0,
+      0.988, 0.156, 0,
+      -0.988, -0.156, 0,
+      0.951, 0.309, 0,
+      -0.951, -0.309, 0,
+      0.891, 0.454, 0,
+      -0.891, -0.454, 0,
+      0.809, 0.588, 0,
+      -0.809, -0.588, 0,
+      0.707, 0.707, 0,
+      -0.707, -0.707, 0,
+      0.588, 0.809, 0,
+      -0.588, -0.809, 0,
+      0.454, 0.891, 0,
+      -0.454, -0.891, 0,
+      0.309, 0.951, 0,
+      -0.309, -0.951, 0,
+      0.156, 0.988, 0,
+      -0.156, -0.988, 0,
+      0.000, 1.000, 0,
+      -0.000, -1.000, 0,
+      -0.156, 0.988, 0,
+      0.156, -0.988, 0,
+      -0.309, 0.951, 0,
+      0.309, -0.951, 0,
+      -0.454, 0.891, 0,
+      0.454, -0.891, 0,
+      -0.588, 0.809, 0,
+      0.588, -0.809, 0,
+      -0.707, 0.707, 0,
+      0.707, -0.707, 0,
+      -0.809, 0.588, 0,
+      0.809, -0.588, 0,
+      -0.891, 0.454, 0,
+      0.891, -0.454, 0,
+      -0.951, 0.309, 0,
+      0.951, -0.309, 0,
+      -0.988, 0.156, 0,
+      0.988, -0.156, 0,
+    ]
+  ]
+};
+
+},{}],8:[function(require,module,exports){
+/* jshint node: true */
+
+module.exports = {
   // a simple letter E
   // from discussion at http://www.gamedev.net/topic/584914-polygon-tessellationtriangulation-implementations/
   name: 'the letter E',
@@ -758,7 +810,7 @@ module.exports = {
   ]
 };
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 /* jshint node: true */
 
 module.exports = {
@@ -799,7 +851,7 @@ module.exports = {
   ]
 };
 
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 /* jshint node: true */
 
 module.exports = {
@@ -821,7 +873,7 @@ module.exports = {
   ]
 };
 
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 /* jshint node: true */
 
 module.exports = {
@@ -842,7 +894,7 @@ module.exports = {
   ]
 };
 
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 /* jshint node: true */
 
 module.exports = {
@@ -863,7 +915,7 @@ module.exports = {
   ]
 };
 
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 /**
  * Copyright 2014, OpenStreetMap contributors.
  * Copyright 2014, Mapzen.
@@ -913,7 +965,7 @@ module.exports = {
   ]
 };
 
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 /**
  * Copyright 2014, OpenStreetMap contributors.
  * Copyright 2014, Mapzen.
@@ -1564,7 +1616,7 @@ module.exports = {
   ]
 };
 
-},{}],14:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 /**
  * Copyright 2014, OpenStreetMap contributors.
  * Copyright 2014, Mapzen.
@@ -1631,7 +1683,7 @@ module.exports = {
   ]
 };
 
-},{}],15:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 /**
  * Poly2Tri Copyright (c) 2009-2010, Poly2Tri Contributors
  * http://code.google.com/p/poly2tri/
@@ -1784,7 +1836,7 @@ module.exports = {
   ]
 };
 
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 /**
  * Copyright (C) 2008 The Android Open Source Project
  * https://developer.android.com/design/style/typography.html
