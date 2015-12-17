@@ -4,7 +4,7 @@
 var gulp = require('gulp');
 var replace = require('gulp-replace');
 var concat = require('gulp-concat');
-var closureCompiler = require('gulp-closure-compiler');
+var closureCompiler = require('google-closure-compiler').gulp();
 var mocha = require('gulp-mocha');
 var browserify = require('browserify');
 var glob = require('glob');
@@ -22,7 +22,6 @@ var coveralls = require('gulp-coveralls');
 var path = require('path');
 var newer = require('gulp-newer');
 
-var COMPILER_PATH = 'node_modules/closurecompiler/compiler/compiler.jar';
 var LIBTESS_SRC = ['./src/libtess.js', './src/**/*.js'];
 // NOTE(bckenny): checking all of third_party for now. Modify if checking in
 // third-party code that doesn't conform to style.
@@ -106,40 +105,38 @@ gulp.task('build-cat', () => {
 /**
  * Compile libtess using the Closure Compiler.
  */
-gulp.task('build-min', () => {
-  return gulp.src(LIBTESS_SRC.concat('./build/closure_exports.js'))
-    .pipe(newer('./libtess.min.js'))
+gulp.task('build-min', () =>
+  gulp.src(LIBTESS_SRC.concat('./build/closure_exports.js'))
+    // TODO(bckenny): https://github.com/ChadKillingsworth/closure-compiler-npm/issues/3
+    // .pipe(newer('./libtess.min.js'))
     .pipe(closureCompiler({
-      compilerPath: COMPILER_PATH,
-      fileName: 'libtess.min.js',
-      compilerFlags: {
-        compilation_level: 'ADVANCED_OPTIMIZATIONS',
-        warning_level: 'VERBOSE',
-        language_in: 'ECMASCRIPT5_STRICT',
-        define: [
-          // NOTE(bckenny): switch to true for assertions throughout code.
-          'libtess.DEBUG=false'
-        ],
-        jscomp_warning: [
-          // https://github.com/google/closure-compiler/wiki/Warnings
-          'accessControls',
-          'const',
-          'visibility',
-        ],
-        use_types_for_optimization: null,
-        // variable_renaming_report: 'varreport.txt',
+      js_output_file: 'libtess.min.js',
+      compilation_level: 'ADVANCED',
+      warning_level: 'VERBOSE',
+      language_in: 'ECMASCRIPT5_STRICT',
+      define: [
+        // NOTE(bckenny): switch to true for assertions throughout code.
+        'libtess.DEBUG=false'
+      ],
+      jscomp_warning: [
+        // https://github.com/google/closure-compiler/wiki/Warnings
+        'accessControls',
+        'const',
+        'visibility',
+      ],
+      use_types_for_optimization: true,
+      // variable_renaming_report: 'varreport.txt'
 
-        // Since DOM isn't touched, don't use default externs, leaving only the
-        // core language keywords unobfuscated.
-        env: 'CUSTOM',
+      // Since DOM isn't touched, don't use default externs, leaving only the
+      // core language keywords unobfuscated.
+      env: 'CUSTOM',
 
-        // for node export
-        output_wrapper: '%output% if (typeof module !== \'undefined\') { ' +
-            'module.exports = this.libtess; }'
-      }
+      // for node export
+      output_wrapper: '%output% if (typeof module !== \'undefined\') { ' +
+          'module.exports = this.libtess; }'
     }))
-    .pipe(gulp.dest('.'));
-});
+    .pipe(gulp.dest('.'))
+);
 
 /**
  * Lint code with JSHint and JSCS.
