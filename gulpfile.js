@@ -4,7 +4,9 @@
 var gulp = require('gulp');
 var replace = require('gulp-replace');
 var concat = require('gulp-concat');
-var closureCompiler = require('google-closure-compiler').gulp();
+var closureCompiler = require('google-closure-compiler').gulp({
+  requireStreamInput: true
+});
 var mocha = require('gulp-mocha');
 var browserify = require('browserify');
 var glob = require('glob');
@@ -107,8 +109,7 @@ gulp.task('build-cat', () => {
  */
 gulp.task('build-min', () =>
   gulp.src(LIBTESS_SRC.concat('./build/closure_exports.js'))
-    // TODO(bckenny): https://github.com/ChadKillingsworth/closure-compiler-npm/issues/3
-    // .pipe(newer('./libtess.min.js'))
+    .pipe(newer('./libtess.min.js'))
     .pipe(closureCompiler({
       js_output_file: 'libtess.min.js',
       compilation_level: 'ADVANCED',
