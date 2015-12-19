@@ -1,6 +1,6 @@
 {
   "name": "libtess",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "Polygon tesselation library, ported from SGI's GLU implementation.",
   "homepage": "https://github.com/brendankenny/libtess.js/",
   "repository": {
