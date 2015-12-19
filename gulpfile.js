@@ -110,6 +110,12 @@ gulp.task('build-cat', () => {
 gulp.task('build-min', () =>
   gulp.src(LIBTESS_SRC.concat('./build/closure_exports.js'))
     .pipe(newer('./libtess.min.js'))
+
+    // TODO(bckenny): The start of library-specific compiler optimizations.
+    // Generalize and pull into separate module.
+    // Inline GluHalfEdge.dst() since closure won't do it for us.
+    .pipe(replace('.dst()', '.sym.org'))
+
     .pipe(closureCompiler({
       js_output_file: 'libtess.min.js',
       compilation_level: 'ADVANCED',
@@ -126,7 +132,7 @@ gulp.task('build-min', () =>
         'visibility',
       ],
       use_types_for_optimization: true,
-      // variable_renaming_report: 'varreport.txt'
+      // variable_renaming_report: 'varreport.txt',
 
       // Since DOM isn't touched, don't use default externs, leaving only the
       // core language keywords unobfuscated.
