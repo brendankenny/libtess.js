@@ -36,7 +36,7 @@
     "browserify": "^12.0.1",
     "chai": "^3.3.0",
     "glob": "^6.0.1",
-    "google-closure-compiler": "^20151130.6.0",
+    "google-closure-compiler": "^20151216.0.0",
     "gulp": "^3.8.8",
     "gulp-concat": "^2.4.2",
     "gulp-coveralls": "^0.1.4",

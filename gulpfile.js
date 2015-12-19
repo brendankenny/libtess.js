@@ -121,6 +121,7 @@ gulp.task('build-min', () =>
       compilation_level: 'ADVANCED',
       warning_level: 'VERBOSE',
       language_in: 'ECMASCRIPT5_STRICT',
+      language_out: 'ECMASCRIPT5_STRICT',
       define: [
         // NOTE(bckenny): switch to true for assertions throughout code.
         'libtess.DEBUG=false'
