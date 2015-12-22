@@ -3907,12 +3907,6 @@ libtess.GluFace = function(opt_nextFace, opt_prevFace) {
   this.anEdge = null;
 
   /**
-   * room for client's data
-   * @type {Object}
-   */
-  this.data = null;
-
-  /**
    * This face is in the polygon interior.
    * @type {boolean}
    */
@@ -4159,7 +4153,7 @@ libtess.GluMesh.prototype.checkMesh = function() {
       e = e.lNext;
     } while (e !== f.anEdge);
   }
-  libtess.assert(f.prev === fPrev && f.anEdge === null && f.data === null);
+  libtess.assert(f.prev === fPrev && f.anEdge === null);
 
   // vertices
   var v;

@@ -3867,12 +3867,6 @@ libtess.GluFace = function(opt_nextFace, opt_prevFace) {
   this.anEdge = null;
 
   /**
-   * room for client's data
-   * @type {Object}
-   */
-  this.data = null;
-
-  /**
    * This face is in the polygon interior.
    * @type {boolean}
    */

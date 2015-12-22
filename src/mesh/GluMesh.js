@@ -96,7 +96,7 @@ libtess.GluMesh.prototype.checkMesh = function() {
       e = e.lNext;
     } while (e !== f.anEdge);
   }
-  libtess.assert(f.prev === fPrev && f.anEdge === null && f.data === null);
+  libtess.assert(f.prev === fPrev && f.anEdge === null);
 
   // vertices
   var v;
